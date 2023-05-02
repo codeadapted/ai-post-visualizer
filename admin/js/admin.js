@@ -126,7 +126,7 @@
 				$( '#apv-admin-view .template.template-generate .current-post-title' ).html( postTitle );
 				$( '#apv-admin-view .template.template-generate .revert-to-original' ).addClass( 'hidden' );
 				if( $( this ).parents( '.post-card' ).find( '.missing-image' ).length > 0 ) {
-					$( '#apv-admin-view .template.template-generate .featured-img' ).html( '<div class="missing-image"><div class="icon"><img src="/wp-content/plugins/ai-post-visualizer/admin/img/missing_image.svg"></div><div class="text">Featured Image <br>Missing</div></div>' );
+					$( '#apv-admin-view .template.template-generate .featured-img' ).html( '<div class="missing-image"><div class="icon"><img src="/wp-content/plugins/ai-post-visualizer/admin/views/img/missing_image.svg"></div><div class="text">Featured Image <br>Missing</div></div>' );
 				}
 
 				getCurrentFI( postId );

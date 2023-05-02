@@ -81,7 +81,7 @@ class APV_Posts {
 				if( get_the_post_thumbnail_url( $post_id ) ) {
 					$thumbnail = get_the_post_thumbnail_url( $post_id, 'medium' );
 				} else {
-					$thumbnail = APV_PLUGIN_DIR . 'admin/img/missing_image_bg.png';
+					$thumbnail = APV_PLUGIN_DIR . 'admin/views/img/missing_image_bg.png';
 					$missing = true;
 				}
 
@@ -91,7 +91,7 @@ class APV_Posts {
 					} else {
 						$content .= '<div class="image" style="background-image: url(' . $thumbnail . ')">';
 							$content .= '<div class="missing-image">';
-								$content .= '<div class="icon"><img src="' . APV_PLUGIN_DIR . 'admin/img/missing_image.svg" /></div>';
+								$content .= '<div class="icon"><img src="' . APV_PLUGIN_DIR . 'admin/views/img/missing_image.svg" /></div>';
 								$content .= '<div class="text">' . __( 'Featured Image <br>Missing', 'ai-post-visualizer' ) . '</div>';
 							$content .= '</div>';
 						$content .= '</div>';
@@ -180,7 +180,7 @@ class APV_Posts {
 		if( $thumbnail ) {
 			wp_send_json( $thumbnail );
 		} else {
-			wp_send_json( APV_PLUGIN_DIR . 'admin/img/missing_image_bg.png' );
+			wp_send_json( APV_PLUGIN_DIR . 'admin/views/img/missing_image_bg.png' );
 		}
 
 	}
