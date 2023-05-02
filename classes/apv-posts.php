@@ -22,7 +22,7 @@ class APV_Posts {
 	*
 	* Get posts to render in Posts admin panel
 	*
-	* @param   int $post_type Post Type
+	* @param   void
 	* @return  string $content
 	**/
 	public function apv_get_posts() {

@@ -19,6 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 require_once __DIR__ . '/classes/apv-ai-processor.php';
+require_once __DIR__ . '/classes/apv-api-keys.php';
 require_once __DIR__ . '/classes/apv-plugin.php';
 require_once __DIR__ . '/classes/apv-posts.php';
 
@@ -70,6 +71,9 @@ if ( ! class_exists( 'AIPostVisualizer' ) ) :
 
 			// Ai Image processing
 			$this->ai_processor = new APV_AI_PROCESSOR();
+
+			// Checkout flow
+			$this->api_keys = new APV_API_KEYS();
 
 		}
 

@@ -151,8 +151,8 @@ class APV_Plugin {
 	 *
 	 * Add settings link on plugin page
 	 *
-	 * @param   array $links The links array.
-	 * @return  array The links array.
+	 * @param   Array $links The links array.
+	 * @return  Array The links array.
 	 */
 	public function add_settings_link( $links ) {
 		$links[] = '<a href="' . $this->get_admin_url() . '">' . __( 'Settings' ) . '</a>';
@@ -169,7 +169,7 @@ class APV_Plugin {
 	 */
 	public function admin_enqueue() {
 		// only enqueue these things on the settings page
-		if ( $this->get_current_admin_url() == $this->get_admin_url() ) {
+		if ( strpos( $this->get_current_admin_url(), $this->get_admin_url() ) !== false ) {
 			wp_enqueue_style( 'apv_stylesheet', APV_PLUGIN_DIR . 'admin/css/admin.css', array(), '1.0.0' );
 			wp_enqueue_script( 'apv_script', APV_PLUGIN_DIR . 'admin/js/admin.js', array( 'jquery' ), '1.0.0' );
 			wp_localize_script( 'apv_script', 'apv_obj',

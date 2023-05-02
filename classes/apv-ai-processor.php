@@ -52,52 +52,60 @@ class APV_AI_PROCESSOR {
 
 		$api_data = $this->apv_api_request( $prompt, $n, $size );
 
-		$urls = json_decode( $api_data )->data;
+		if( $api_data && !isset( $api_data->status ) ) {
 
-		$content = '';
-		$generated_images = array();
+			$urls = json_decode( $api_data )->data;
 
-		$i = 0;
-		foreach( $urls as $url ) {
+			$content = '';
+			$generated_images = array();
 
-			$image_id = $this->upload_images_to_library( $url->url, $image_title . '-' . $i );
-			$image_url = wp_get_attachment_url( $image_id );
-			array_push( $generated_images, $image_id );
+			$i = 0;
+			foreach( $urls as $url ) {
 
-			$content .= '<div class="post-card" data-image="' . $image_id  . '">';
-				$content .= '<div class="image" style="background-image: url(' . $image_url . ')"></div>';
-				$content .= '<div class="set-image">';
-					$content .= '<div class="plus">';
-						$content .= '<img src="' . APV_PLUGIN_DIR  . 'admin/img/plus.svg" />';
+				$image_id = $this->upload_images_to_library( $url->url, $image_title . '-' . $i );
+				$image_url = wp_get_attachment_url( $image_id );
+				array_push( $generated_images, $image_id );
+
+				$content .= '<div class="post-card" data-image="' . $image_id  . '">';
+					$content .= '<div class="image" style="background-image: url(' . $image_url . ')"></div>';
+					$content .= '<div class="set-image">';
+						$content .= '<div class="plus">';
+							$content .= '<img src="' . APV_PLUGIN_DIR  . 'admin/img/plus.svg" />';
+						$content .= '</div>';
+						$content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
+						$content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
 					$content .= '</div>';
-					$content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
-					$content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
 				$content .= '</div>';
-			$content .= '</div>';
 
+				$i++;
 
+			}
 
-			$i++;
+			if( $content ) {
 
-		}
+				$history = wp_insert_post( [
+						'post_type'    => 'apv_history',
+						'post_status'  => 'publish',
+						'post_title'   => $prompt,
+						'post_name'    => uniqid( 'apv_' )
+				] );
 
-		if( $content ) {
+				update_post_meta( $history, 'prompt', $prompt );
+				update_post_meta( $history, 'images', $generated_images );
 
-			$history = wp_insert_post( [
-					'post_type'    => 'apv_history',
-					'post_status'  => 'publish',
-					'post_title'   => $prompt,
-					'post_name'    => uniqid( 'apv_' )
-			] );
+				wp_send_json( $content );
 
-			update_post_meta( $history, 'prompt', $prompt );
-			update_post_meta( $history, 'images', $generated_images );
+			} else {
 
-			wp_send_json( $content );
+				wp_send_json( 'Error with prompt.' );
+
+			}
 
 		} else {
 
-			wp_send_json( 'Error with prompt.' );
+			$content = '<div class="invalid-api-key">' . __( 'Please go to the Settings tab and sign up for a plan before continuing.', 'ai-post-visualizer' ) . '</div>';
+
+			wp_send_json( $content );
 
 		}
 
@@ -199,39 +207,49 @@ class APV_AI_PROCESSOR {
 	 *
 	 * Remove DALLE image as post featured image
 	 *
-	 * @param   void
+	 * @param   String $prompt Main from to send to API endpoint.
+	 * @param   Integer $n Number of images to return from API endpoint.
+	 * @param   String $size Size of images.
 	 * @return  Object $data Curl request response data
 	 */
 	public function apv_api_request( $prompt, $n, $size ) {
 
-		$url = 'https://api.openai.com/v1/images/generations';
+		$api_key = get_option( 'apv_api_key' );
 
-		$curl = curl_init();
+		if( $api_key ) {
 
-		$fields = array(
-			'prompt' => $prompt,
-			'n' => $n,
-			'size' => $size
-		);
+			$url = 'https://apv-key-validator.herokuapp.com/image-processor';
 
-		$headers = array(
-			'Content-Type: application/json',
-			'Authorization: Bearer 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'
-		);
+			$curl = curl_init();
 
-		$json_string = json_encode( $fields );
+			$fields = array(
+				'prompt' => $prompt,
+				'n' => $n,
+				'size' => $size,
+				'apiKey' => $api_key
+			);
 
-		curl_setopt( $curl, CURLOPT_URL, $url );
-		curl_setopt( $curl, CURLOPT_POST, TRUE );
-		curl_setopt( $curl, CURLOPT_POSTFIELDS, $json_string );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true  );
+			$headers = array(
+				'Content-Type: application/json'
+			);
 
-		$data = curl_exec( $curl );
+			$json_string = json_encode( $fields );
 
-		curl_close( $curl );
+			curl_setopt( $curl, CURLOPT_URL, $url );
+			curl_setopt( $curl, CURLOPT_POST, TRUE );
+			curl_setopt( $curl, CURLOPT_POSTFIELDS, $json_string );
+			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true  );
 
-		return $data;
+			$data = curl_exec( $curl );
+
+			curl_close( $curl );
+
+			return $data;
+
+		} else {
+			return false;
+		}
 
 	}
 
@@ -240,7 +258,8 @@ class APV_AI_PROCESSOR {
 	 *
 	 * Remove DALLE image as post featured image
 	 *
-	 * @param   void
+	 * @param   String $url Image url
+	 * @param   String $title Optional title to add to image.
 	 * @return  integer $file_id Uploaded image id
 	 */
 	public function upload_images_to_library ( $url, $title = null ) {

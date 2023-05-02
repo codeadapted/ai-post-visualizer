@@ -834,6 +834,43 @@ Generate tab
 	border-color: #8c00a9;
 }
 
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn {
+	pointer-events: none;
+	overflow: visible;
+}
+
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn:before {
+	background: #323232;
+}
+
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn:after {
+	display: none;
+}
+#apv-admin-view .content-area .main-content .template-generate.validated .render.btn .sign-up-text {
+	display: none;
+}
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text {
+	position: absolute;
+    left: 100%;
+    text-transform: none;
+    width: fit-content;
+    font-size: 13px;
+    white-space: nowrap;
+    margin-left: 1rem;
+	pointer-events: visible;
+}
+
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div {
+	color: #ffffff;
+	transition: color .3s ease-in-out;
+	cursor: pointer;
+	display: inline-block;
+}
+
+#apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div:hover {
+	color: #8c00a9;
+}
+
 /******
 ****
 Settings tab
@@ -841,6 +878,90 @@ Settings tab
 *******/
 #apv-admin-view .content-area .main-content .template-settings {
 	padding: 3rem;
+}
+
+#apv-admin-view .content-area .main-content .template-settings.not-validated .settings {
+	width: 100%;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans {
+	display: flex;
+	gap: 2rem;
+	margin-top: 3rem;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan {
+	border: 2px solid #2F19B5;
+	border-radius: 5px;
+	padding: 1.5rem;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan h4 {
+	margin: 0 0 1rem;
+	font-weight: 700;
+	font-size: 26px;
+	line-height: 1;
+	text-transform: capitalize;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .plan-description {
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 20px;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan ul {
+	margin: 1rem 0;
+	padding: 1rem 0;
+	border-top: 1px solid rgba(217, 217, 217, 0.25);
+	border-bottom: 1px solid rgba(217, 217, 217, 0.25);
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan ul li {
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 20px;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan ul li:not(:first-of-type) {
+	margin-top: 1rem;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .plan-price {
+
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .plan-price div {
+	font-weight: 700;
+	font-size: 32px;
+	line-height: 1;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .plan-price span {
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 20px;
+    display: block;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .select-plan {
+	width: 100%;
+	background: transparent;
+	border: 2px solid #2F19B5;
+	border-radius: 5px;
+	font-weight: 700;
+	font-size: 18px;
+	line-height: 1;
+	text-transform: capitalize;
+	padding: 0.75rem 0;
+	margin-top: 1rem;
+    text-align: center;
+	cursor: pointer;
+	transition: background-color .2s ease-in-out;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .plans .plan .select-plan:hover {
+	background: #2F19B5;
 }
 
 /******

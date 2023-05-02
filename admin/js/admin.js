@@ -148,7 +148,7 @@
 			$.ajax( {
 
 				method: 'GET',
-				url: '/wp-admin/admin-ajax.php',
+				url: ajaxURL,
 				data: {
 					action: 'apv_get_dalle_images',
 					prompt: _prompt,
@@ -181,7 +181,7 @@
 			$.ajax( {
 
 				method: 'GET',
-				url: '/wp-admin/admin-ajax.php',
+				url: ajaxURL,
 				data: {
 					action: 'apv_set_dalle_image',
 					post_id: _postId,
@@ -210,7 +210,7 @@
 			$.ajax( {
 
 				method: 'GET',
-				url: '/wp-admin/admin-ajax.php',
+				url: ajaxURL,
 				data: {
 					action: 'apv_revert_featured_image',
 					post_id: _postId
@@ -234,7 +234,7 @@
 			$.ajax( {
 
 				method: 'GET',
-				url: '/wp-admin/admin-ajax.php',
+				url: ajaxURL,
 				data: {
 					action: 'apv_load_dalle_history',
 					post_id: _historyId
@@ -263,7 +263,7 @@
 			$.ajax( {
 
 				method: 'GET',
-				url: '/wp-admin/admin-ajax.php',
+				url: ajaxURL,
 				data: {
 					action: 'apv_get_history',
 					is_ajax: 1
@@ -308,6 +308,58 @@
 
 		}
 
+		function planSelectClickEvent() {
+
+			$( '#apv-admin-view .select-plan' ).click( function() {
+
+				var _tier = $( this ).data( 'tier' );
+
+				$.ajax( {
+
+					method: 'GET',
+					url: ajaxURL,
+					data: {
+						action: 'apv_plans_routing',
+						tier: _tier,
+						return_url: window.location.href
+					},
+					success: function( response ) {
+	
+						window.location.href = response.replaceAll( '"', '' );
+	
+					}
+	
+				} );
+	
+			} );
+
+		}
+
+		function checkQueryParams() {
+
+			let currentTab;
+			let mainUrl;
+			const url = new URL( window.location.href );
+
+			if( Boolean( url.toString().split( '&tab' ) ) ) {
+				mainUrl = url.toString().split( '&tab' )[0];
+				currentTab = url.toString().split( '&tab=' )[1];
+			} else {
+				mainUrl = url;
+				currentTab = $( '#apv-admin-view .sidebar .item.active' ).data( 'tab' );
+			}
+
+			$( '.sidebar .item' ).removeClass( 'active' );
+			$( '.sidebar .item[data-tab="' + currentTab + '"]' ).addClass( 'active' );
+			$( '.main-content .template' ).removeClass( 'active' );
+			$( '.main-content .template[data-tab="' + currentTab + '"]' ).addClass( 'active' );
+
+			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
+			
+			window.history.replaceState( {}, '', mainUrl + '&tab=' + currentTab );
+
+		}
+
 		var ajaxURL = apv_obj.ajax_url;
 
 		$( '#apv-admin-view .accordions .accordion .title' ).click( function() {
@@ -341,6 +393,10 @@
 			$( '.main-content .template[data-tab="' + tab + '"]' ).addClass( 'active' );
 
 			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
+
+			const url = new URL( window.location.href );
+			const mainUrl = url.toString().split( '&tab' )[0];
+			window.history.replaceState( {}, '', mainUrl + '&tab=' + tab );
 
 		} );
 
@@ -400,7 +456,7 @@
 
 		});
 
-		$( '#apv-admin-view .render.btn' ).click( function( e ) {
+		$( '#apv-admin-view .template-generate.validated .render.btn' ).click( function( e ) {
 
 			e.preventDefault();
 
@@ -415,6 +471,22 @@
 			var resolution = $( '#apv-admin-view .resolution-select select' ).val();
 
 			getDalleImages( postId, prompt, num, resolution );
+
+		} );
+
+		$( '#apv-admin-view .template-generate.not-validated .sign-up-text div' ).click( function( e ) {
+
+			var tab = $( this ).data( 'tab' );
+			$( '.sidebar .item' ).removeClass( 'active' );
+			$( '.sidebar .item[data-tab="' + tab + '"]' ).addClass( 'active' );
+			$( '.main-content .template' ).removeClass( 'active' );
+			$( '.main-content .template[data-tab="' + tab + '"]' ).addClass( 'active' );
+
+			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
+
+			const url = new URL( window.location.href );
+			const mainUrl = url.toString().split( '&tab' )[0];
+			window.history.replaceState( {}, '', mainUrl + '&tab=' + tab );
 
 		} );
 
@@ -498,6 +570,8 @@
 		} );
 
 		postCardClickEvent();
+		planSelectClickEvent();
+		checkQueryParams();
 
 	});
 } ( jQuery, window, document ) );
