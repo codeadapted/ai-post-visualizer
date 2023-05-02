@@ -3,7 +3,7 @@
 Contributors: CodeAdapted
 Tags: ai, ai image, post thumbnail, dall-e ai image generation, post thumbnail generator
 Requires at least: 5.0 or higher
-Tested up to: 6.1.1
+Tested up to: 6.2.0
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

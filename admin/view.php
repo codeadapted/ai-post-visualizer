@@ -26,21 +26,29 @@ if( isset( $_GET[ 'apv_api_key' ] ) ) {
 $api_key = get_option( 'apv_api_key' );
 
 if( $api_key ) {
-	$validation = apv()->api_keys()->apv_subscription_validation();
-	$validation = json_decode( $validation );
-	if( $validation->status === 'active' ) {
+
+	if( get_transient( 'apv_key_validation' ) && get_transient( 'apv_key_validation' ) == 'valid' ) {
 		$validation = true;
+	} else {
+		// Set expiration for transient to the beginning of the next day
+		$now = time();
+		$tomorrow = strtotime( 'tomorrow' );
+		$expiration = $tomorrow - $now;
+
+		// Send api key to validator app and retrieve sub status
+		$validation = apv()->api_keys()->apv_subscription_validation();
+		$validation = json_decode( $validation );
+
+		// If sub is active set validation var to true, else to false
+		if( $validation->status === 'active' ) {
+			$validation = true;
+			set_transient( 'apv_key_validation', 'valid', $expiration );
+		} else {
+			$validation = false;
+			set_transient( 'apv_key_validation', 'invalid', $expiration );
+		}
 	}
 }
-
-// $now = time();
-// $tomorrow = strtotime( 'tomorrow' );
-
-// // Calculate the number of seconds until the start of the next day
-// $expiration = $tomorrow - $now;
-
-// // Set the transient with a unique name, value, and expiration time
-// set_transient( 'my_transient', 'my_value', $expiration );
 
 ?>
 <div id="apv-admin-view">
