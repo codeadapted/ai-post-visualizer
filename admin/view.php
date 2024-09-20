@@ -17,12 +17,19 @@ $history = apv()->posts()->apv_get_history();
 $admin_url = apv()->plugin()->get_admin_url();
 
 $validation = false;
+
+if( isset( $_GET[ 'apv_dalle_api_key' ] ) ) {
+	$apv_dalle_api_key = $_GET[ 'apv_dalle_api_key' ];
+	update_option( 'apv_dalle_api_key', $apv_dalle_api_key );
+}
+
 if( isset( $_GET[ 'apv_api_key' ] ) ) {
 	$apv_api_key = $_GET[ 'apv_api_key' ];
 	update_option( 'apv_api_key', $apv_api_key );
 }
 
 // delete_option( 'apv_api_key' );
+$dalle_api_key = get_option( 'apv_dalle_api_key' );
 $api_key = get_option( 'apv_api_key' );
 
 if( $api_key ) {
@@ -62,7 +69,7 @@ if( $api_key ) {
 		</div>
 	</div>
 </div>
-<?php if( isset( $_GET[ 'apv_api_key' ] ) ) { ?>
+<?php if( isset( $_GET[ 'apv_api_key' ] ) || isset( $_GET[ 'apv_dalle_api_key' ] ) ) { ?>
 	<script>
 		window.history.replaceState( {}, '', '<?php echo esc_url( $admin_url ); ?>' );
 	</script>

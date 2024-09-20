@@ -1,10 +1,16 @@
 <div class="template template-settings active <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="settings">
     <div class="settings">
 
+        <h3><?php echo esc_html_e( 'DALL·E API Key Settings', 'ai-post-visualizer' ); ?></h3>
+        <div class="setting">
+            <div class="label"><?php echo esc_html_e( 'Type in DALL·E API key.  If you don\'t have an API key login to you account <a href="https://platform.openai.com/">here</a> then go to <a href="https://platform.openai.com/api-keys">the API keys page</a>.', 'ai-post-visualizer' ); ?></div>
+            <input type="password" name="dalleApiKey" class="text-input" placeholder="<?php echo esc_html_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $dalle_api_key ? 'value="' . $dalle_api_key . '"' : ''; ?> />
+        </div>
+
         <?php if( $api_key ) { ?>
             <h3><?php echo esc_html_e( 'API Key Settings', 'ai-post-visualizer' ); ?></h3>
             <div class="setting">
-                <div class="label"><?php echo esc_html_e( 'Type in AI Post Visualizer API key.  If you don’t have an API key please select a plan to the right to get started.', 'ai-post-visualizer' ); ?></div>
+                <div class="label"><?php echo esc_html_e( 'Type in AI Post Visualizer API key.  If you don\'t know your API key please select a plan to the right to get started.', 'ai-post-visualizer' ); ?></div>
                 <input type="text" name="apiKey" class="text-input" placeholder="<?php echo esc_html_e( 'Insert API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $api_key ? 'value="' . $api_key . '"' : ''; ?> />
             </div>
         <?php } else { ?>
