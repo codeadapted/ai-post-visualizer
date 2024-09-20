@@ -1437,6 +1437,29 @@ Mobile styles
 	#apv-admin-view .content-area .main-content .template-generate .rendered-images .post-card .set-image {
 		font-size: 11px;
 	}
+	#apv-admin-view .content-area .main-content .template-generate .cost .breakdown {
+		width: 100%;
+	}
+	#apv-admin-view .content-area .main-content .template-generate .render.btn {
+		width: 100%;
+		height: unset;
+		display: flex;
+		flex-wrap: wrap;
+	}
+	#apv-admin-view .content-area .main-content .template-generate .render.btn span {
+		width: 100%;
+		height: unset;
+		display: flex;
+		flex-wrap: wrap;
+	}
+	#apv-admin-view .content-area .main-content .template-generate .render.btn .sign-up-text {
+		width: 100%;
+		display: block;
+		left: 0;
+		margin: 0;
+		white-space: unset;
+		position: relative;
+	}
 	#apv-admin-view .content-area .main-content .template.template-settings {
 		padding: 1.5rem;
 	}
