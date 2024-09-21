@@ -880,8 +880,12 @@ Settings tab
 	padding: 3rem;
 }
 
-#apv-admin-view .content-area .main-content .template-settings.not-validated .settings {
+#apv-admin-view .content-area .main-content .template-settings .settings {
 	width: 100%;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .settings h3:not(:first-of-type) {
+	margin-top: 3rem;
 }
 
 #apv-admin-view .content-area .main-content .template-settings .plans {

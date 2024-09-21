@@ -13,6 +13,27 @@ class APV_API_KEYS {
 
 		if ( is_admin() ) {
 			add_action( 'wp_ajax_apv_plans_routing', array( $this, 'apv_plans_routing' ) );
+			add_action( 'wp_ajax_apv_set_dalle_api_key', array( $this, 'apv_set_dalle_api_key' ) );
+		}
+
+	}
+
+	/**
+	 * apv_set_dalle_api_key
+	 *
+	 * Set Dalle API Key 
+	 *
+	 * @param   void
+	 * @return  void
+	 */
+	public function apv_set_dalle_api_key() {
+
+		// Set api key
+		$api_key = $_GET['api_key'];
+
+		// Set dalle api key option if added
+		if( $api_key ) {
+			update_option( 'apv_dalle_api_key', $api_key );
 		}
 
 	}
@@ -31,7 +52,7 @@ class APV_API_KEYS {
 
         $tier = $_GET['tier'];
 
-		$url = 'https://apv-key-validator.herokuapp.com/plans';
+		$url = 'https://apv-key-validator-6359afeed8ed.herokuapp.com/plans';
 
 		$fields = array(
 			'tier' => $tier,
@@ -60,7 +81,7 @@ class APV_API_KEYS {
 
         $api_key = get_option( 'apv_api_key' );
 
-		$url = 'https://apv-key-validator.herokuapp.com/api-keys/verify';
+		$url = 'https://apv-key-validator-6359afeed8ed.herokuapp.com/api-keys/verify';
 
 		$fields = array(
 			'apiKey' => $api_key

@@ -2,576 +2,976 @@
 	'use strict';
 	$( document ).ready( function () {
 
-		function filtering( _exclude = false ) {
-
-			var search = $( '#apv-admin-view .search-bar .search-input' ).val();
-
-			var dataObj = {
-				action: 'apv_get_posts'
-			};
-
-			$( '#apv-admin-view .type-block.active' ).each( function() {
-
-				var postType = $( this ).data( 'type' );
-				var alphabetical = $( this ).data( 'alphabetical' );
-				var date = $( this ).data( 'date' );
-
-				if( Boolean( postType ) ) {
-					dataObj.post_type = postType;
-				}
-
-				if( Boolean( alphabetical ) ) {
-					dataObj.alphabetical = alphabetical;
-				}
-
-				if( Boolean( date ) ) {
-					dataObj.date = date;
-				}
-
-			} );
-
-			if( Boolean( search ) ) {
-				dataObj.search = search;
-			}
-
-			if( Boolean( _exclude ) ) {
-				dataObj.exclude = _exclude;
-			}
-
-			$.ajax({
-				method: 'GET',
-				url: ajaxURL,
-				data: dataObj,
-				success: function( response ) {
-
-					if( Boolean( _exclude ) ) {
-						$( '#apv-admin-view .posts-section .posts-wrapper' ).append( response.content );
-					} else {
-						$( '#apv-admin-view .posts-section .posts-wrapper' ).html( response.content );
-					}
-
-					if( response.total_posts > 18 ) {
-						$( '#apv-admin-view .load-more' ).removeClass( 'hidden' );
-					} else {
-						$( '#apv-admin-view .load-more' ).addClass( 'hidden' );
-					}
-
-					postCardClickEvent();
-
-					$( '#apv-admin-view .load-more .load-more-text' ).removeClass( 'loading' );
-					$( '#apv-admin-view .load-more .rc-loader' ).removeClass( 'loading' );
-
-				}
-			});
-
-		}
-
-		function getCurrentFI( post ) {
-
-			var dataObj = {
-				action: 'apv_get_current_fi',
-				post_id: post
-			};
-
-			$.ajax({
-				method: 'GET',
-				url: ajaxURL,
-				data: dataObj,
-				success: function( response ) {
-
-					$( '#apv-admin-view .template.template-generate .featured-img' ).css( 'background-image', 'url(' + response + ')' );
-
-				}
-			});
-
-		}
-
-		function checkForFIRevert( post ) {
-
-			const dataObj = {
-				action: 'apv_check_fi_revert',
-				post_id: post
-			};
-
-			$.ajax({
-				method: 'GET',
-				url: ajaxURL,
-				data: dataObj,
-				success: function( response ) {
-
-					if( Boolean( response ) ) {
-						console.log( response );
-						$( '#apv-admin-view .template.template-generate .revert-to-original' ).removeClass( 'hidden' );
-					}
-
-				}
-			});
-
-		}
-
-		function postCardClickEvent() {
-
-			$( '#apv-admin-view .post-card .btn' ).click( function() {
-
-				$( '#apv-admin-view .template.template-generate .featured-img' ).html( '' );
-				$( '#apv-admin-view .template.template-generate .featured-img' ).css( 'background-image', '' );
-				$( '#apv-admin-view .template.template-generate .current-post-title' ).html( '' );
-				var postId = $( this ).parents( '.post-card' ).data( 'post' );
-				var postTitle = $( this ).parents( '.post-card' ).find( '.card-title .text' ).html();
-				$( '#apv-admin-view .sidebar .item' ).removeClass( 'active' );
-				$( '#apv-admin-view .sidebar .item.generate' ).addClass( 'active' );
-				$( '#apv-admin-view .template' ).removeClass( 'active' );
-				$( '#apv-admin-view .template.template-generate' ).addClass( 'for-post active' );
-				$( '#apv-admin-view .template.template-generate' ).data( 'post', postId );
-				$( '#apv-admin-view .template.template-generate .current-post-title' ).html( postTitle );
-				$( '#apv-admin-view .template.template-generate .revert-to-original' ).addClass( 'hidden' );
-				if( $( this ).parents( '.post-card' ).find( '.missing-image' ).length > 0 ) {
-					$( '#apv-admin-view .template.template-generate .featured-img' ).html( '<div class="missing-image"><div class="icon"><img src="/wp-content/plugins/ai-post-visualizer/admin/views/img/missing_image.svg"></div><div class="text">Featured Image <br>Missing</div></div>' );
-				}
-
-				getCurrentFI( postId );
-				checkForFIRevert( postId )
-				setHistoryHeight();
-
-				$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
-
-			} );
-
-		}
-
-		function getDalleImages( _postId, _prompt, _n = false, _size = false ) {
-
-			$( '#apv-admin-view .rendered-images .images-wrapper' ).html( '' );
-			$( '#apv-admin-view .rendered-images' ).addClass( 'loaded' );
-			$( '#apv-admin-view .rendered-images .rc-loader' ).addClass( 'loading' );
-
-			$.ajax( {
-
-				method: 'GET',
-				url: ajaxURL,
-				data: {
-					action: 'apv_get_dalle_images',
-					prompt: _prompt,
-					n: _n,
-					size: _size,
-					post_id: _postId
-				},
-				success: function( response ) {
-
-					$( '#apv-admin-view .rendered-images .rc-loader' ).removeClass( 'loading' );
-
-					$( '#apv-admin-view .rendered-images .images-wrapper' ).html( response );
-
-					$( 'html, body' ).animate( {
-						scrollTop: $( '#apv-admin-view .rendered-images' ).offset().top
-					}, 1000 );
-
-					addNewHistoryRow();
-					setHistoryHeight();
-					renderedImageSetFI();
-
-				}
-
-			} );
-
-		}
-
-		function setDalleImage( _postId, _imageId ) {
-
-			$.ajax( {
-
-				method: 'GET',
-				url: ajaxURL,
-				data: {
-					action: 'apv_set_dalle_image',
-					post_id: _postId,
-					image_id: _imageId
-				},
-				success: function( response ) {
-
-					$( '#apv-admin-view .template-generate .current-featured .featured-img' ).css( 'background-image', 'url(' + response + ')' );
-					$( '#apv-admin-view .template-posts .post-card[data-post="' + _postId + '"] .image' ).css( 'background-image', 'url(' + response + ')' );
-					$( '#apv-admin-view .template.template-generate .revert-to-original' ).removeClass( 'hidden' );
-
-					if( $( '#apv-admin-view .template-generate .current-featured .featured-img .missing-image' ).length > 0 ) {
-						$( '#apv-admin-view .template-generate .current-featured .featured-img .missing-image' ).remove();
-						$( '#apv-admin-view .template-posts .post-card[data-post="' + _postId + '"] .image .missing-image' ).remove();
-						$( '#apv-admin-view .template.template-generate .revert-to-original' ).addClass( 'hidden' );
-					}
-
-				}
-
-			} );
-
-		}
-
-		function revertFeaturedImage( _postId ) {
-
-			$.ajax( {
-
-				method: 'GET',
-				url: ajaxURL,
-				data: {
-					action: 'apv_revert_featured_image',
-					post_id: _postId
-				},
-				success: function( response ) {
-
-					$( '#apv-admin-view .template-generate .current-featured .featured-img' ).css( 'background-image', 'url(' + response + ')' );
-					$( '#apv-admin-view .template-posts .post-card[data-post="' + _postId + '"] .image' ).css( 'background-image', 'url(' + response + ')' );
-					( '#apv-admin-view .template.template-generate .revert-to-original' ).addClass( 'hidden' );
-
-				}
-
-			} );
-
-		}
-
-		function loadDalleHistoryRow( _historyId ) {
-
-			$( '#apv-admin-view .rendered-images' ).addClass( 'loaded' );
-
-			$.ajax( {
-
-				method: 'GET',
-				url: ajaxURL,
-				data: {
-					action: 'apv_load_dalle_history',
-					post_id: _historyId
-				},
-				success: function( response ) {
-
-					$( '#apv-admin-view .rendered-images .rc-loader' ).removeClass( 'loading' );
-
-					$( '#apv-admin-view .rendered-images .images-wrapper' ).html( response );
-
-					$( 'html, body' ).animate( {
-						scrollTop: $( '#apv-admin-view .rendered-images' ).offset().top
-					}, 1000 );
-
-					setHistoryHeight();
-					renderedImageSetFI();
-
-				}
-
-			} );
-
-		}
-
-		function addNewHistoryRow() {
-
-			$.ajax( {
-
-				method: 'GET',
-				url: ajaxURL,
-				data: {
-					action: 'apv_get_history',
-					is_ajax: 1
-				},
-				success: function( response ) {
-
-					$( '#apv-admin-view .history-rows' ).html( response );
-
-					$( '#apv-admin-view .history .load-images' ).click( function( e ) {
-
-						e.preventDefault();
-
-						var historyId = $( this ).parents( '.history-row' ).data( 'history' );
-
-						loadDalleHistoryRow( historyId );
-
-					} );
-
-				}
-
-			} );
-
-		}
-
-		function setHistoryHeight() {
-
-			var height = $( '#apv-admin-view .template.template-generate .settings' ).outerHeight( true );
-			$( '#apv-admin-view .history' ).css( 'height', height );
-
-		}
-
-		function renderedImageSetFI() {
-
-			$( '#apv-admin-view .rendered-images .post-card .set-image' ).click( function() {
-
-				var postId = $( this ).parents( '.template-generate' ).data( 'post' );
-				var imageId = $( this ).parents( '.post-card' ).data( 'image' );
-				setDalleImage( postId, imageId );
-				$( this ).addClass( 'current' );
-
-			} );
-
-		}
-
-		function planSelectClickEvent() {
-
-			$( '#apv-admin-view .select-plan' ).click( function() {
-
-				var _tier = $( this ).data( 'tier' );
-
-				$.ajax( {
-
-					method: 'GET',
-					url: ajaxURL,
-					data: {
-						action: 'apv_plans_routing',
-						tier: _tier,
-						return_url: window.location.href
-					},
-					success: function( response ) {
-	
-						window.location.href = response.replaceAll( '"', '' );
-	
-					}
-	
-				} );
-	
-			} );
-
-		}
-
-		function checkQueryParams() {
-
-			let currentTab;
-			let mainUrl;
-			const url = new URL( window.location.href );
-
-			if( Boolean( url.toString().split( '&tab' ) ) ) {
-				mainUrl = url.toString().split( '&tab' )[0];
-				currentTab = url.toString().split( '&tab=' )[1];
-			} else {
-				mainUrl = url;
-				currentTab = $( '#apv-admin-view .sidebar .item.active' ).data( 'tab' );
-			}
-
-			$( '.sidebar .item' ).removeClass( 'active' );
-			$( '.sidebar .item[data-tab="' + currentTab + '"]' ).addClass( 'active' );
-			$( '.main-content .template' ).removeClass( 'active' );
-			$( '.main-content .template[data-tab="' + currentTab + '"]' ).addClass( 'active' );
-
-			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
-			
-			window.history.replaceState( {}, '', mainUrl + '&tab=' + currentTab );
-
-		}
-
-		var ajaxURL = apv_obj.ajax_url;
-
-		$( '#apv-admin-view .accordions .accordion .title' ).click( function() {
-
-			var typesHeight = $( this ).parents( '.accordion' ).find( '.types' ).height();
-			if( typesHeight ) {
-				$( this ).parents( '.accordion' ).find( '.types .types-wrapper' ).css( 'margin-top', 'calc((' + typesHeight + 'px + 1rem) * -1)' );
-			} else {
-				$( this ).parents( '.accordion' ).find( '.types .types-wrapper' ).attr( 'style', '' );
-			}
-
-		} );
-
-		$( '#apv-admin-view .sidebar .item' ).click( function() {
-
-			$( '#apv-admin-view .rendered-images' ).removeClass( 'loaded' );
-			$( '#apv-admin-view .rendered-images .images-wrapper' ).html( '' );
-			$( '#apv-admin-view .template.template-generate' ).removeClass( 'for-post' );
-			$( '#apv-admin-view .template.template-generate' ).data( 'post', '' );
-			$( '#apv-admin-view .template.template-generate .featured-img' ).html( '' );
-			$( '#apv-admin-view .template.template-generate .featured-img' ).css( 'background-image', '' );
-			$( '#apv-admin-view .template.template-generate .current-post-title' ).html( '' );
-			$( '#apv-admin-view .template.template-generate .setting input' ).val('').change();
-			$( '#apv-admin-view .template.template-generate .breakdown .num-images span' ).html( 1 );
-			$( '#apv-admin-view .template.template-generate .setting select' ).prop( 'selectedIndex', 0 ).change();
-			$( '#apv-admin-view .history' ).css( 'height', '' );
-			var tab = $( this ).data( 'tab' );
-			$( '.sidebar .item' ).removeClass( 'active' );
-			$( this ).addClass( 'active' );
-			$( '.main-content .template' ).removeClass( 'active' );
-			$( '.main-content .template[data-tab="' + tab + '"]' ).addClass( 'active' );
-
-			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
-
-			const url = new URL( window.location.href );
-			const mainUrl = url.toString().split( '&tab' )[0];
-			window.history.replaceState( {}, '', mainUrl + '&tab=' + tab );
-
-		} );
-
-		$( '#apv-admin-view .search-bar .search-input' ).on( 'change', function ( e ) {
-
-			e.preventDefault();
-
-			filtering();
-
-		});
-
-		$( '#apv-admin-view .number-input' ).on( 'change', function ( e ) {
-
-			e.preventDefault();
-
-			var num = $( this ).val();
-			var resolution = $( '#apv-admin-view .resolution-select select' ).val();
-			var cost;
-
-			if( resolution == '256x256' ) {
-				cost = .016;
-			} else if( resolution == '512x512' ) {
-				cost = .018;
-			} else if( resolution == '1024x1024' ) {
-				cost = .02;
-			}
-
-			var total = parseFloat(num * cost).toFixed(3);
-
-			$( '#apv-admin-view .breakdown .num-images span' ).html( num );
-
-			$( '#apv-admin-view .breakdown .total span' ).html( '$' + total );
-
-		});
-
-		$( '#apv-admin-view .resolution-select select' ).on( 'change', function ( e ) {
-
-			e.preventDefault();
-
-			var num = $( '#apv-admin-view .number-input' ).val();
-			var resolution = $( this ).val();
-			var cost;
-
-			if( resolution == '256x256' ) {
-				cost = .016;
-			} else if( resolution == '512x512' ) {
-				cost = .018;
-			} else if( resolution == '1024x1024' ) {
-				cost = .02;
-			}
-
-			var total = parseFloat(num * cost).toFixed(3);
-
-			$( '#apv-admin-view .breakdown .cost-per-img span' ).html( '$' + cost );
-
-			$( '#apv-admin-view .breakdown .total span' ).html( '$' + total );
-
-		});
-
-		$( '#apv-admin-view .template-generate.validated .render.btn' ).click( function( e ) {
-
-			e.preventDefault();
-
-			var postId;
-			if( $( '#apv-admin-view .template-generate' ).hasClass( 'for-post' ) ) {
-				postId = $( '#apv-admin-view .template-generate' ).data( 'post' );
-			} else {
-				postId = false;
-			}
-			var prompt = $( '#apv-admin-view .keyword-input' ).val();
-			var num = $( '#apv-admin-view .number-input' ).val();
-			var resolution = $( '#apv-admin-view .resolution-select select' ).val();
-
-			getDalleImages( postId, prompt, num, resolution );
-
-		} );
-
-		$( '#apv-admin-view .template-generate.not-validated .sign-up-text div' ).click( function( e ) {
-
-			var tab = $( this ).data( 'tab' );
-			$( '.sidebar .item' ).removeClass( 'active' );
-			$( '.sidebar .item[data-tab="' + tab + '"]' ).addClass( 'active' );
-			$( '.main-content .template' ).removeClass( 'active' );
-			$( '.main-content .template[data-tab="' + tab + '"]' ).addClass( 'active' );
-
-			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
-
-			const url = new URL( window.location.href );
-			const mainUrl = url.toString().split( '&tab' )[0];
-			window.history.replaceState( {}, '', mainUrl + '&tab=' + tab );
-
-		} );
-
-		$( '#apv-admin-view .history .load-images' ).click( function( e ) {
-
-			e.preventDefault();
-
-			var historyId = $( this ).parents( '.history-row' ).data( 'history' );
-
-			loadDalleHistoryRow( historyId );
-
-		} );
-
-		$( '#apv-admin-view .type-block' ).click( function( e ) {
-
-			e.preventDefault();
-
-			if( $( this ).hasClass( 'active' ) ) {
-				$( this ).removeClass( 'active' );
-			} else {
-				if( $( this ).parents( '.accordion' ).hasClass( 'sort' ) ) {
-					$( '.accordion.sort' ).find( '.type-block.active' ).removeClass( 'active' );
-				} else {
-					$( this ).parents( '.accordion' ).find( '.type-block.active' ).removeClass( 'active' );
-				}
-				$( this ).addClass( 'active' );
-			}
-
-			if( $( '.post-types .type-block.active' ).length == 0 ) {
-				$( '.post-types .type-block[data-type="any"]' ).addClass( 'active' );
-			}
-
-			filtering();
-
-		} );
-
-		$( '#apv-admin-view .load-more' ).click( function( e ) {
-
-			e.preventDefault();
-
-			const exclude = [];
-
-			$( '#apv-admin-view .posts-wrapper .post-card' ).each( function() {
-				exclude.push( $( this ).data( 'post' ) );
-			} );
-
-			$( '#apv-admin-view .load-more .load-more-text' ).addClass( 'loading' );
-			$( '#apv-admin-view .load-more .rc-loader' ).addClass( 'loading' );
-
-			filtering( exclude );
-
-		} );
-
-		$( '#apv-admin-view .back-to-posts' ).click( function() {
-
-			$( '#apv-admin-view .rendered-images' ).removeClass( 'loaded' );
-			$( '#apv-admin-view .rendered-images .images-wrapper' ).html( '' );
-			$( '#apv-admin-view .template.template-generate' ).removeClass( 'for-post' );
-			$( '#apv-admin-view .template.template-generate' ).data( 'post', '' );
-			$( '#apv-admin-view .template.template-generate .featured-img' ).html( '' );
-			$( '#apv-admin-view .template.template-generate .featured-img' ).css( 'background-image', '' );
-			$( '#apv-admin-view .template.template-generate .current-post-title' ).html( '' );
-			$( '#apv-admin-view .template.template-generate .setting input' ).val('').change();
-			$( '#apv-admin-view .template.template-generate .breakdown .num-images span' ).html( 1 );
-			$( '#apv-admin-view .template.template-generate .setting select' ).prop( 'selectedIndex', 0 ).change();
-			$( '#apv-admin-view .history' ).css( 'height', '' );
-			$( '.sidebar .item' ).removeClass( 'active' );
-			$( '.sidebar .item.posts' ).addClass( 'active' );
-			$( '.main-content .template' ).removeClass( 'active' );
-			$( '.main-content .template.template-posts' ).addClass( 'active' );
-
-			$( 'html, body' ).animate( { scrollTop: 0 }, 'slow' );
-
-		} );
-
-		$( '#apv-admin-view .revert-to-original' ).click( function() {
-
-			var postId = $( this ).parents( '.template-generate' ).data( 'post' );
-			revertFeaturedImage( postId );
-
-		} );
-
-		postCardClickEvent();
-		planSelectClickEvent();
-		checkQueryParams();
+		// Initialize APV_ADMIN
+		const admin = new APV_ADMIN();
+		admin.initialize();
 
 	});
 } ( jQuery, window, document ) );
+
+// Main APV_ADMIN class
+class APV_ADMIN {
+	
+	constructor () {
+        
+        // Set ajax variable
+        this._ajaxURL = apv_obj.ajax_url;
+
+		// Set global variables
+		this.apv = '';
+		this.sidebar = '';
+		this.postView = '';
+		this.generateView = '';
+		this.settingsView = '';
+		this.searchInput = '';
+		this.postWrapper = '';
+		this.postWrapperLoadMore = '';
+		this.renderedImages = '';
+		this.renderedImagesWrapper = '';
+		this.revertToOriginal = '';
+
+	}
+
+    initialize () {
+
+		// Setup global variables
+		this.setupGlobalVariables();
+
+		// Run the initialization function
+		this.initEventHandlers();
+
+    }
+
+	/***
+	* GLOBAL FUNCTIONS
+	***/
+
+	setupGlobalVariables () {
+
+		// Setup global element variables
+		this.apv = document.getElementById( 'apv-admin-view' );
+		this.sidebar = this.apv.querySelector( '.sidebar' );
+
+		// Setup posts view variables
+		this.postView = this.apv.querySelector( '.template.template-posts' );
+		this.searchInput = this.apv.querySelector( '.search-bar .search-input' );
+		this.postWrapper = this.apv.querySelector( '.posts-section .posts-wrapper' );
+		this.postWrapperLoadMore = this.apv.querySelector( '.load-more' );
+
+		// Set up generate view variables
+		this.generateView = this.apv.querySelector( '.template.template-generate' );
+		this.renderedImages = this.apv.querySelector( '.rendered-images' );
+		this.renderedImagesWrapper = this.renderedImages.querySelector( '.images-wrapper' );
+		this.revertToOriginal = this.generateView.querySelector( '.revert-to-original' );
+
+		// Set up settings view variables
+		this.settingsView = this.apv.querySelector( '.template.template-settings' );
+
+	}
+
+	initEventHandlers () {
+		this.accordionClickEvent();
+		this.sidebarClickEvent();
+		this.searchBarChangeEvent();
+		this.numberInputChangeEvent();
+		this.resolutionSelectChangeEvent();
+		this.renderButtonClickEvent();
+		this.revertToOriginalClickEvent();
+		this.goBackToPostsClickEvent();
+		this.postCardClickEvent();
+		this.historyLoadImagesClickEvent();
+		this.checkQueryParams();
+		this.dalleAPIKeyInputChangeEvent();
+		this.accordionItemClickEvent();
+		this.signUpTextClickEvent();
+		this.planSelectClickEvent();
+	}
+
+	checkQueryParams () {
+
+		// Create URL object and check if 'tab' exists in the query params
+		const url = new URL( window.location.href );
+		const hasTab = url.searchParams.has( 'tab' );
+	
+		// Determine mainUrl and currentTab based on the presence of 'tab' parameter
+		const mainUrl = hasTab ? url.toString().split( '&tab' )[0] : url;
+		const currentTab = hasTab 
+			? url.searchParams.get('tab') 
+			: (this.sidebar.querySelector('.item.active') || this.sidebar.querySelector('.item')).dataset.tab;
+	
+		// Update active state for sidebar items
+		this.sidebar.querySelectorAll( '.item' ).forEach( item => item.classList.remove( 'active' ) );
+		const currentSidebarItem = this.sidebar.querySelector( `.item[data-tab="${currentTab}"]` );
+		if( currentSidebarItem ) {
+			currentSidebarItem.classList.add( 'active' );
+		}
+	
+		// Update active state for templates
+		this.apv.querySelectorAll( '.main-content .template' ).forEach( item => item.classList.remove( 'active' ) );
+		const currentTemplate = this.apv.querySelector( `.main-content .template[data-tab="${currentTab}"]` );
+		if( currentTemplate ) {
+			currentTemplate.classList.add( 'active' );
+		}
+	
+		// Scroll the window to the top of the page smoothly
+		window.scrollTo({ top: 0, behavior: 'smooth' });
+	
+		// Update the browser's history to reflect the current tab in the URL
+		window.history.replaceState( {}, '', `${mainUrl}&tab=${currentTab}` );
+
+	}
+
+	async genericFetchRequest ( _$data, _method = 'GET' ) {
+
+		// Try/Catch
+		try {
+
+			// Setup options object
+			let options = {
+				method: _method
+			};
+
+			// Set url
+			let url = this._ajaxURL;
+	
+			// Set the body only for POST (or other methods that allow a body)
+			if( _method === 'POST' ) {
+				options.body = _$data;
+			}
+	
+			// For GET requests, append data as query parameters to the URL
+			if( _method === 'GET' ) {
+				const queryParams = new URLSearchParams( _$data ).toString();
+				url += `?${queryParams}`;
+			}
+	
+			// Send fetch request and wait for the response
+			const _$response = await fetch( url, options );
+	
+			// Check if the response status is OK (200)
+			if( _$response.ok ) {
+
+				const _$result = await _$response.json();
+				return _$result;
+
+			} else {
+
+				// Handle non-OK response here
+				console.error( 'Fetch failed with status:', _$response.status );
+				return null;
+
+			}
+
+		} catch ( error ) {
+
+			// Handle any errors that occur during the fetch request
+			console.error( error );
+			return null;
+
+		}
+
+	}	
+
+	setHistoryHeight () {
+
+		const height = this.generateView.querySelector( '.settings' ).clientHeight;
+		this.apv.querySelector( '.history' ).style.height = height;
+
+	}
+
+	sidebarClickEvent () {
+
+		// Set sidebar items
+		const sidebarItems = this.sidebar.querySelectorAll( '.item' );
+
+		// Set click events for each sidebar item
+		sidebarItems.forEach( item => {
+			item.addEventListener( 'click', () => {
+
+				// Reset 
+				this.renderedImages.classList.remove( 'loaded' );
+				this.renderedImagesWrapper.innerHTML = '';
+				this.resetGenerateView();
+				
+				// Set active sidebar item
+				const tab = item.dataset.tab;
+				this.setActiveSidebarItem( item, tab );
+				
+				// Scroll to top
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+
+				// Update url
+				const url = new URL( window.location.href );
+				const mainUrl = url.toString().split( '&tab' )[0];
+				window.history.replaceState( {}, '', `${mainUrl}&tab=${tab}` );
+
+			});
+		});
+		
+	}
+
+	setActiveSidebarItem ( item, tab ) {
+
+		// Reset sidebar item active states
+		this.sidebar.querySelectorAll( '.item' ).forEach( el => el.classList.remove( 'active' ) );
+		item.classList.add( 'active' );
+
+		// Reset templayte view active states
+		document.querySelectorAll( '.main-content .template' ).forEach( el => el.classList.remove( 'active' ) );
+		document.querySelector( `.main-content .template[data-tab="${tab}"]` ).classList.add( 'active' );
+
+	}
+
+	/***
+	* POSTS FUNCTIONS
+	***/
+
+	async filtering ( _exclude = false ) {
+
+		// Set search value and create FormData object
+		const search = this.searchInput.value;
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_get_posts' );
+		_$data.append( 'page_id', this._postId );
+
+		// Loop through active filters and set postType, order, and date if present
+		this.apv.querySelectorAll( '.type-block.active' ).forEach( item => {
+			_$data.append( 'post_type', item.dataset.type || '' );
+			_$data.append( 'alphabetical', item.dataset.alphabetical || '' );
+			_$data.append( 'date', item.dataset.date || '' );
+		} );
+
+		// Set search and exclude if present
+		if( search ) {
+			_$data.append( 'search', search );
+		}
+		if( _exclude ) {
+			_$data.append( 'exclude', _exclude );
+		}
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Update post wrapper content based on excluded types
+		this.postWrapper.innerHTML = _exclude ? this.postWrapper.innerHTML + _$fetchRequest.content : _$fetchRequest.content;
+
+		// Toggle "load more" button visibility
+		this.postWrapperLoadMore.classList.toggle( 'hidden', _$fetchRequest.total_posts <= 18 );
+
+		// Set post card click events and end loading animation
+		this.postCardClickEvent();
+		this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.remove( 'loading' );
+		this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.remove( 'loading' );
+
+	}
+
+	loadMoreClickEvent () {
+
+		// Set load more button click event for posts view
+		this.postWrapperLoadMore.addEventListener( 'click', () => {
+
+			// Prevent the default action (e.g., a link click)
+			e.preventDefault();
+		
+			// Create an array to hold the excluded post IDs
+			const exclude = [];
+		
+			// Loop through each post-card and get the 'data-post' attribute
+			this.postWrapper.querySelectorAll( '.post-card' ).forEach( card => {
+				exclude.push( card.getAttribute( 'data-post' ) );
+			});
+		
+			// Add 'loading' class to the load-more text and loader elements
+			this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.add( 'loading' );
+			this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.add( 'loading' );
+		
+			// Call the filtering function, passing the exclude array
+			this.filtering( exclude );
+
+		});
+
+	}
+
+	async getCurrentFI ( post ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_get_current_fi' );
+		_$data.append( 'post_id', post );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Update featured image
+		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
+
+	}
+
+	async checkForFIRevert ( post ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_check_fi_revert' );
+		_$data.append( 'post_id', post );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Update featured image
+		if( _$fetchRequest ) {
+			this.revertToOriginal.classList.remove( 'hidden' );
+		}
+
+	}
+
+	postCardClickEvent () {
+
+		// Loop through post card buttons and add click events
+		this.apv.querySelectorAll( '.post-card .btn' ).forEach( btn => {
+			btn.addEventListener( 'click', async () => {
+
+				// Set element variables
+				const featuredImg = this.generateView.querySelector( '.featured-img' );
+				const currentPostTitle = this.generateView.querySelector( '.current-post-title' );
+
+				// Clear featured image and post title
+				featuredImg.innerHTML = '';
+				featuredImg.style.backgroundImage = '';
+				currentPostTitle.innerHTML = '';
+
+				// Get post ID and title
+				const postCard = btn.closest( '.post-card' );
+				if( !postCard ) return;
+				const postId = postCard.dataset.post;
+				const postTitleElement = postCard.querySelector( '.card-title .text' );
+				const postTitle = postTitleElement ? postTitleElement.innerHTML : '';
+		
+				// Update sidebar and template classes
+				this.sidebar.querySelectorAll( '.item' ).forEach( item => {
+					item.classList.remove( 'active' );
+				} );
+				this.sidebar.querySelector( '.item.generate' ).classList.add( 'active' );
+				this.apv.querySelectorAll( '.template' ).forEach( template => {
+					template.classList.remove( 'active' );
+				} );
+				this.generateView.classList.add( 'for-post', 'active' );
+				this.generateView.dataset.post = postId;
+				currentPostTitle.innerHTML = postTitle;
+				this.revertToOriginal.classList.add( 'hidden' );
+		
+				// Check for missing image
+				if( postCard.querySelector( '.missing-image' ) ) {
+					featuredImg.innerHTML = `
+                    <div class="missing-image">
+                        <div class="icon">
+                            <img src="/wp-content/plugins/ai-post-visualizer/admin/views/img/missing_image.svg">
+                        </div>
+                        <div class="text">Featured Image <br>Missing</div>
+                    </div>`;
+				}
+		
+				// Call functions (assuming these are defined elsewhere)
+				await this.getCurrentFI( postId );
+				await this.checkForFIRevert( postId );
+				this.setHistoryHeight();
+		
+				// Scroll to the top
+				window.scrollTo({ top: 0, behavior: 'smooth' });
+
+			} );
+		} );
+
+	}
+
+	searchBarChangeEvent () {
+
+		// Search bar change event
+		this.searchInput.addEventListener( 'change', (e) => {
+
+			// Prevent default behavior
+			e.preventDefault();
+
+			// Start filtering
+			this.filtering();
+
+		});
+	}
+
+	accordionClickEvent () {
+
+		// Set accordions
+		const accordions = this.apv.querySelectorAll( '.accordions .accordion .title' );
+
+		// Add click event to each accordion
+		accordions.forEach( title => {
+			title.addEventListener( 'click', () => {
+				
+				// Get accordion variables
+				const typesElement = title.closest( '.accordion' ).querySelector( '.types' );
+				const typesHeight = typesElement ? typesElement.offsetHeight : 0;
+				const wrapper = title.closest( '.accordion' ).querySelector( '.types .types-wrapper' );
+				
+				// Update wrapper margins
+				if( typesHeight ) {
+					wrapper.style.marginTop = `calc((${typesHeight}px + 1rem) * -1)`;
+				} else {
+					wrapper.style.marginTop = '';
+				}
+
+			});
+		});
+
+	}
+
+	accordionItemClickEvent () {
+
+		// Select all elements with the class 'type-block' and add a click event listener to each
+		this.apv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
+			
+			// Add click event listener to each 'type-block'
+			typeBlock.addEventListener( 'click', (e) => {
+
+				// Prevent the default behavior
+				e.preventDefault();
+
+				// Check if the clicked 'type-block' already has the 'active' class
+				if( typeBlock.classList.contains( 'active' ) ) {
+
+					// If it is active, remove the 'active' class
+					typeBlock.classList.remove( 'active' );
+
+				} else {
+
+					// Otherwise, if the 'type-block' is inside an accordion with the class 'sort'
+					const accordion = typeBlock.closest( '.accordion' );
+
+					if( accordion && accordion.classList.contains( 'sort' ) ) {
+
+						// Remove the 'active' class from any other 'type-block' inside the 'accordion.sort'
+						this.apv.querySelectorAll( '.accordion.sort .type-block.active' ).forEach( activeBlock => {
+							activeBlock.classList.remove( 'active' );
+						});
+
+					} else {
+
+						// If it's not inside 'accordion.sort', remove the 'active' class from 'type-block' within the closest accordion
+						accordion.querySelectorAll( '.type-block.active' ).forEach( activeBlock => {
+							activeBlock.classList.remove( 'active' );
+						});
+
+					}
+
+					// Add the 'active' class to the clicked 'type-block'
+					typeBlock.classList.add( 'active' );
+
+				}
+
+				// Check if no 'type-block' elements are active inside '.post-types'
+				if( this.apv.querySelectorAll( '.post-types .type-block.active' ).length === 0 ) {
+
+					// If none are active, activate the 'type-block' with data-type="any"
+					this.apv.querySelector( '.post-types .type-block[data-type="any"]' ).classList.add( 'active' );
+
+				}
+
+				// Call the filtering function
+				this.filtering();
+
+			});
+		});
+
+	}
+
+	/***
+	* GENERATE FUNCTIONS
+	***/
+
+	renderButtonClickEvent () {
+
+		// Get validated generate view
+		const validatedGenerateView = this.apv.querySelector( '.template-generate.validated' );
+
+		// Ensure view is validate with api key
+		if( !validatedGenerateView ) return;
+
+		// Set click event for render button
+		validatedGenerateView.querySelector( '.render.btn' ).addEventListener( 'click', (e) => {
+
+			// Prevent default functionality
+			e.preventDefault();
+
+			// Set dalle image requirements
+			const postId = this.generateView.classList.contains( 'for-post' ) ? this.generateView.dataset.post : false;
+			const prompt = this.generateView.querySelector( '.keyword-input' ).value;
+			const num = this.generateView.querySelector( '.number-input' ).value;
+			const resolution = this.generateView.querySelector( '.resolution-select select' ).value;
+
+			// Get dalle images
+			this.getDalleImages( postId, prompt, num, resolution );
+
+		});
+
+	}
+
+	async getDalleImages ( _postId, _prompt, _n = false, _size = false ) {
+
+		// Clear images and start loading animation
+		this.renderedImagesWrapper.innerHTML = '';
+		this.renderedImages.classList.add( 'loaded' );
+		this.renderedImages.querySelector( '.rc-loader' ).classList.add( 'loading' );
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_get_dalle_images' );
+		_$data.append( 'prompt', _prompt );
+		_$data.append( 'n', _n );
+		_$data.append( 'size', _size );
+		_$data.append( 'post_id', _postId );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Stop the loading animation
+			this.renderedImages.querySelector( '.rc-loader' ).classList.remove( 'loading' );
+	
+			// Insert the response HTML into the images wrapper
+			this.renderedImagesWrapper.innerHTML = _$fetchRequest;
+	
+			// Smooth scroll to the rendered images section
+			window.scrollTo({
+				top: this.renderedImages.offsetTop,
+				behavior: 'smooth'
+			});
+	
+			// Call additional functions
+			this.addNewHistoryRow();
+			this.setHistoryHeight();
+			this.renderedImageSetFI();
+
+		}
+
+	}
+
+	async setDalleImage ( _postId, _imageId ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_set_dalle_image' );
+		_$data.append( 'post_id', _postId );
+		_$data.append( 'image_id', _imageId );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Set featured image
+			const featuredImage = this.generateView.querySelector( '.current-featured .featured-img' );
+
+			// Set background images for the featured image and post card
+			featuredImage.style.backgroundImage = `url(${_$fetchRequest})`;
+			this.postView.querySelector( `.post-card[data-post="${_postId}"] .image` ).style.backgroundImage = `url(${_$fetchRequest})`;
+
+			// Remove 'hidden' class from the revert-to-original element
+			this.revertToOriginal.classList.remove( 'hidden' );
+
+			// Check if there is a missing image element inside the featured image
+			if( featuredImage.querySelector( '.missing-image' ) ) {
+
+				// Remove missing image elements from both the featured image and post card
+				featuredImage.querySelector( '.missing-image' ).remove();
+				this.postView.querySelector( `.post-card[data-post="${_postId}"] .image .missing-image` ).remove();
+
+				// Add 'hidden' class to the revert-to-original element
+				this.revertToOriginal.classList.add( 'hidden' );
+
+			}
+
+		}
+
+	}
+
+	revertToOriginalClickEvent () {
+
+		// Set click event for revert to original button
+		this.revertToOriginal.addEventListener( 'click', () => {
+
+			// Get post id
+			const postId = this.generateView.dataset.post;
+
+			// revet featured image to original
+			this.revertFeaturedImage( postId );
+
+		});
+
+	}
+
+	async revertFeaturedImage ( _postId ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_revert_featured_image' );
+		_$data.append( 'post_id', _postId );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Set background images for the featured image and post card
+			this.generateView.querySelector( '.current-featured .featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
+			this.postView.querySelector( `.post-card[data-post="${_postId}"] .image` ).style.backgroundImage = `url(${_$fetchRequest})`;
+
+			// Add 'hidden' class to the revert-to-original element
+			this.revertToOriginal.classList.add( 'hidden' );
+
+		}
+
+	}
+
+	async loadDalleHistoryRow ( _historyId ) {
+
+		// Add loaded class to rendered images
+		this.renderedImages.classList.add( 'loaded' );
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_load_dalle_history' );
+		_$data.append( 'post_id', _historyId );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Remove 'loading' class from the loader
+			this.renderedImages.querySelector( '.rc-loader' ).classList.remove( 'loading' );
+
+			// Insert the response HTML into the images wrapper
+			this.renderedImagesWrapper.innerHTML = _$fetchRequest;
+
+			// Smooth scroll to the rendered images section
+			window.scrollTo({
+				top: this.renderedImages.offsetTop,
+				behavior: 'smooth'
+			});
+
+			// Call additional functions
+			this.setHistoryHeight();
+			this.renderedImageSetFI();
+
+		}
+
+	}
+
+	async addNewHistoryRow () {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_get_history' );
+		_$data.append( 'is_ajax', 1 );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Insert the response HTML into the history rows container
+			this.apv.querySelector( '.history-rows' ).innerHTML = _$fetchRequest;
+
+			// Load history images
+			this.historyLoadImagesClickEvent();
+
+		}
+
+	}
+
+	historyLoadImagesClickEvent () {
+
+		// Add click event listeners to the 'load-images' buttons
+		this.apv.querySelectorAll( '.history .load-images' ).forEach( button => {
+			button.addEventListener( 'click', ( e ) => {
+
+				// Prevent the default action
+				e.preventDefault();
+
+				// Find the parent '.history-row' and get the 'data-history' attribute
+				const historyId = button.closest( '.history-row' ).dataset.history;
+
+				// Call the function to load the history row
+				this.loadDalleHistoryRow( historyId );
+
+			} );
+		} );
+
+	}
+
+	renderedImageSetFI () {
+
+		// Add click event listeners to the '.set-image' buttons
+		this.renderedImages.querySelectorAll( '.post-card .set-image' ).forEach( button => {
+			button.addEventListener( 'click', async () => {
+
+				// Get the post ID and image ID
+				const postId = button.closest( '.template-generate' ).dataset.post;
+				const imageId = button.closest( '.post-card' ).dataset.image;
+
+				// Call the function to set the image
+				await this.setDalleImage( postId, imageId );
+
+				// Add the 'current' class to the clicked button
+				button.classList.add( 'current' );
+
+			});
+		});
+
+
+	}
+
+	updateCost ( num, resolution ) {
+
+		// Set cost variable
+		let cost;
+
+		// Get cost from resolution
+		switch (resolution) {
+			case '256x256': cost = 0.016; break;
+			case '512x512': cost = 0.018; break;
+			case '1024x1024': cost = 0.02; break;
+		}
+
+		// Get total
+		const total = (num * cost).toFixed( 3 );
+
+		// Set breakdown
+		const breakdown = this.apv.querySelector( '.breakdown' );
+		breakdown.querySelector( '.num-images span' ).innerHTML = num;
+		breakdown.querySelector( '.total span' ).innerHTML = `$${total}`;
+		breakdown.querySelector( '.cost-per-img span' ).innerHTML = `$${cost}`;
+
+	}
+
+	resetGenerateView () {
+
+		// Reset generate view
+		this.generateView.classList.remove( 'for-post' );
+		this.generateView.dataset.post = '';
+		this.generateView.querySelector( '.featured-img' ).innerHTML = '';
+		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = '';
+		this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
+		this.generateView.querySelectorAll( '.setting input' ).forEach( input => input.value = '' );
+		this.generateView.querySelectorAll( '.setting select' ).forEach( select => select.selectedIndex = 0 );
+		this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
+		this.generateView.querySelector( '.history' ).style.height = '';
+
+	}
+
+	numberInputChangeEvent () {
+
+		// Handle number input change
+		this.apv.querySelector( '.number-input' ).addEventListener( 'change', (e) => {
+
+			// Prevent default functionality
+			e.preventDefault();
+
+			// Get number and resolution
+			const num = e.target.value;
+			const resolution = document.querySelector('#apv-admin-view .resolution-select select').value;
+
+			// Update cost
+			this.updateCost( num, resolution );
+
+		});
+
+	}
+
+	resolutionSelectChangeEvent () {
+
+		// Handle resolution select change
+		this.apv.querySelector( '.resolution-select select' ).addEventListener( 'change', (e) => {
+
+			// Prevent default functionality
+			e.preventDefault();
+
+			// Get number and resolution
+			const resolution = e.target.value;
+			const num = document.querySelector('#apv-admin-view .number-input').value;
+			this.updateCost( num, resolution );
+
+		});
+	}
+
+	goBackToPostsClickEvent () {
+
+		this.apv.querySelector( '.back-to-posts' ).addEventListener( 'click', () => {
+
+			// Remove 'loaded' class from rendered-images
+			this.renderedImages.classList.remove( 'loaded' );
+		
+			// Clear the images wrapper content
+			this.renderedImagesWrapper.innerHTML = '';
+		
+			// Remove 'for-post' class and clear 'post' data attribute
+			this.generateView.classList.remove( 'for-post' );
+			this.generateView.setAttribute( 'data-post', '' );
+		
+			// Clear the featured image and background-image
+			const featuredImg = this.generateView.querySelector( '.featured-img' );
+			featuredImg.innerHTML = '';
+			featuredImg.style.backgroundImage = '';
+		
+			// Clear the current post title
+			this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
+		
+			// Clear input values and trigger change event
+			this.generateView.querySelectorAll( '.setting input' ).forEach( input => {
+				input.value = '';
+				const event = new Event( 'change' );
+				input.dispatchEvent( event );
+			});
+		
+			// Reset the number of images and select dropdowns
+			this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
+			this.generateView.querySelectorAll( '.setting select' ).forEach( select => {
+				select.selectedIndex = 0;
+				const event = new Event( 'change' );
+				select.dispatchEvent( event );
+			});
+		
+			// Reset history height
+			this.apv.querySelector( '.history' ).style.height = '';
+		
+			// Handle sidebar items' active class
+			this.sidebar.querySelectorAll( '.item' ).forEach( item => {
+				item.classList.remove( 'active' );
+			});
+			this.sidebar.querySelector( '.item.posts' ).classList.add( 'active' );
+		
+			// Handle main content templates' active class
+			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
+				template.classList.remove( 'active' );
+			});
+			this.postView.classList.add( 'active' );
+		
+			// Smooth scroll to the top
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		
+		});		
+
+	}
+
+	signUpTextClickEvent () {
+
+		// Set validation check
+		const invalidGenerateView = this.apv.querySelector( '.template-generate.not-validated' );
+
+		// Skip click if valid generate view
+		if( !invalidGenerateView ) return;
+
+		// Add click evnet for sign up text
+		invalidGenerateView.querySelector( '.sign-up-text div' ).addEventListener( 'click', (e) => {
+
+			// Get the value of the 'data-tab' attribute
+			const tab = e.target.getAttribute( 'data-tab' );
+		
+			// Remove 'active' class from all sidebar items
+			this.sidebar.querySelectorAll( '.item' ).forEach( item => {
+				item.classList.remove( 'active' );
+			});
+		
+			// Add 'active' class to the sidebar item that matches the tab
+			this.sidebar.querySelector( `.item[data-tab="${tab}"]` ).classList.add( 'active' );
+		
+			// Remove 'active' class from all templates
+			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
+				template.classList.remove( 'active' );
+			});
+		
+			// Add 'active' class to the template that matches the tab
+			document.querySelector( `.main-content .template[data-tab="${tab}"]` ).classList.add( 'active' );
+		
+			// Smooth scroll to the top
+			window.scrollTo({
+				top: 0,
+				behavior: 'smooth'
+			});
+		
+			// Modify the URL to include the new tab without reloading the page
+			const url = new URL( window.location.href );
+			const mainUrl = url.toString().split( '&tab' )[0];
+			window.history.replaceState( {}, '', `${mainUrl}&tab=${tab}` );
+
+		});		
+
+	}
+
+	/***
+	* SETTINGS FUNCTIONS
+	***/
+
+	dalleAPIKeyInputChangeEvent () {
+
+		// Set dalle api key input change event
+		this.settingsView.querySelector( 'input[name="dalleApiKey"]' ).addEventListener( 'change', async (event) => {
+
+			// Get the value of the input field
+			const apiKey = event.target.value;
+
+			// Call the setDalleAPIKey function with the input value
+			await this.setDalleAPIKey( apiKey );
+
+		} );
+
+	}
+
+	async setDalleAPIKey ( apiKey ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_set_dalle_api_key' );
+		_$data.append( 'api_key', apiKey );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+	}
+
+	planSelectClickEvent () {
+
+		// Add click event to select plan
+		this.apv.querySelectorAll( '.select-plan' ).forEach( plan => {
+			plan.addEventListener( 'click', async () => {
+				
+				// Set tier
+				const _tier = plan.dataset.tier;
+
+				// Set data object and action
+				const _$data = new FormData();
+				_$data.append( 'action', 'apv_plans_routing' );
+				_$data.append( 'tier', _tier );
+				_$data.append( 'return_url', window.location.href );
+
+				// Run fetch request
+				const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+				// Check if request successful
+				if( _$fetchRequest ) {
+
+					// Reload page with the returned URL
+					window.location.href = _$fetchRequest.replaceAll( '"', '' );
+
+				}
+
+			});
+		});
+
+	}
+
+}

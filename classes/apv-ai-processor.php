@@ -54,7 +54,7 @@ class APV_AI_PROCESSOR {
 
 		if( $api_data && !isset( $api_data->status ) ) {
 
-			$urls = json_decode( $api_data )->data;
+			$urls = $api_data['data'];
 
 			$content = '';
 			$generated_images = array();
@@ -62,7 +62,7 @@ class APV_AI_PROCESSOR {
 			$i = 0;
 			foreach( $urls as $url ) {
 
-				$image_id = $this->upload_images_to_library( $url->url, $image_title . '-' . $i );
+				$image_id = $this->upload_images_to_library( $url['url'], $image_title . '-' . $i );
 				$image_url = wp_get_attachment_url( $image_id );
 				array_push( $generated_images, $image_id );
 
@@ -205,7 +205,7 @@ class APV_AI_PROCESSOR {
 	/**
 	 * apv_api_request
 	 *
-	 * Remove DALLE image as post featured image
+	 * Send API request
 	 *
 	 * @param   String $prompt Main from to send to API endpoint.
 	 * @param   Integer $n Number of images to return from API endpoint.
@@ -214,49 +214,83 @@ class APV_AI_PROCESSOR {
 	 */
 	public function apv_api_request( $prompt, $n, $size ) {
 
+		// Get API Keys
+		$dalle_api_key = get_option( 'apv_dalle_api_key' );
 		$api_key = get_option( 'apv_api_key' );
-
-		if( $api_key ) {
-
-			$url = 'https://apv-key-validator.herokuapp.com/image-processor';
-
-			$curl = curl_init();
-
-			$fields = array(
-				'prompt' => $prompt,
-				'n' => $n,
-				'size' => $size,
-				'apiKey' => $api_key
-			);
-
-			$headers = array(
-				'Content-Type: application/json'
-			);
-
-			$json_string = json_encode( $fields );
-
-			curl_setopt( $curl, CURLOPT_URL, $url );
-			curl_setopt( $curl, CURLOPT_POST, TRUE );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, $json_string );
-			curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true  );
-
-			$data = curl_exec( $curl );
-
-			curl_close( $curl );
-
-			return $data;
-
-		} else {
+	
+		// Ensure at least one API key is set
+		if( !$dalle_api_key && !$api_key ) {
 			return false;
 		}
+	
+		// Setup endpoint and headers based on the available API key
+		if( $dalle_api_key ) {
+			$endpoint = 'https://api.openai.com/v1/images/generations';
+			$headers = [
+				'Authorization: Bearer ' . $dalle_api_key,
+				'Content-Type: application/json'
+			];
+		} else {
+			$endpoint = 'https://apv-key-validator-6359afeed8ed.herokuapp.com/image-processor';
+			$headers = [
+				'Authorization: Bearer ' . $api_key,
+				'Content-Type: application/json'
+			];
+		}
+	
+		// Setup fields object
+		$fields = [
+			'prompt' => $prompt,
+			'n' => $n,
+			'size' => $size
+		];
+	
+		// Encode fields into JSON string
+		$json_string = json_encode( $fields );
+	
+		// Initialize curl
+		$curl = curl_init( $endpoint );
+	
+		// Setup and send curl request
+		curl_setopt( $curl, CURLOPT_POST, true );
+		curl_setopt( $curl, CURLOPT_POSTFIELDS, $json_string );
+		curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true  );
+	
+		// Run curl and get response
+		$response = curl_exec( $curl );
+	
+		// Check for connection errors
+		if( curl_errno( $curl ) ) {
 
-	}
+			// Log connection errors
+			error_log( 'Curl error: ' . curl_error( $curl ) );
+			curl_close( $curl );
+			return false;
+
+		}
+	
+		// Get the HTTP response code
+		$http_status = curl_getinfo( $curl, CURLINFO_HTTP_CODE );
+		
+		// Close curl
+		curl_close( $curl );
+	
+		// Check if the HTTP response status is not OK (200)
+		if( $http_status !== 200 ) {
+			error_log( 'HTTP error: ' . $http_status . ' Response: ' . $response );
+			return false;
+		}
+	
+		// Decode and return the JSON response
+		return json_decode( $response, true );
+
+	}	
 
 	/**
 	 * upload_images_to_library
 	 *
-	 * Remove DALLE image as post featured image
+	 * Upload images to WP media library
 	 *
 	 * @param   String $url Image url
 	 * @param   String $title Optional title to add to image.

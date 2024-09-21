@@ -18,11 +18,6 @@ $admin_url = apv()->plugin()->get_admin_url();
 
 $validation = false;
 
-if( isset( $_GET[ 'apv_dalle_api_key' ] ) ) {
-	$apv_dalle_api_key = $_GET[ 'apv_dalle_api_key' ];
-	update_option( 'apv_dalle_api_key', $apv_dalle_api_key );
-}
-
 if( isset( $_GET[ 'apv_api_key' ] ) ) {
 	$apv_api_key = $_GET[ 'apv_api_key' ];
 	update_option( 'apv_api_key', $apv_api_key );
@@ -35,8 +30,11 @@ $api_key = get_option( 'apv_api_key' );
 if( $api_key ) {
 
 	if( get_transient( 'apv_key_validation' ) && get_transient( 'apv_key_validation' ) == 'valid' ) {
+
 		$validation = true;
+
 	} else {
+
 		// Set expiration for transient to the beginning of the next day
 		$now = time();
 		$tomorrow = strtotime( 'tomorrow' );
@@ -54,7 +52,12 @@ if( $api_key ) {
 			$validation = false;
 			set_transient( 'apv_key_validation', 'invalid', $expiration );
 		}
+
 	}
+} else if ( $dalle_api_key ) {
+
+	$validation = true;
+
 }
 
 ?>
@@ -69,7 +72,7 @@ if( $api_key ) {
 		</div>
 	</div>
 </div>
-<?php if( isset( $_GET[ 'apv_api_key' ] ) || isset( $_GET[ 'apv_dalle_api_key' ] ) ) { ?>
+<?php if( isset( $_GET[ 'apv_api_key' ] ) ) { ?>
 	<script>
 		window.history.replaceState( {}, '', '<?php echo esc_url( $admin_url ); ?>' );
 	</script>
