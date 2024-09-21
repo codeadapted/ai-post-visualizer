@@ -88,7 +88,7 @@ class APV_Plugin {
 
 		global $wpdb;
 
-		$deleted_rows = $wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE `meta_key` LIKE '%apv_profile_bio%'" );
+		$deleted_rows = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE `option_name` LIKE '%apv_%'" );
 
 		restore_current_blog();
 

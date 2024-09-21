@@ -216,27 +216,18 @@ class APV_AI_PROCESSOR {
 
 		// Get API Keys
 		$dalle_api_key = get_option( 'apv_dalle_api_key' );
-		$api_key = get_option( 'apv_api_key' );
 	
 		// Ensure at least one API key is set
-		if( !$dalle_api_key && !$api_key ) {
+		if( !$dalle_api_key ) {
 			return false;
 		}
 	
 		// Setup endpoint and headers based on the available API key
-		if( $dalle_api_key ) {
-			$endpoint = 'https://api.openai.com/v1/images/generations';
-			$headers = [
-				'Authorization: Bearer ' . $dalle_api_key,
-				'Content-Type: application/json'
-			];
-		} else {
-			$endpoint = 'https://apv-key-validator-6359afeed8ed.herokuapp.com/image-processor';
-			$headers = [
-				'Authorization: Bearer ' . $api_key,
-				'Content-Type: application/json'
-			];
-		}
+		$endpoint = 'https://api.openai.com/v1/images/generations';
+		$headers = [
+			'Authorization: Bearer ' . $dalle_api_key,
+			'Content-Type: application/json'
+		];
 	
 		// Setup fields object
 		$fields = [

@@ -67,7 +67,7 @@
                 <span><?php echo esc_html_e( 'Render Images', 'ai-post-visualizer' ); ?></span>
                 <?php if( !$validation ) { ?>
                     <div class="sign-up-text">
-                        <?php echo esc_html_e( 'Sign up for a plan to start rendering images by going to ', 'ai-post-visualizer' ); ?>
+                        <?php echo esc_html_e( 'Add your DALL·E API Key by going to ', 'ai-post-visualizer' ); ?>
                         <div data-tab="settings"><?php echo esc_html_e( 'Settings.', 'ai-post-visualizer' ); ?></div>
                     </div>
                 <?php } ?>

@@ -84,7 +84,6 @@ class APV_ADMIN {
 		this.dalleAPIKeyInputChangeEvent();
 		this.accordionItemClickEvent();
 		this.signUpTextClickEvent();
-		this.planSelectClickEvent();
 	}
 
 	checkQueryParams () {
@@ -940,37 +939,6 @@ class APV_ADMIN {
 
 		// Run fetch request
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
-
-	}
-
-	planSelectClickEvent () {
-
-		// Add click event to select plan
-		this.apv.querySelectorAll( '.select-plan' ).forEach( plan => {
-			plan.addEventListener( 'click', async () => {
-				
-				// Set tier
-				const _tier = plan.dataset.tier;
-
-				// Set data object and action
-				const _$data = new FormData();
-				_$data.append( 'action', 'apv_plans_routing' );
-				_$data.append( 'tier', _tier );
-				_$data.append( 'return_url', window.location.href );
-
-				// Run fetch request
-				const _$fetchRequest = await this.genericFetchRequest( _$data );
-
-				// Check if request successful
-				if( _$fetchRequest ) {
-
-					// Reload page with the returned URL
-					window.location.href = _$fetchRequest.replaceAll( '"', '' );
-
-				}
-
-			});
-		});
 
 	}
 
