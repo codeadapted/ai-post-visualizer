@@ -18,6 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! defined( 'APV_PLUGIN_FILE' ) ) {
+    define( 'APV_PLUGIN_FILE', __FILE__ );
+}
+
 require_once __DIR__ . '/classes/apv-ai-processor.php';
 require_once __DIR__ . '/classes/apv-plugin.php';
 require_once __DIR__ . '/classes/apv-posts.php';

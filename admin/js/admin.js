@@ -84,6 +84,7 @@ class APV_ADMIN {
 		this.dalleAPIKeyInputChangeEvent();
 		this.dropdownItemClickEvent();
 		this.signUpTextClickEvent();
+		this.loadMoreClickEvent();
 	}
 
 	checkQueryParams () {
@@ -258,6 +259,7 @@ class APV_ADMIN {
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
 
 		// Update post wrapper content based on excluded types
+		console.log( _$fetchRequest.content );
 		this.postWrapper.innerHTML = _exclude ? this.postWrapper.innerHTML + _$fetchRequest.content : _$fetchRequest.content;
 
 		// Toggle "load more" button visibility
@@ -273,7 +275,7 @@ class APV_ADMIN {
 	loadMoreClickEvent () {
 
 		// Set load more button click event for posts view
-		this.postWrapperLoadMore.addEventListener( 'click', () => {
+		this.postWrapperLoadMore.querySelector( '.load-more-text' ).addEventListener( 'click', ( e ) => {
 
 			// Prevent the default action (e.g., a link click)
 			e.preventDefault();
@@ -283,7 +285,7 @@ class APV_ADMIN {
 		
 			// Loop through each post-card and get the 'data-post' attribute
 			this.postWrapper.querySelectorAll( '.post-card' ).forEach( card => {
-				exclude.push( card.getAttribute( 'data-post' ) );
+				exclude.push( card.dataset.post );
 			});
 		
 			// Add 'loading' class to the load-more text and loader elements

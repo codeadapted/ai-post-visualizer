@@ -1,5 +1,6 @@
 <div class="template template-posts <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="posts">
     <div class="posts-section">
+        <h3><?php echo esc_html_e( 'Filter Posts', 'ai-post-visualizer' ); ?></h3>
         <div class="filters">
             <div class="search-bar">
                 <input name="searchPosts" class="search-input" placeholder="<?php echo esc_html_e( 'Search Posts', 'ai-post-visualizer' ); ?>" />

@@ -27,96 +27,104 @@ class APV_Posts {
 	**/
 	public function apv_get_posts() {
 
-		// Only if admin
-		if( !current_user_can( 'manage_options' ) ) {
+		// Only allow admin users
+		if ( !current_user_can( 'manage_options' ) ) {
 			return false;
 		}
-
+	
+		// Set up the default query arguments
 		$args = array(
 			'posts_per_page' => 18,
-			'status'         => 'publish',
-			'public'         => 'true'
+			'post_status'    => 'publish',  // Correct key for querying post status
+			'public'         => true
 		);
-
-		if( isset( $_GET['exclude'] ) && $_GET['exclude'] ) {
-			$args['post__not_in'] = $_GET['exclude'];
+	
+		// Sanitize and handle the exclude parameter
+		if ( isset( $_GET['exclude'] ) && !empty( $_GET['exclude'] ) ) {
+			$exclude_ids = explode( ',', $_GET['exclude'] ); 
+			$exclude_ids = array_map( 'absint', $exclude_ids ); 
+			$args['post__not_in'] = $exclude_ids;
 		}
-
-		if( isset( $_GET['post_type'] ) && $_GET['post_type'] ) {
-			$args['post_type'] = $_GET['post_type'];
+	
+		// Sanitize and handle the post_type parameter
+		if ( isset( $_GET['post_type'] ) && !empty( $_GET['post_type'] ) ) {
+			$args['post_type'] = sanitize_text_field( $_GET['post_type'] );
 		} else {
 			$args['post_type'] = 'any';
 		}
-
-		if( isset( $_GET['alphabetical'] ) && $_GET['alphabetical'] ) {
-			$args['orderby'] = 'post_title';
-			$args['order'] = $_GET['alphabetical'];
+	
+		// Handle the alphabetical sorting
+		if ( isset( $_GET['alphabetical'] ) && !empty( $_GET['alphabetical'] ) ) {
+			$order = sanitize_text_field( $_GET['alphabetical'] );
+			$args['orderby'] = 'title';
+			$args['order'] = in_array( $order, array( 'ASC', 'DESC' ) ) ? $order : 'ASC'; // Ensure valid order
 		}
-
-		if( isset( $_GET['date'] ) && $_GET['date'] ) {
+	
+		// Handle the date sorting
+		if ( isset( $_GET['date'] ) && !empty( $_GET['date'] ) ) {
+			$order = sanitize_text_field( $_GET['date'] );
 			$args['orderby'] = 'date';
-			$args['order'] = $_GET['date'];
+			$args['order'] = in_array( $order, array( 'ASC', 'DESC' ) ) ? $order : 'ASC';
 		}
-
-		if( isset( $_GET['search'] ) && $_GET['search'] ) {
-			$args['search_prod_title'] = $_GET['search'];
-			add_filter( 'posts_where', array( $this, 'apv_search_by_title_only' ), 10, 2 );
-			$posts = new WP_Query( $args );
-			remove_filter( 'posts_where',  array( $this, 'apv_search_by_title_only' ), 10, 2 );
-		} else {
-			$posts = new WP_Query( $args );
+	
+		// Handle the search functionality
+		if ( isset( $_GET['search'] ) && !empty( $_GET['search'] ) ) {
+			$args['s'] = sanitize_text_field( $_GET['search'] ); // Sanitize the search input
 		}
-
+	
+		// Run the query
+		$posts = new WP_Query( $args );
+	
 		$content = '';
-
+		$total_posts = $posts->found_posts; // Make sure this is set
+	
 		if ( $posts->have_posts() ) {
-			$total_posts = $posts->found_posts;
-			$i = 0;
 			while ( $posts->have_posts() ) {
-
 				$posts->the_post();
 				$post_id = get_the_ID();
 				$missing = false;
-
-				if( get_the_post_thumbnail_url( $post_id ) ) {
+	
+				// Get post thumbnail or fallback to a missing image
+				if ( has_post_thumbnail( $post_id ) ) {
 					$thumbnail = get_the_post_thumbnail_url( $post_id, 'medium' );
 				} else {
-					$thumbnail = APV_PLUGIN_DIR . 'admin/views/img/missing_image_bg.png';
+					$thumbnail = plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE ); // Use plugins_url for assets
 					$missing = true;
 				}
-
-				$content .= '<div class="post-card" data-post="' . $post_id  . '">';
-					if( !$missing ) {
-						$content .= '<div class="image" style="background-image: url(' . $thumbnail . ')"></div>';
-					} else {
-						$content .= '<div class="image" style="background-image: url(' . $thumbnail . ')">';
-							$content .= '<div class="missing-image">';
-								$content .= '<div class="icon"><img src="' . APV_PLUGIN_DIR . 'admin/views/img/missing_image.svg" /></div>';
-								$content .= '<div class="text">' . __( 'Featured Image <br>Missing', 'ai-post-visualizer' ) . '</div>';
-							$content .= '</div>';
-						$content .= '</div>';
-					}
-					$content .= '<div class="card-title">';
-						$content .= '<div class="post-type">' . get_post_type() . '</div>';
-						$content .= '<div class="text">' . get_the_title() . '</div>';
-					 	$content .= '<div class="btn"><span>' . __( 'Generate New Image', 'ai-post-visualizer' ) . '</span></div>';
+	
+				$content .= '<div class="post-card" data-post="' . esc_attr( $post_id ) . '">';
+				if ( !$missing ) {
+					$content .= '<div class="image" style="background-image: url(' . esc_url( $thumbnail ) . ')"></div>';
+				} else {
+					$content .= '<div class="image" style="background-image: url(' . esc_url( $thumbnail ) . ')">';
+					$content .= '<div class="missing-image">';
+					$content .= '<div class="icon"><img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', APV_PLUGIN_FILE ) ) . '" /></div>';
+					$content .= '<div class="text">' . __( 'Featured Image <br>Missing', 'ai-post-visualizer' ) . '</div>';
 					$content .= '</div>';
+					$content .= '</div>';
+				}
+	
+				$content .= '<div class="card-title">';
+				$content .= '<div class="post-type">' . esc_html( get_post_type() ) . '</div>';
+				$content .= '<div class="text">' . esc_html( get_the_title() ) . '</div>';
+				$content .= '<div class="btn"><span>' . __( 'Generate New Image', 'ai-post-visualizer' ) . '</span></div>';
 				$content .= '</div>';
-
+				$content .= '</div>';
 			}
-
+	
 			wp_reset_postdata();
 		} else {
 			$content .= '<div class="no-results">' . __( 'No posts were found. Please try your query again.', 'ai-post-visualizer' ) . '</div>';
 		}
-
-		if( isset( $_GET['post_type'] ) || isset( $_GET['search'] ) ) {
+	
+		// Return the JSON response or array based on the parameters
+		if ( isset( $_GET['post_type'] ) || isset( $_GET['search'] ) ) {
 			wp_send_json( array( 'content' => $content, 'total_posts' => $total_posts ) );
 		} else {
 			return array( 'content' => $content, 'total_posts' => $total_posts );
 		}
-
 	}
+	
 
 	/**
 	* apv_search_by_title_only
