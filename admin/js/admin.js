@@ -70,7 +70,7 @@ class APV_ADMIN {
 	}
 
 	initEventHandlers () {
-		this.accordionClickEvent();
+		this.dropdownClickEvent();
 		this.sidebarClickEvent();
 		this.searchBarChangeEvent();
 		this.numberInputChangeEvent();
@@ -82,7 +82,7 @@ class APV_ADMIN {
 		this.historyLoadImagesClickEvent();
 		this.checkQueryParams();
 		this.dalleAPIKeyInputChangeEvent();
-		this.accordionItemClickEvent();
+		this.dropdownItemClickEvent();
 		this.signUpTextClickEvent();
 	}
 
@@ -235,9 +235,15 @@ class APV_ADMIN {
 
 		// Loop through active filters and set postType, order, and date if present
 		this.apv.querySelectorAll( '.type-block.active' ).forEach( item => {
-			_$data.append( 'post_type', item.dataset.type || '' );
-			_$data.append( 'alphabetical', item.dataset.alphabetical || '' );
-			_$data.append( 'date', item.dataset.date || '' );
+			if( Boolean( item.dataset.type ) ) {
+				_$data.append( 'post_type', item.dataset.type );
+			}
+			if( Boolean( item.dataset.alphabetical ) ) {
+				_$data.append( 'alphabetical', item.dataset.alphabetical );
+			}
+			if( Boolean( item.dataset.date ) ) {
+				_$data.append( 'date', item.dataset.date );
+			}
 		} );
 
 		// Set search and exclude if present
@@ -396,33 +402,33 @@ class APV_ADMIN {
 		});
 	}
 
-	accordionClickEvent () {
+	dropdownClickEvent () {
 
-		// Set accordions
-		const accordions = this.apv.querySelectorAll( '.accordions .accordion .title' );
+		// Set dropdowns
+		const dropdowns = this.apv.querySelectorAll( '.dropdowns .dropdown .title' );
 
-		// Add click event to each accordion
-		accordions.forEach( title => {
+		// Add click event to each dropdown
+		dropdowns.forEach( title => {
 			title.addEventListener( 'click', () => {
 				
-				// Get accordion variables
-				const typesElement = title.closest( '.accordion' ).querySelector( '.types' );
-				const typesHeight = typesElement ? typesElement.offsetHeight : 0;
-				const wrapper = title.closest( '.accordion' ).querySelector( '.types .types-wrapper' );
+				// Get dropdown variables
+				const parentDropdown = title.closest( '.dropdown' );
 				
-				// Update wrapper margins
-				if( typesHeight ) {
-					wrapper.style.marginTop = `calc((${typesHeight}px + 1rem) * -1)`;
-				} else {
-					wrapper.style.marginTop = '';
-				}
+				// Update active filter dropdown
+				this.apv.querySelectorAll( '.dropdowns .dropdown' ).forEach( dropdown => {
+					if( dropdown != parentDropdown ) {
+						dropdown.classList.remove( 'active' );
+					}
+				});
+				parentDropdown.classList.toggle( 'active' );
+
 
 			});
 		});
 
 	}
 
-	accordionItemClickEvent () {
+	dropdownItemClickEvent () {
 
 		// Select all elements with the class 'type-block' and add a click event listener to each
 		this.apv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
@@ -441,20 +447,20 @@ class APV_ADMIN {
 
 				} else {
 
-					// Otherwise, if the 'type-block' is inside an accordion with the class 'sort'
-					const accordion = typeBlock.closest( '.accordion' );
+					// Otherwise, if the 'type-block' is inside an dropdown with the class 'sort'
+					const dropdown = typeBlock.closest( '.dropdown' );
 
-					if( accordion && accordion.classList.contains( 'sort' ) ) {
+					if( dropdown && dropdown.classList.contains( 'sort' ) ) {
 
-						// Remove the 'active' class from any other 'type-block' inside the 'accordion.sort'
-						this.apv.querySelectorAll( '.accordion.sort .type-block.active' ).forEach( activeBlock => {
+						// Remove the 'active' class from any other 'type-block' inside the 'dropdown.sort'
+						this.apv.querySelectorAll( '.dropdown.sort .type-block.active' ).forEach( activeBlock => {
 							activeBlock.classList.remove( 'active' );
 						});
 
 					} else {
 
-						// If it's not inside 'accordion.sort', remove the 'active' class from 'type-block' within the closest accordion
-						accordion.querySelectorAll( '.type-block.active' ).forEach( activeBlock => {
+						// If it's not inside 'dropdown.sort', remove the 'active' class from 'type-block' within the closest dropdown
+						dropdown.querySelectorAll( '.type-block.active' ).forEach( activeBlock => {
 							activeBlock.classList.remove( 'active' );
 						});
 

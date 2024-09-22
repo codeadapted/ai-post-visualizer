@@ -12,7 +12,7 @@
                 );
                 ?>
             </div>
-            <input type="password" name="dalleApiKey" class="text-input" placeholder="<?php echo esc_html_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $dalle_api_key ? 'value="' . $dalle_api_key . '"' : ''; ?> />
+            <input type="password" name="dalleApiKey" class="dalle-api-key-input" placeholder="<?php echo esc_html_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $dalle_api_key ? 'value="' . $dalle_api_key . '"' : ''; ?> />
         </div>
 
     </div>

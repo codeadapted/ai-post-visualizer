@@ -170,6 +170,8 @@ class APV_Plugin {
 	public function admin_enqueue() {
 		// only enqueue these things on the settings page
 		if ( strpos( $this->get_current_admin_url(), $this->get_admin_url() ) !== false ) {
+
+			wp_enqueue_style( 'font-poppins', 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap', array(), null );
 			wp_enqueue_style( 'apv_stylesheet', APV_PLUGIN_DIR . 'admin/css/admin.css', array(), '1.0.0' );
 			wp_enqueue_script( 'apv_script', APV_PLUGIN_DIR . 'admin/js/admin.js', array( 'jquery' ), '1.0.0' );
 			wp_localize_script( 'apv_script', 'apv_obj',
