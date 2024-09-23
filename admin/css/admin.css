@@ -1070,6 +1070,50 @@ Settings tab
 	background: #2F19B5;
 }
 
+#apv-admin-view .content-area .main-content .template-settings .toggle-button {
+	display: inline-block;
+	position: relative;
+	width: 50px;
+	height: 26px;
+	margin-top: 1rem;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .toggle-input {
+	display: none;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .toggle-label {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 1px solid #545869;
+	border-radius: 50px;
+	position: relative;
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .toggle-circle {
+	position: absolute;
+	top: 2px;
+	left: 3px;
+	width: 20px;
+	height: 20px;
+	background-color: #ffffff;
+	border-radius: 50%;
+	transition: transform 0.2s ease;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .toggle-input:checked + .toggle-label {
+	background-color: #2F19B5;
+	border-color: #2F19B5;
+}
+
+#apv-admin-view .content-area .main-content .template-settings .toggle-input:checked + .toggle-label .toggle-circle {
+	transform: translateX(23px);
+}
+  
+
 /******
 ****
 General Settings styles

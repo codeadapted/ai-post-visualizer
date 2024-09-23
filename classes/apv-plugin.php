@@ -66,10 +66,10 @@ class APV_Plugin {
 			add_filter( 'plugin_action_links_' . APV_BASENAME . '/ai-post-visualizer.php', array( $this, 'add_settings_link' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
 			add_action( 'admin_menu', array( $this, 'admin_page' ) );
-			add_action( 'wp_ajax_apv_save_admin_page', array( $this, 'apv_save_admin_page' ) );
 			add_action( 'init', array( $this, 'apv_register_history_post_type' ) );
 			add_action( 'init', array( $this, 'apv_load_plugin_textdomain' ) );
 			add_action( 'wp_ajax_apv_update_viewer_mode', array( $this, 'apv_update_viewer_mode' ) );
+			add_action( 'wp_ajax_apv_save_clear_data_setting', array( $this, 'apv_save_clear_data_setting' ) );
 		}
 
 	}
@@ -84,9 +84,8 @@ class APV_Plugin {
 	 */
 	public function apv_clear_data() {
 
-		$main_site_id = get_main_site_id();
-
 		if( function_exists('is_multisite') && is_multisite() ) {
+			$main_site_id = get_main_site_id();
 			switch_to_blog( $main_site_id );
 		}
 
@@ -94,33 +93,37 @@ class APV_Plugin {
 
 		$deleted_rows = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE `option_name` LIKE '%apv_%'" );
 
-		restore_current_blog();
+		if( function_exists('is_multisite') && is_multisite() ) {
+			restore_current_blog();
+		}
 
 	}
 
 	/**
-	 * apv_save_admin_page
+	 * apv_save_clear_data_setting
 	 *
-	 * Save admin page data
+	 * Save clear data setting in Settings view
 	 *
 	 * @param   void
 	 * @return  void
 	 */
-	public function apv_save_admin_page() {
-		$clear_data = sanitize_text_field( $_POST['clear_data'] );
-		$main_site_id = get_main_site_id();
+	public function apv_save_clear_data_setting() {
+		$clear_data = sanitize_text_field( $_GET['clear_data'] );
 
 		if( function_exists('is_multisite') && is_multisite() ) {
+			$main_site_id = get_main_site_id();
 			switch_to_blog( $main_site_id );
 		}
 
-		if( $clear_data ) {
+		if( $clear_data && $clear_data == 'true' ) {
 			update_option( 'apv_clear_data', true );
 		} else {
 			delete_option( 'apv_clear_data' );
 		}
 
-		restore_current_blog();
+		if( function_exists('is_multisite') && is_multisite() ) {
+			restore_current_blog();
+		}
 
 		wp_send_json_success( __( 'AI Post Visualizer data set to be cleared on uninstall', 'ai-post-visualizer' ) );
 	}

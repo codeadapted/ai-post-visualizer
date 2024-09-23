@@ -15,5 +15,18 @@
             <input type="password" name="dalleApiKey" class="dalle-api-key-input" placeholder="<?php echo esc_html_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $dalle_api_key ? 'value="' . $dalle_api_key . '"' : ''; ?> />
         </div>
 
+        <h3><?php echo esc_html_e( 'Data Retention Settings', 'ai-post-visualizer' ); ?></h3>
+        <div class="setting retention">
+            <div class="label">
+                <?php echo esc_html__( 'If you would like for all AI Post Visualizer data to be removed after uninstalling the plugin, click the toggle below.', 'ai-post-visualizer'); ?>
+            </div>
+            <div class="toggle-button">
+                <input type="checkbox" id="toggle" class="toggle-input"<?php echo $clear_data ? ' checked' : ''; ?>>
+                <label for="toggle" class="toggle-label">
+                    <span class="toggle-circle"></span>
+                </label>
+            </div>
+        </div>
+
     </div>
 </div>

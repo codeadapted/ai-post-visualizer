@@ -86,6 +86,7 @@ class APV_ADMIN {
 		this.dropdownItemClickEvent();
 		this.signUpTextClickEvent();
 		this.loadMoreClickEvent();
+		this.dataRetentionToggleClickEvent();
 	}
 
 	checkQueryParams () {
@@ -997,6 +998,26 @@ class APV_ADMIN {
 
 		// Run fetch request
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+	}
+
+	dataRetentionToggleClickEvent () {
+
+		// Add click event for retention toggle
+		this.settingsView.querySelector( '.setting.retention .toggle-input' ).addEventListener( 'click', async (e) => {
+
+			// Get input
+			const input = e.target;
+
+			// Set data object and action
+			const _$data = new FormData();
+			_$data.append( 'action', 'apv_save_clear_data_setting' );
+			_$data.append( 'clear_data', input.checked );
+
+			// Run fetch request
+			const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		});
 
 	}
 
