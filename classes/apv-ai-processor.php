@@ -92,6 +92,7 @@ class APV_AI_PROCESSOR {
 
 				update_post_meta( $history, 'prompt', $prompt );
 				update_post_meta( $history, 'images', $generated_images );
+				update_post_meta( $history, 'resolution', $size );
 
 				wp_send_json( $content );
 

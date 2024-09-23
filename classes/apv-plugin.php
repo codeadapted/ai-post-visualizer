@@ -13,6 +13,9 @@ class APV_Plugin {
 	public static function install() {
 
 		update_option( 'apv_activated', true );
+		if( !get_option( 'apv_viewer_mode' ) ) {
+			update_option( 'apv_viewer_mode', 'dark' );
+		}
 
 	}
 

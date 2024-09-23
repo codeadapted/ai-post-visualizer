@@ -70,7 +70,8 @@ class APV_ADMIN {
 	}
 
 	initEventHandlers () {
-		this.dropdownClickEvent();
+		this.modeToggle();
+		this.dropdownClickEvents();
 		this.sidebarClickEvent();
 		this.searchBarChangeEvent();
 		this.numberInputChangeEvent();
@@ -219,6 +220,29 @@ class APV_ADMIN {
 		// Reset templayte view active states
 		document.querySelectorAll( '.main-content .template' ).forEach( el => el.classList.remove( 'active' ) );
 		document.querySelector( `.main-content .template[data-tab="${tab}"]` ).classList.add( 'active' );
+
+	}
+
+	modeToggle () {
+
+		// Add change event for mode toggles
+		this.apv.querySelectorAll( '.mode-toggle .mode' ).forEach( mode => {
+			mode.addEventListener( 'click', () => {
+
+
+				// Chekc if if light mode and update apv container
+				if( mode.classList.contains( 'light' ) ) {
+					this.apv.classList.add( 'light' );
+					mode.nextElementSibling.classList.remove( 'active' );
+					mode.classList.add( 'active' );
+				} else {
+					this.apv.classList.remove( 'light' );
+					mode.previousElementSibling.classList.remove( 'active' );
+					mode.classList.add( 'active' );
+				}
+
+			});
+		});
 
 	}
 
@@ -404,7 +428,7 @@ class APV_ADMIN {
 		});
 	}
 
-	dropdownClickEvent () {
+	dropdownClickEvents () {
 
 		// Set dropdowns
 		const dropdowns = this.apv.querySelectorAll( '.dropdowns .dropdown .title' );
@@ -426,6 +450,21 @@ class APV_ADMIN {
 
 
 			});
+		});
+
+		// Add a click event listener to the document
+		document.addEventListener( 'click', ( event ) => {
+
+			const dropdown = this.apv.querySelector( '.dropdowns .dropdown.active' )
+
+			// Check if the clicked element is not inside the dropdown
+			if( dropdown && !dropdown.contains( event.target ) ) {
+
+				// If clicked outside the dropdown, remove the 'active' class
+				dropdown.classList.remove( 'active' );
+
+			}
+
 		});
 
 	}

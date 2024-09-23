@@ -243,6 +243,9 @@ class APV_Posts {
 				$post_id = get_the_ID();
 				$prompt = get_post_meta( $post_id, 'prompt', true );
 				$images = get_post_meta( $post_id, 'images', true );
+				$resolution = get_post_meta( $post_id, 'resolution', true );
+				$sanitized_prompt = sanitize_text_field( $prompt );
+				$capitalized_prompt = ucfirst( $sanitized_prompt );
 
 				$content .= '<div class="history-row" data-history="' . $post_id . '">';
 					$content .= '<div class="row-images">';
@@ -264,9 +267,11 @@ class APV_Posts {
 							$i++;
 						}
 					$content .= '</div>';
-					$content .= '<div class="load-images">' . __( 'Load', 'ai-post-visualizer' ) . '</div>';
+					$content .= '<div class="history-row-prompt"><strong>Prompt:</strong> ' . $capitalized_prompt . '</div>';
+					$content .= '<div class="history-row-prompt"><strong>Image Count:</strong> ' . count( $images ) . '</div>';
+					$content .= '<div class="history-row-prompt"><strong>Image Resolution:</strong> ' . $resolution . '</div>';
+					$content .= '<div class="load-images btn"><span>' . __( 'Load Images', 'ai-post-visualizer' ) . '</span></div>';
 				$content .= '</div>';
-				$content .= '<div class="history-row-prompt">' . sanitize_text_field( $prompt ) . '</div>';
 
 			}
 		}

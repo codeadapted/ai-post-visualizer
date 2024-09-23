@@ -48,6 +48,7 @@ Header
 #apv-admin-view .apv-header .content .logo img {
 	width: 100%;
 	height: auto;
+	transition: filter 0.2s ease-in-out;
 }
 
 #apv-admin-view .apv-header .content h1 {
@@ -58,11 +59,14 @@ Header
 	line-height: 1.4;
 	text-transform: uppercase;
 	color: #FFFFFF;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .apv-header .sizer {
 	width: 100%;
 	height: auto;
+	z-index: -1;
+	transition: filter 0.2s ease-in-out;
 }
 
 /******
@@ -73,6 +77,7 @@ Sidebar
 #apv-admin-view .content-area {
 	display: flex;
 	background: #171717;
+	transition: background-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .sidebar {
@@ -82,7 +87,52 @@ Sidebar
 	background: #171717;
 	position: sticky;
 	top: 2rem;
-	height: 100vh;
+	height: fit-content;
+	transition: background-color 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle {
+	display: flex;
+	justify-content: center;
+	padding: 0.5rem 0;
+	border-bottom: 1px solid #202123;
+	transition: border-color 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode {
+	display: flex;
+    height: fit-content;
+	border: 1px solid #202123;
+	padding: 0.5rem;
+	opacity: 0.7;
+	cursor: pointer;
+	transition: all 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode.light {
+	border-top-left-radius: 8px;
+	border-bottom-left-radius: 8px;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode.light.active {
+	opacity: 1;
+	background: #ececf1;
+	background: #ffffff;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode.dark {
+	border-top-right-radius: 8px;
+	border-bottom-right-radius: 8px;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode.dark.active {
+	background: #202123;
+	opacity: 1;
+}
+
+#apv-admin-view .content-area .sidebar .mode-toggle .mode svg {
+	fill: #ffffff;
+	transition: fill 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .sidebar .item {
@@ -128,15 +178,16 @@ Sidebar
 #apv-admin-view .content-area .sidebar .item .icon img {
 	width: 100%;
 	height: 100%;
+	transition: filter .2s ease-in-out;
 }
 
 #apv-admin-view .content-area .sidebar .name {
-
 	font-weight: 400;
 	font-size: 15px;
 	line-height: 1;
 	text-align: center;
 	color: #FFFFFF;
+	transition: color .2s ease-in-out;
 }
 
 
@@ -156,19 +207,7 @@ Template setup
 	height: 100%;
 	border-top-left-radius: 20px;
 	background: #202123;
-}
-
-#apv-admin-view .content-area .main-content .template.active.template-posts {
-	display: flex;
-}
-
-#apv-admin-view .content-area .main-content .template.active.template-generate {
-	display: flex;
-	align-items: flex-start;
-}
-
-#apv-admin-view .content-area .main-content .template.active.template-settings {
-	display: block;
+	transition: background-color .2s ease-in-out;
 }
 
 /******
@@ -177,8 +216,11 @@ Posts tab
 ****
 *******/
 
+#apv-admin-view .content-area .main-content .template.active.template-posts {
+	display: flex;
+}
+
 #apv-admin-view .content-area .main-content .template-posts .posts-section {
-	background: #202123;
 	width: 100%;
 	padding: 3rem;
 	box-sizing: border-box;
@@ -194,6 +236,7 @@ Posts tab
 	color: #FFFFFF;
 	margin-top: 0;
 	border-radius: 20px;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .filters .search-bar .icon {
@@ -209,6 +252,7 @@ Posts tab
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .filters .search-bar .icon img {
 	width: 100%;
+	transition: filter 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .filters .dropdowns {
@@ -237,6 +281,7 @@ Posts tab
     padding: 0.75rem 1rem;
     border-radius: 8px;
     border: 1px solid #545869;
+	transition: all 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown .title:after {
@@ -250,7 +295,7 @@ Posts tab
 	border-style: solid;
 	border-color: #FFFFFF;
 	transform: translateY(-50%) rotate(-45deg);
-	transition: transform .3s ease-in-out;
+	transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown.active .title:after {
@@ -276,14 +321,13 @@ Posts tab
 	top: calc(100% + 20px);
 	left: 0;
     opacity: 0;
-	transition: top 0.3s ease-in-out, opacity 0.3s ease-in-out;
+	transition: all 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown .types .types-wrapper {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 0.75rem;
-	transition: margin-top .3s ease-in-out;
 	margin-top: 1rem;
 	margin-bottom: 1rem;
 }
@@ -300,7 +344,7 @@ Posts tab
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	transition: background-color .3s ease-in-out;
+	transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 	padding: 0.75rem 0;
 	border-radius: 8px;
 }
@@ -318,7 +362,6 @@ Posts tab
 	flex-wrap: wrap;
 	flex: 1;
 	align-content: flex-start;
-	background: #202123;
 	gap: 2rem;
 }
 
@@ -332,18 +375,19 @@ Posts tab
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	max-width: 290px;
+	max-width: calc((100% * (1/3)) - (2rem * (2/3)));
 	width: 100%;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .image {
-	width: 290px;
+	width: 100%;
 	height: 190px;
 	background-size: cover;
 	background-position: center;
@@ -378,7 +422,7 @@ Posts tab
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .image .missing-image .text {
 	font-weight: 400;
-	font-size: 20px;
+	font-size: 16px;
 	line-height: 1;
 	text-align: center;
 	color: #FFFFFF;
@@ -395,6 +439,7 @@ Posts tab
 	flex-grow: 1;
 	border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+	transition: border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .post-type {
@@ -424,24 +469,12 @@ Posts tab
 	-webkit-line-clamp: 4;
 	-webkit-box-orient: vertical;
 	margin-bottom: 2rem;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn {
-	background: transparent;
-	cursor: pointer;
 	width: 175px;
-	height: 35px;
-	font-weight: 400;
 	font-size: 11.75px;
-	line-height: .78;
-	text-transform: uppercase;
-	color: #FFFFFF;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	overflow: hidden;
-	margin-top: auto;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn span {
@@ -460,7 +493,7 @@ Posts tab
 	border-style: solid;
 	border-color: #FFFFFF;
 	transform: translateY(-50%) rotate(-135deg);
-	transition: transform .3s ease-in-out, right .3s ease-in-out;
+	transition: transform 0.2s ease-in-out, right 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn:before {
@@ -483,7 +516,7 @@ Posts tab
 	height: 100%;
 	background: #8c00a9;
 	z-index: 1;
-	transition: left .3s ease-in-out;
+	transition: left 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn:hover:after {
@@ -498,9 +531,10 @@ Posts tab
 	background: #8c00a9cc;
 	cursor: pointer;
 	width: 175px;
-	height: 35px;
+	height: 37.5px;
+	border-radius: 8px;
 	font-weight: 400;
-	font-size: 15px;
+	font-size: 14px;
 	line-height: .78;
 	text-transform: uppercase;
 	color: #FFFFFF;
@@ -509,7 +543,7 @@ Posts tab
 	justify-content: center;
 	position: relative;
 	margin: 0 auto 3rem;
-	transition: background-color .3s ease-in-out;
+	transition: background-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .posts-section .load-more .load-more-text.loading {
@@ -537,14 +571,21 @@ Posts tab
 Generate tab
 ****
 *******/
-#apv-admin-view .content-area .main-content .template-generate {
+#apv-admin-view .content-area .main-content .template-generate.active {
+	display: flex;
+	align-items: flex-start;
+	gap: 3rem;
 	padding: 3rem;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .settings {
+	flex-shrink: 0;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .back-to-posts {
 	font-style: normal;
 	font-weight: 300;
-	font-size: 20px;
+	font-size: 18px;
 	line-height: 1;
 	text-transform: uppercase;
 	color: #FFFFFF;
@@ -554,7 +595,7 @@ Generate tab
 	cursor: pointer;
 	margin-left: .25rem;
 	margin-bottom: 1rem;
-	transition: margin-left .3s ease-in-out;
+	transition: margin-left 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .back-to-posts span {
@@ -565,6 +606,7 @@ Generate tab
 	border-style: solid;
 	border-color: #FFFFFF;
 	transform: rotate(45deg);
+	transition: border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .back-to-posts:hover {
@@ -673,6 +715,7 @@ Generate tab
 
 #apv-admin-view .content-area .main-content .template-generate .keyword-search .icon img {
 	width: 100%;
+	transition: filter 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .cost {
@@ -685,16 +728,19 @@ Generate tab
 
 #apv-admin-view .content-area .main-content .template-generate .cost .breakdown {
 	background: #323232;
+	border-radius: 6px;
 	padding: 1rem;
 	width: 100%;
     display: flex;
     flex-wrap: wrap;
     justify-content: space-evenly;
+	transition: background-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .cost .breakdown div {
 	font-size: 14px;
 	color: #d2d2d2;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .cost .breakdown div span {
@@ -708,30 +754,32 @@ Generate tab
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history {
-	margin-left: auto;
-	padding-right: 1rem;
-	width: 366px;
-	height: 550px;
-	overflow: auto;
+	width: 100%;
+	height: fit-content;
+	border-radius: 10px;
+	border-radius: 10px;
+	border: 1px solid #565869;
+	transition: border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .title {
 	display: flex;
-	align-items: center;
-	position: sticky;
-	top: 0;
-	z-index: 2;
-	background: #1d1d1d;
+    align-items: center;
+    border-bottom: 1px solid #565869;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+	transition: border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .title .icon {
 	width: 50px;
-	height: 40px;
+	height: 45px;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	background: #2F19B5;
 	margin-right: 1rem;
+	border-top-left-radius: 9px;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .title .icon img {
@@ -743,30 +791,35 @@ Generate tab
 	font-weight: 700;
 	font-size: 18px;
 	line-height: 1;
-	text-transform: uppercase;
 	color: #FFFFFF;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows {
 	position: relative;
-	background: rgba(255,255,255,0.05);
+	overflow: auto;
+	max-height: calc(100vh - 6rem + 46px);
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row {
 	position: relative;
+	padding: 1rem;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row:not(:first-of-type) {
 	border-top: 1px solid #323232;
+	transition: border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row .row-images {
 	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row .row-images .row-image {
-	height: 82.5px;
-	width: 82.5px;
+	aspect-ratio: 1;
+    width: calc(25% - (0.5rem * (3 / 4)));
 	background-size: cover;
 	background-position: center center;
 	background-repeat: no-repeat;
@@ -787,32 +840,13 @@ Generate tab
 	align-items: center;
 }
 
-#apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row .load-images {
-	position: absolute;
-	top: 0;
-	right: 0;
-	background: #8c00a9;
-	writing-mode: vertical-rl;
-	text-orientation: upright;
-	text-transform: uppercase;
-	padding: 0 0.25rem;
-	font-weight: 700;
-	font-size: 13px;
-	line-height: 13px;
-	color: #FFFFFF;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-}
-
 #apv-admin-view .content-area .main-content .template-generate .history .history-rows .history-row-prompt {
 	font-weight: 400;
-	font-size: 15px;
+	font-size: 14px;
 	line-height: 1;
 	color: #FFFFFF;
-	padding: .75rem 1rem;
+	margin-bottom: 0.75rem;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .rendered-images {
@@ -865,7 +899,7 @@ Generate tab
 	text-transform: uppercase;
 	font-weight: 600;
 	letter-spacing: .055em;
-	transition: background-color .3s ease-in-out, border-color .3s ease-in-out;
+	transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .template-generate.for-post .rendered-images .post-card .set-image {
@@ -930,7 +964,7 @@ Generate tab
 
 #apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div {
 	color: #ffffff;
-	transition: color .3s ease-in-out;
+	transition: color 0.2s ease-in-out;
 	cursor: pointer;
 	display: inline-block;
 }
@@ -946,6 +980,10 @@ Settings tab
 *******/
 #apv-admin-view .content-area .main-content .template-settings {
 	padding: 3rem;
+}
+
+#apv-admin-view .content-area .main-content .template.active.template-settings {
+	display: block;
 }
 
 #apv-admin-view .content-area .main-content .template-settings .settings {
@@ -1043,6 +1081,7 @@ General Settings styles
 	line-height: 1;
 	color: #FFFFFF;
 	width: calc(100% - 350px - 6rem);
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .settings .setting {
@@ -1054,6 +1093,7 @@ General Settings styles
 	font-size: 42px;
 	margin: 0 0 2rem;
 	color: #FFFFFF;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content h3 {
@@ -1061,12 +1101,14 @@ General Settings styles
 	font-size: 28px;
 	margin: 0 0 1rem;
 	color: #FFFFFF;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content a {
 	color: #03ECFD;
 	position: relative;
 	text-decoration: none;
+	transition: color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content a:hover {
@@ -1081,7 +1123,7 @@ General Settings styles
 	width: 0;
 	height: 1px;
 	background-color: #03ECFD;
-	transition: width .2s ease-in-out;
+	transition: width .2s ease-in-out, color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content a:hover:after {
@@ -1099,6 +1141,7 @@ General Settings styles
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	transition: background-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .tooltip span {
@@ -1160,7 +1203,6 @@ General Settings styles
 	background: #2f2f2f;
 	border: 1px solid #565869;
 	padding: 0.75rem 1rem 0.7rem;
-
 	font-weight: 400;
 	font-size: 16px;
 	line-height: 1;
@@ -1168,6 +1210,7 @@ General Settings styles
 	margin-top: 1rem;
 	border-radius: 3px;
 	max-width: unset;
+	transition: all 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content input::-webkit-input-placeholder,
@@ -1192,7 +1235,7 @@ General Settings styles
 	border-style: solid;
 	border-color: #FFFFFF;
 	transform: translateY(-50%) rotate(-45deg);
-	transition: transform .3s ease-in-out;
+	transition: transform 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .btn {
@@ -1238,7 +1281,7 @@ General Settings styles
 	height: 100%;
 	background: #8c00a9;
 	z-index: 1;
-	transition: left .3s ease-in-out;
+	transition: left 0.2s ease-in-out;
 }
 
 #apv-admin-view .content-area .main-content .btn:hover:after {
@@ -1381,11 +1424,13 @@ Mobile styles
 		width: 100%;
 	}
 }
+
 @media screen and (max-width: 782px) {
 	#apv-admin-view {
 		padding-right: 10px;
 	}
 }
+
 @media screen and (max-width: 640px) {
 	#apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card {
 		width: 100%;
@@ -1474,4 +1519,205 @@ Mobile styles
 	#apv-admin-view .content-area .main-content .template.template-settings {
 		padding: 1.5rem;
 	}
+}
+
+/******
+****
+Light Mode
+****
+*******/
+#apv-admin-view.light .apv-header .content .logo img {
+	filter: invert(100);
+}
+
+#apv-admin-view.light .apv-header .content h1 {
+	color: #171717;
+}
+
+#apv-admin-view.light .apv-header .sizer {
+    filter: invert(100);
+}
+
+#apv-admin-view.light .content-area {
+	background: #f5f5f5;
+}
+
+#apv-admin-view.light .content-area .sidebar {
+	background: #f5f5f5;
+}
+
+#apv-admin-view.light .content-area .sidebar .mode-toggle {
+	border-color: #ececf1;
+}
+
+#apv-admin-view.light .content-area .sidebar .mode-toggle .mode {
+	border-color: #ececf1;
+}
+
+#apv-admin-view.light .content-area .sidebar .mode-toggle .mode.dark {
+	background: #ececf1;
+}
+
+#apv-admin-view.light .content-area .sidebar .mode-toggle .mode svg {
+	fill: #171717;
+}
+
+#apv-admin-view.light .content-area .sidebar .item.active {
+	background: #ffffff!important;
+}
+
+#apv-admin-view.light .content-area .sidebar .item .icon img {
+	filter: invert(100);
+	transition: filter .2s ease-in-out;
+}
+
+#apv-admin-view.light .content-area .sidebar .name {
+	color: #171717;
+	transition: color .2s ease-in-out;
+}
+
+#apv-admin-view.light .content-area .main-content .template {
+	background: #ffffff;
+}
+
+#apv-admin-view.light .content-area .main-content .settings {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content h2 {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content h3 {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content a {
+	color: #8c00a9;
+}
+
+#apv-admin-view.light .content-area .main-content a:hover {
+	color: #8c00a9;
+}
+
+#apv-admin-view.light .content-area .main-content a:after {
+	background-color: #8c00a9;
+}
+
+#apv-admin-view.light .content-area .main-content .tooltip {
+	background: #ececf4;
+}
+
+#apv-admin-view.light .content-area .main-content .tooltip .tooltip-description {
+	background: #ececf4;
+	border-color: #ffffff;
+}
+
+#apv-admin-view.light .content-area .main-content .tooltip .tooltip-description:after {
+	background: #ececf4;
+	border-color: #ffffff;
+}
+
+#apv-admin-view.light .content-area .main-content input,
+#apv-admin-view.light .content-area .main-content select {
+	background: #f7f7f8;
+	border-color: #ececf3;
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content select:after {
+	border-color: #ececf3;
+}
+
+#apv-admin-view.light .rc-loader div {
+	background: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .posts-section .filters .search-bar .search-input {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .posts-section .filters .search-bar .icon img {
+	filter: invert(100);
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .title {
+	color: #171717;
+	background: #ffffff;
+    border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .title:after {
+	border-color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .types {
+    background: #ffffff;
+    border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .types .type-block {
+	background: transparent;
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .types .type-block.active {
+	background-color: #8c00a9!important;
+	color: #ffffff;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .types .type-block:hover {
+	background-color: rgba(140,0,169,0.25);
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .posts-section .posts-wrapper .no-results {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title {
+	border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .text {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .back-to-posts {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .back-to-posts span {
+	border-color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .keyword-search .icon img {
+	filter: invert(100);
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .cost .breakdown {
+	background: #f7f7f8;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .cost .breakdown div {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .history {
+	border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .history .title {
+	border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .history .title .text {
+	color: #171717;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .history .history-rows .history-row:not(:first-of-type) {
+	border-color: #ececf3;
+}
+
+#apv-admin-view.light .content-area .main-content .template-generate .history .history-rows .history-row-prompt {
+	color: #171717;
 }

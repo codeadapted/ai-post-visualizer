@@ -21,6 +21,9 @@ $validation = false;
 // Get dalle api key option;
 $dalle_api_key = get_option( 'apv_dalle_api_key' );
 
+// Get viewer mode
+$viewer_mode = get_option( 'apv_viewer_mode' );
+
 // Set validation
 $validation = $dalle_api_key ? true : false;
 
