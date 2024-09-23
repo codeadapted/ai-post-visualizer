@@ -1,44 +1,56 @@
 <?php
-// Admin View Options Page
 
-if( !current_user_can( 'manage_options' ) ) {
-	wp_die(__('You do not have sufficient permissions to access this page.'));
+// Ensure the user has the appropriate capability to manage options
+if ( !current_user_can( 'manage_options' ) ) {
+    wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
 }
 
-if( get_option( 'apv_clear_data' ) ) {
-	$clear_data = true;
-} else {
-	$clear_data = false;
-}
+// Check if the 'apv_clear_data' option is set, otherwise set default to false
+$clear_data = get_option( 'apv_clear_data', false );
 
-$posts = apv()->posts()->apv_get_posts();
+// Fetch posts, post types, and history using the custom methods from the plugin instance
+$posts      = apv()->posts()->apv_get_posts();
 $post_types = apv()->posts()->apv_get_post_types();
-$history = apv()->posts()->apv_get_history();
-$admin_url = apv()->plugin()->get_admin_url();
+$history    = apv()->posts()->apv_get_history();
 
+// Fetch admin URL for internal linking purposes
+$admin_url  = apv()->plugin()->get_admin_url();
+
+// Variable to track if the API key is validated
 $validation = false;
 
-// Get dalle api key option;
+// Fetch DALLE API key from options
 $dalle_api_key = get_option( 'apv_dalle_api_key' );
 
-// Get viewer mode
-$viewer_mode = get_option( 'apv_viewer_mode' );
+// Fetch the viewer mode (light/dark) for setting the theme in the admin view
+$viewer_mode = get_option( 'apv_viewer_mode', 'dark' ); // Default to 'dark' if no mode is set
 
-// Get data retention setting
-$clear_data = get_option( 'apv_clear_data' );
+// Set validation flag if DALLE API key exists
+$validation = !empty( $dalle_api_key );
 
-// Set validation
-$validation = $dalle_api_key ? true : false;
-
+// Begin rendering the admin page view
 ?>
-<div id="apv-admin-view" class="<?php echo $viewer_mode;?>">
-	<?php include_once dirname( __FILE__ ) . '/views/header.php'; ?>
-	<div class="content-area">
-		<?php include_once dirname( __FILE__ ) . '/views/sidebar.php'; ?>
-		<div class="main-content">
-			<?php include_once dirname( __FILE__ ) . '/views/posts.php'; ?>
-			<?php include_once dirname( __FILE__ ) . '/views/generate.php'; ?>
-			<?php include_once dirname( __FILE__ ) . '/views/settings.php'; ?>
-		</div>
-	</div>
+<div id="apv-admin-view" class="<?php echo esc_attr( $viewer_mode ); ?>">
+    <?php 
+    // Include the header view for the admin page
+    include_once dirname( __FILE__ ) . '/views/header.php'; 
+    ?>
+    <div class="content-area">
+        <?php 
+        // Include the sidebar for navigation within the plugin
+        include_once dirname( __FILE__ ) . '/views/sidebar.php'; 
+        ?>
+        <div class="main-content">
+            <?php 
+            // Include the posts view for managing posts within the plugin
+            include_once dirname( __FILE__ ) . '/views/posts.php'; 
+            
+            // Include the generate view for generating new images
+            include_once dirname( __FILE__ ) . '/views/generate.php'; 
+            
+            // Include the settings view for managing plugin settings
+            include_once dirname( __FILE__ ) . '/views/settings.php'; 
+            ?>
+        </div>
+    </div>
 </div>
