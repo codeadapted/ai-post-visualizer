@@ -227,11 +227,14 @@ class APV_ADMIN {
 
 		// Add change event for mode toggles
 		this.apv.querySelectorAll( '.mode-toggle .mode' ).forEach( mode => {
-			mode.addEventListener( 'click', () => {
+			mode.addEventListener( 'click', async () => {
 
-
-				// Chekc if if light mode and update apv container
+				// Set modeString
+				let modeString = 'dark';
+				
+				// Check if light mode and update apv container
 				if( mode.classList.contains( 'light' ) ) {
+					modeString = 'light';
 					this.apv.classList.add( 'light' );
 					mode.nextElementSibling.classList.remove( 'active' );
 					mode.classList.add( 'active' );
@@ -240,6 +243,14 @@ class APV_ADMIN {
 					mode.previousElementSibling.classList.remove( 'active' );
 					mode.classList.add( 'active' );
 				}
+
+				// Set data object and action
+				const _$data = new FormData();
+				_$data.append( 'action', 'apv_update_viewer_mode' );
+				_$data.append( 'mode', modeString );
+
+				// Run fetch request
+				const _$fetchRequest = await this.genericFetchRequest( _$data );
 
 			});
 		});

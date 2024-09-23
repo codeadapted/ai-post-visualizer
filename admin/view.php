@@ -28,7 +28,7 @@ $viewer_mode = get_option( 'apv_viewer_mode' );
 $validation = $dalle_api_key ? true : false;
 
 ?>
-<div id="apv-admin-view">
+<div id="apv-admin-view" class="<?php echo $viewer_mode;?>">
 	<?php include_once dirname( __FILE__ ) . '/views/header.php'; ?>
 	<div class="content-area">
 		<?php include_once dirname( __FILE__ ) . '/views/sidebar.php'; ?>

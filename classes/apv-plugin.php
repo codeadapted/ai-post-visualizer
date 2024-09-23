@@ -69,6 +69,7 @@ class APV_Plugin {
 			add_action( 'wp_ajax_apv_save_admin_page', array( $this, 'apv_save_admin_page' ) );
 			add_action( 'init', array( $this, 'apv_register_history_post_type' ) );
 			add_action( 'init', array( $this, 'apv_load_plugin_textdomain' ) );
+			add_action( 'wp_ajax_apv_update_viewer_mode', array( $this, 'apv_update_viewer_mode' ) );
 		}
 
 	}
@@ -257,6 +258,23 @@ class APV_Plugin {
 	 */
 	public function apv_load_plugin_textdomain() {
 		load_plugin_textdomain( 'ai-post-visualizer', false, APV_BASENAME . '/languages' );
+	}
+
+	/**
+	* apv_update_viewer_mode
+	*
+	* Update viewer mode (light/dark)
+	*
+	* @return  void
+	**/
+	public function apv_update_viewer_mode() {
+
+		// Get mode
+		$mode = $_GET['mode'];
+
+		// Update viewer mode option
+		update_option( 'apv_viewer_mode', $mode );
+
 	}
 
 }
