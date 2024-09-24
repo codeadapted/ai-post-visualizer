@@ -263,7 +263,7 @@ class APV_ADMIN {
 	* POSTS FUNCTIONS
 	***/
 
-	async filtering ( _exclude = false ) {
+	async filtering ( _paged = 1 ) {
 
 		// Set search value and create FormData object
 		const search = this.searchInput.value;
@@ -287,18 +287,21 @@ class APV_ADMIN {
 		if( search ) {
 			_$data.append( 'search', search );
 		}
-		if( _exclude ) {
-			_$data.append( 'exclude', _exclude );
-		}
+
+		// Add pagination parameter
+		_$data.append( 'paged', _paged );
 
 		// Run fetch request
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
 
 		// Update post wrapper content based on excluded types
-		this.postWrapper.innerHTML = _exclude ? this.postWrapper.innerHTML + _$fetchRequest.content : _$fetchRequest.content;
+		this.postWrapper.innerHTML = _paged > 1 ? this.postWrapper.innerHTML + _$fetchRequest.content : _$fetchRequest.content;
 
-		// Toggle "load more" button visibility
-		this.postWrapperLoadMore.classList.toggle( 'hidden', _$fetchRequest.total_posts <= 18 );
+		// Toggle "load more" button visibility based on total posts
+		this.postWrapperLoadMore.classList.toggle( 'hidden', _$fetchRequest.total_posts <= 18 * _paged );
+
+		 // Set current page attribute for the wrapper (track pagination)
+		 this.postWrapper.setAttribute( 'data-current-page', _paged );
 
 		// Set post card click events and end loading animation
 		this.postCardClickEvent();
@@ -537,20 +540,16 @@ class APV_ADMIN {
 			// Prevent the default action (e.g., a link click)
 			e.preventDefault();
 		
-			// Create an array to hold the excluded post IDs
-			const exclude = [];
-		
-			// Loop through each post-card and get the 'data-post' attribute
-			this.postWrapper.querySelectorAll( '.post-card' ).forEach( card => {
-				exclude.push( card.dataset.post );
-			});
-		
 			// Add 'loading' class to the load-more text and loader elements
 			this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.add( 'loading' );
 			this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.add( 'loading' );
+
+			// Get the current page (track current pagination)
+			const currentPage = parseInt( this.postWrapper.dataset.currentPage, 10 ) || 1;
+			const nextPage = currentPage + 1;
 		
 			// Call the filtering function, passing the exclude array
-			this.filtering( exclude );
+			this.filtering( nextPage );
 
 		});
 

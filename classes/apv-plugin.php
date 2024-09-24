@@ -97,8 +97,15 @@ class APV_Plugin {
 		// Set $wpdb to access db
         global $wpdb;
 
-		// Delete options related to the plugin
-		$deleted_rows = $wpdb->query( "DELETE FROM {$wpdb->options} WHERE `option_name` LIKE '%apv_%'" );
+        // Set apv options array
+        $options = array( 'apv_dalle_api_key', 'apv_clear_data', 'apv_viewer_mode' );
+
+        // Loop through options and delete them
+        if( ! empty( $options ) && is_array( $options ) ) {
+            foreach ( $options as $option_name ) {
+                delete_option( $option_name );
+            }
+        }
 
 		// Query for all posts of custom post type 'apv_history'
 		$apv_history_posts = get_posts( array(
@@ -129,15 +136,13 @@ class APV_Plugin {
      */
     public function apv_save_clear_data_setting() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize user input
-        $clear_data = sanitize_text_field( $_GET['clear_data'] );
+        $clear_data = isset( $_GET['clear_data'] ) ? sanitize_text_field( wp_unslash( $_GET['clear_data'] ) ) : '';
 
         // Update or delete the clear data option
         if ( $clear_data && $clear_data === 'true' ) {
@@ -201,7 +206,7 @@ class APV_Plugin {
         if ( strpos( $this->get_current_admin_url(), $this->get_admin_url() ) !== false ) {
 
             // Enqueue Google Fonts (Poppins)
-            wp_enqueue_style( 'font-poppins', 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap', array(), null );
+            wp_enqueue_style( 'font-poppins', 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap', array(), '1.0.0' );
 
             // Enqueue the main admin stylesheet
             wp_enqueue_style( 'apv_stylesheet', APV_PLUGIN_DIR . 'admin/css/admin.css', array(), '1.0.0' );
@@ -305,15 +310,13 @@ class APV_Plugin {
      */
     public function apv_update_viewer_mode() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize the mode input
-        $mode = sanitize_text_field( $_GET['mode'] );
+        $mode = isset( $_GET['mode'] ) ? sanitize_text_field( wp_unslash( $_GET['mode'] ) ) : 'dark';
 
         // Update the viewer mode option
         update_option( 'apv_viewer_mode', $mode );
@@ -330,21 +333,55 @@ class APV_Plugin {
 	 */
 	public function apv_set_dalle_api_key() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
-		// Set api key
-		$api_key = $_GET['api_key'];
+        // Set api key
+        $api_key = isset( $_GET['api_key'] ) ? sanitize_text_field( wp_unslash( $_GET['api_key'] ) ) : '';
 
 		// Set dalle api key option if added
 		if( $api_key ) {
 			update_option( 'apv_dalle_api_key', $api_key );
 		}
 
+        // Send json success
+        wp_send_json_success( array( 'message' => 'API key successfully updated' ) );
+
 	}
+
+    /**
+     * Validate the nonce for security.
+     *
+     * @param string $action The nonce action name.
+     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
+     *
+     * @return bool|void False if the nonce is invalid or missing, true if valid.
+     */
+    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
+
+        // Check if the nonce exists in $_GET
+        if ( isset( $_GET[ $nonce_field ] ) ) {
+
+            // Sanitize and unslash the nonce
+            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
+
+            // Validate the nonce
+            if ( ! wp_verify_nonce( $nonce, $action ) ) {
+                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+                return false;
+            }
+
+        } else {
+            // Nonce is missing
+            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
+            return false;
+        }
+
+        // If everything is correct, return true
+        return true;
+
+    }
 
 }

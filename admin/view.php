@@ -2,8 +2,30 @@
 
 // Ensure the user has the appropriate capability to manage options
 if ( !current_user_can( 'manage_options' ) ) {
-    wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+    wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
 }
+
+// Setup allowed html
+$allowed_html = array(
+    'div' => array(
+        'class' => array(),
+        'data-history' => array(),
+        'data-post' => array(),
+        'data-type' => array(),
+        'data-alphabetical' => array(),
+        'data-date' => array(),
+        'data-current-page' => array(),
+        'style' => array()
+    ),
+    'img' => array(
+        'src' => array(),
+        'alt' => array(),
+    ),
+    'span' => array(),
+    'strong' => array(),
+    'em' => array(),
+    'a' => array()
+);
 
 // Check if the 'apv_clear_data' option is set, otherwise set default to false
 $clear_data = get_option( 'apv_clear_data', false );

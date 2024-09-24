@@ -132,7 +132,7 @@
             <div class="text"><?php esc_html_e( 'Generation History', 'ai-post-visualizer' ); ?></div>
         </div>
         <div class="history-rows">
-            <?php echo $history; ?> <!-- Populated with history data -->
+            <?php echo wp_kses( $history, $allowed_html ); ?> <!-- Populated with history data -->
         </div>
     </div>
 

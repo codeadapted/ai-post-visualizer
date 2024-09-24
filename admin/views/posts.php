@@ -1,4 +1,4 @@
-<div class="template template-posts <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="posts">
+<div class="template template-posts <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="posts" data-current-page="1">
     <div class="posts-section">
 
         <!-- Section header for filtering posts -->
@@ -31,7 +31,7 @@
                             <div class="type-block active" data-type="any"><?php esc_html_e( 'All', 'ai-post-visualizer' ); ?></div>
 
                             <!-- Post types are echoed dynamically here -->
-                            <?php echo $post_types; ?>
+                            <?php echo wp_kses( $post_types, $allowed_html ); ?>
 
                         </div>
                     </div>
@@ -67,7 +67,7 @@
 
         <!-- Posts list wrapper where filtered posts will be displayed -->
         <div class="posts-wrapper">
-            <?php echo $posts['content']; ?>
+            <?php echo wp_kses( $posts['content'], $allowed_html ); ?>
         </div>
 
         <!-- Load more button (hidden if total posts <= 18) -->
