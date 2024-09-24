@@ -106,7 +106,7 @@ class APV_Posts {
                     $content .= '<div class="image" style="background-image: url(' . esc_url( $thumbnail ) . ')">';
                     $content .= '<div class="missing-image">';
                     $content .= '<div class="icon"><img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', APV_PLUGIN_FILE ) ) . '" /></div>';
-                    $content .= '<div class="text">' . esc_html__( 'Featured Image <br>Missing', 'ai-post-visualizer' ) . '</div>';
+                    $content .= '<div class="text">' . esc_html__( 'Featured Image Missing', 'ai-post-visualizer' ) . '</div>';
                     $content .= '</div>';
                     $content .= '</div>';
                 }
@@ -127,7 +127,7 @@ class APV_Posts {
         }
 
         // Return the content and total posts count in a JSON response for AJAX requests
-        if ( isset( $_GET['post_type'] ) || isset( $_GET['search'] ) ) {
+        if ( $ajax_check ) {
             wp_send_json( array( 'content' => $content, 'total_posts' => $total_posts ) );
         } else {
             return array( 'content' => $content, 'total_posts' => $total_posts );

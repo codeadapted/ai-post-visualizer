@@ -59,6 +59,9 @@
                     </div>
                 </div>
 
+                <!-- Filter reset -->
+                <a class="filter-reset">Reset Filters</a>
+
             </div>
         </div>
 

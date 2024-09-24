@@ -80,6 +80,7 @@ class APV_Plugin {
             // AJAX actions
             add_action( 'wp_ajax_apv_update_viewer_mode', array( $this, 'apv_update_viewer_mode' ) );
             add_action( 'wp_ajax_apv_save_clear_data_setting', array( $this, 'apv_save_clear_data_setting' ) );
+            add_action( 'wp_ajax_apv_set_dalle_api_key', array( $this, 'apv_set_dalle_api_key' ) );
         }
 
     }
@@ -318,5 +319,32 @@ class APV_Plugin {
         update_option( 'apv_viewer_mode', $mode );
 
     }
+
+    /**
+	 * apv_set_dalle_api_key
+	 *
+	 * Set Dalle API Key 
+	 *
+	 * @param   void
+	 * @return  void
+	 */
+	public function apv_set_dalle_api_key() {
+
+        // Verify nonce for security to prevent CSRF
+        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
+        if ( $nonce_check ) {
+            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+            return false;
+        }
+
+		// Set api key
+		$api_key = $_GET['api_key'];
+
+		// Set dalle api key option if added
+		if( $api_key ) {
+			update_option( 'apv_dalle_api_key', $api_key );
+		}
+
+	}
 
 }

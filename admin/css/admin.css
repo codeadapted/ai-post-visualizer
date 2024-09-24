@@ -372,6 +372,16 @@ Posts tab
 	background-color: rgba(140,0,169,0.25);
 }
 
+#apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .filter-reset {
+	align-self: center;
+    cursor: pointer;
+	color: var(--light-bg);
+}
+
+#apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .filter-reset:after {
+	background-color: var(--light-bg);
+}
+
 #apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper {
 	display: flex;
 	flex-wrap: wrap;
@@ -1730,6 +1740,14 @@ Light Mode
 
 #apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .dropdown .types .type-block:hover {
 	background-color: rgba(140,0,169,0.25);
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .filter-reset {
+	color: var(--dark-bg)!important;
+}
+
+#apv-admin-view.light .content-area .main-content .template-posts .filters .dropdowns .filter-reset:after {
+	background-color: var(--dark-bg)!important;
 }
 
 #apv-admin-view.light .content-area .main-content .template-posts .posts-section .posts-wrapper .no-results {

@@ -78,6 +78,7 @@ class APV_ADMIN {
 		// Initialize events
 		this.modeToggle();
 		this.dropdownClickEvents();
+		this.resetFilters();
 		this.sidebarClickEvent();
 		this.searchBarChangeEvent();
 		this.numberInputChangeEvent();
@@ -144,7 +145,7 @@ class APV_ADMIN {
 			let url = this._ajaxURL;
 
 			// Set nonce to data
-			_$data.apv_nonce = this._nonce;
+			_$data.append( 'apv_nonce', this._nonce );
 	
 			// Set the body only for POST (or other methods that allow a body)
 			if( _method === 'POST' ) {
@@ -267,7 +268,6 @@ class APV_ADMIN {
 		const search = this.searchInput.value;
 		const _$data = new FormData();
 		_$data.append( 'action', 'apv_get_posts' );
-		_$data.append( 'page_id', this._postId );
 
 		// Loop through active filters and set postType, order, and date if present
 		this.apv.querySelectorAll( '.type-block.active' ).forEach( item => {
@@ -294,7 +294,6 @@ class APV_ADMIN {
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
 
 		// Update post wrapper content based on excluded types
-		console.log( _$fetchRequest.content );
 		this.postWrapper.innerHTML = _exclude ? this.postWrapper.innerHTML + _$fetchRequest.content : _$fetchRequest.content;
 
 		// Toggle "load more" button visibility
@@ -304,6 +303,26 @@ class APV_ADMIN {
 		this.postCardClickEvent();
 		this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.remove( 'loading' );
 		this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.remove( 'loading' );
+
+	}
+
+	resetFilters () {
+
+		// Reset filter button click event
+		this.postView.querySelector( '.filter-reset' ).addEventListener( 'click', (e) => {
+
+			// Prevent default behavior
+			e.preventDefault();
+
+			// Clear search and dropdown filters
+			this.searchInput.value = '';
+			this.apv.querySelectorAll( '.type-block.active' ).forEach( typeBlock => typeBlock.classList.remove( 'active' ) );
+			this.apv.querySelector( '.type-block[data-type="any"]' ).classList.add( 'active' );
+
+			// Start filtering
+			this.filtering();
+
+		});
 
 	}
 	
