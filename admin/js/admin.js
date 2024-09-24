@@ -1,12 +1,15 @@
 ( function ( $, window, document ) {
-	'use strict';
-	$( document ).ready( function () {
+    'use strict';
 
-		// Initialize APV_ADMIN
-		const admin = new APV_ADMIN();
-		admin.initialize();
+    // Ensure the DOM is fully loaded before initializing
+    $( document ).ready( function () {
 
-	});
+        // Initialize the APV_ADMIN class instance and call the initialization method
+        const admin = new APV_ADMIN();
+        admin.initialize();
+
+    });
+
 } ( jQuery, window, document ) );
 
 // Main APV_ADMIN class
@@ -14,23 +17,24 @@ class APV_ADMIN {
 	
 	constructor () {
         
-        // Set ajax variable
+        // Set AJAX URL and nonce from localized script (ensures secure requests)
         this._ajaxURL = apv_obj.ajax_url;
+        this._nonce = apv_obj.apv_nonce;
 
-		// Set global variables
-		this.apv = '';
-		this.sidebar = '';
-		this.postView = '';
-		this.generateView = '';
-		this.settingsView = '';
-		this.searchInput = '';
-		this.postWrapper = '';
-		this.postWrapperLoadMore = '';
-		this.renderedImages = '';
-		this.renderedImagesWrapper = '';
-		this.revertToOriginal = '';
+        // Global variables
+        this.apv = '';
+        this.sidebar = '';
+        this.postView = '';
+        this.generateView = '';
+        this.settingsView = '';
+        this.searchInput = '';
+        this.postWrapper = '';
+        this.postWrapperLoadMore = '';
+        this.renderedImages = '';
+        this.renderedImagesWrapper = '';
+        this.revertToOriginal = '';
 
-	}
+    }
 
     initialize () {
 
@@ -70,9 +74,14 @@ class APV_ADMIN {
 	}
 
 	initEventHandlers () {
-		this.accordionClickEvent();
+
+		// Initialize events
+		this.modeToggle();
+		this.dropdownClickEvents();
+		this.resetFilters();
 		this.sidebarClickEvent();
 		this.searchBarChangeEvent();
+		this.keywordSearchChangeEvent();
 		this.numberInputChangeEvent();
 		this.resolutionSelectChangeEvent();
 		this.renderButtonClickEvent();
@@ -82,9 +91,11 @@ class APV_ADMIN {
 		this.historyLoadImagesClickEvent();
 		this.checkQueryParams();
 		this.dalleAPIKeyInputChangeEvent();
-		this.accordionItemClickEvent();
+		this.dropdownItemClickEvent();
 		this.signUpTextClickEvent();
-		this.planSelectClickEvent();
+		this.loadMoreClickEvent();
+		this.dataRetentionToggleClickEvent();
+
 	}
 
 	checkQueryParams () {
@@ -133,6 +144,9 @@ class APV_ADMIN {
 
 			// Set url
 			let url = this._ajaxURL;
+
+			// Set nonce to data
+			_$data.append( 'apv_nonce', this._nonce );
 	
 			// Set the body only for POST (or other methods that allow a body)
 			if( _method === 'POST' ) {
@@ -170,12 +184,35 @@ class APV_ADMIN {
 
 		}
 
-	}	
+	}
 
-	setHistoryHeight () {
+	/***
+	* SIDEBAR FUNCTIONS
+	***/
 
-		const height = this.generateView.querySelector( '.settings' ).clientHeight;
-		this.apv.querySelector( '.history' ).style.height = height;
+	modeToggle () {
+
+		// Add change event for mode toggling between light and dark
+		this.apv.querySelectorAll( '.mode-toggle .mode' ).forEach( mode => {
+			mode.addEventListener( 'click', async () => {
+
+				// Set modeString
+				let modeString = mode.classList.contains( 'light' ) ? 'light' : 'dark';
+
+                // Toggle active states between light/dark
+                this.apv.classList.toggle( 'light', modeString === 'light' );
+                mode.classList.add( 'active' );
+                mode.nextElementSibling?.classList.remove( 'active' );
+                mode.previousElementSibling?.classList.remove( 'active' );
+
+                // Send AJAX request to update viewer mode option
+                const _$data = new FormData();
+                _$data.append( 'action', 'apv_update_viewer_mode' );
+                _$data.append( 'mode', modeString );
+                await this.genericFetchRequest( _$data );
+
+			});
+		});
 
 	}
 
@@ -232,13 +269,18 @@ class APV_ADMIN {
 		const search = this.searchInput.value;
 		const _$data = new FormData();
 		_$data.append( 'action', 'apv_get_posts' );
-		_$data.append( 'page_id', this._postId );
 
 		// Loop through active filters and set postType, order, and date if present
 		this.apv.querySelectorAll( '.type-block.active' ).forEach( item => {
-			_$data.append( 'post_type', item.dataset.type || '' );
-			_$data.append( 'alphabetical', item.dataset.alphabetical || '' );
-			_$data.append( 'date', item.dataset.date || '' );
+			if( Boolean( item.dataset.type ) ) {
+				_$data.append( 'post_type', item.dataset.type );
+			}
+			if( Boolean( item.dataset.alphabetical ) ) {
+				_$data.append( 'alphabetical', item.dataset.alphabetical );
+			}
+			if( Boolean( item.dataset.date ) ) {
+				_$data.append( 'date', item.dataset.date );
+			}
 		} );
 
 		// Set search and exclude if present
@@ -265,62 +307,137 @@ class APV_ADMIN {
 
 	}
 
-	loadMoreClickEvent () {
+	resetFilters () {
 
-		// Set load more button click event for posts view
-		this.postWrapperLoadMore.addEventListener( 'click', () => {
+		// Reset filter button click event
+		this.postView.querySelector( '.filter-reset' ).addEventListener( 'click', (e) => {
 
-			// Prevent the default action (e.g., a link click)
+			// Prevent default behavior
 			e.preventDefault();
-		
-			// Create an array to hold the excluded post IDs
-			const exclude = [];
-		
-			// Loop through each post-card and get the 'data-post' attribute
-			this.postWrapper.querySelectorAll( '.post-card' ).forEach( card => {
-				exclude.push( card.getAttribute( 'data-post' ) );
+
+			// Clear search and dropdown filters
+			this.searchInput.value = '';
+			this.apv.querySelectorAll( '.type-block.active' ).forEach( typeBlock => typeBlock.classList.remove( 'active' ) );
+			this.apv.querySelector( '.type-block[data-type="any"]' ).classList.add( 'active' );
+
+			// Start filtering
+			this.filtering();
+
+		});
+
+	}
+	
+	searchBarChangeEvent () {
+
+		// Search bar change event
+		this.searchInput.addEventListener( 'change', (e) => {
+
+			// Prevent default behavior
+			e.preventDefault();
+
+			// Start filtering
+			this.filtering();
+
+		});
+	}
+
+	dropdownClickEvents () {
+
+		// Set dropdowns
+		const dropdowns = this.apv.querySelectorAll( '.dropdowns .dropdown .title' );
+
+		// Add click event to each dropdown
+		dropdowns.forEach( title => {
+			title.addEventListener( 'click', () => {
+				
+				// Get dropdown variables
+				const parentDropdown = title.closest( '.dropdown' );
+				
+				// Update active filter dropdown
+				this.apv.querySelectorAll( '.dropdowns .dropdown' ).forEach( dropdown => {
+					if( dropdown != parentDropdown ) {
+						dropdown.classList.remove( 'active' );
+					}
+				});
+				parentDropdown.classList.toggle( 'active' );
+
+
 			});
-		
-			// Add 'loading' class to the load-more text and loader elements
-			this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.add( 'loading' );
-			this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.add( 'loading' );
-		
-			// Call the filtering function, passing the exclude array
-			this.filtering( exclude );
+		});
+
+		// Add a click event listener to the document
+		document.addEventListener( 'click', ( event ) => {
+
+			const dropdown = this.apv.querySelector( '.dropdowns .dropdown.active' )
+
+			// Check if the clicked element is not inside the dropdown
+			if( dropdown && !dropdown.contains( event.target ) ) {
+
+				// If clicked outside the dropdown, remove the 'active' class
+				dropdown.classList.remove( 'active' );
+
+			}
 
 		});
 
 	}
 
-	async getCurrentFI ( post ) {
+	dropdownItemClickEvent () {
 
-		// Set data object and action
-		const _$data = new FormData();
-		_$data.append( 'action', 'apv_get_current_fi' );
-		_$data.append( 'post_id', post );
+		// Select all elements with the class 'type-block' and add a click event listener to each
+		this.apv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
+			
+			// Add click event listener to each 'type-block'
+			typeBlock.addEventListener( 'click', (e) => {
 
-		// Run fetch request
-		const _$fetchRequest = await this.genericFetchRequest( _$data );
+				// Prevent the default behavior
+				e.preventDefault();
 
-		// Update featured image
-		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
+				// Check if the clicked 'type-block' already has the 'active' class
+				if( typeBlock.classList.contains( 'active' ) ) {
 
-	}
+					// If it is active, remove the 'active' class
+					typeBlock.classList.remove( 'active' );
 
-	async checkForFIRevert ( post ) {
+				} else {
 
-		// Set data object and action
-		const _$data = new FormData();
-		_$data.append( 'action', 'apv_check_fi_revert' );
-		_$data.append( 'post_id', post );
+					// Otherwise, if the 'type-block' is inside an dropdown with the class 'sort'
+					const dropdown = typeBlock.closest( '.dropdown' );
 
-		// Run fetch request
-		const _$fetchRequest = await this.genericFetchRequest( _$data );
+					if( dropdown && dropdown.classList.contains( 'sort' ) ) {
 
-		// Update featured image
-		if( _$fetchRequest ) {
-			this.revertToOriginal.classList.remove( 'hidden' );
-		}
+						// Remove the 'active' class from any other 'type-block' inside the 'dropdown.sort'
+						this.apv.querySelectorAll( '.dropdown.sort .type-block.active' ).forEach( activeBlock => {
+							activeBlock.classList.remove( 'active' );
+						});
+
+					} else {
+
+						// If it's not inside 'dropdown.sort', remove the 'active' class from 'type-block' within the closest dropdown
+						dropdown.querySelectorAll( '.type-block.active' ).forEach( activeBlock => {
+							activeBlock.classList.remove( 'active' );
+						});
+
+					}
+
+					// Add the 'active' class to the clicked 'type-block'
+					typeBlock.classList.add( 'active' );
+
+				}
+
+				// Check if no 'type-block' elements are active inside '.post-types'
+				if( this.apv.querySelectorAll( '.post-types .type-block.active' ).length === 0 ) {
+
+					// If none are active, activate the 'type-block' with data-type="any"
+					this.apv.querySelector( '.post-types .type-block[data-type="any"]' ).classList.add( 'active' );
+
+				}
+
+				// Call the filtering function
+				this.filtering();
+
+			});
+		});
 
 	}
 
@@ -359,17 +476,6 @@ class APV_ADMIN {
 				currentPostTitle.innerHTML = postTitle;
 				this.revertToOriginal.classList.add( 'hidden' );
 		
-				// Check for missing image
-				if( postCard.querySelector( '.missing-image' ) ) {
-					featuredImg.innerHTML = `
-                    <div class="missing-image">
-                        <div class="icon">
-                            <img src="/wp-content/plugins/ai-post-visualizer/admin/views/img/missing_image.svg">
-                        </div>
-                        <div class="text">Featured Image <br>Missing</div>
-                    </div>`;
-				}
-		
 				// Call functions (assuming these are defined elsewhere)
 				await this.getCurrentFI( postId );
 				await this.checkForFIRevert( postId );
@@ -383,101 +489,69 @@ class APV_ADMIN {
 
 	}
 
-	searchBarChangeEvent () {
+	async getCurrentFI ( post ) {
 
-		// Search bar change event
-		this.searchInput.addEventListener( 'change', (e) => {
+		// Set featured image
+		const featuredImage = this.generateView.querySelector( '.featured-img' );
 
-			// Prevent default behavior
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_get_current_fi' );
+		_$data.append( 'post_id', post );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Update featured image
+		featuredImage.style.backgroundImage = `url(${_$fetchRequest.imageUrl})`;
+
+		// Check for missing image
+		if( _$fetchRequest.text ) {
+			featuredImage.innerHTML = _$fetchRequest.text;
+		}
+
+	}
+
+	async checkForFIRevert ( post ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_check_fi_revert' );
+		_$data.append( 'post_id', post );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Update featured image
+		if( _$fetchRequest ) {
+			this.revertToOriginal.classList.remove( 'hidden' );
+		}
+
+	}
+
+	loadMoreClickEvent () {
+
+		// Set load more button click event for posts view
+		this.postWrapperLoadMore.querySelector( '.load-more-text' ).addEventListener( 'click', ( e ) => {
+
+			// Prevent the default action (e.g., a link click)
 			e.preventDefault();
-
-			// Start filtering
-			this.filtering();
-
-		});
-	}
-
-	accordionClickEvent () {
-
-		// Set accordions
-		const accordions = this.apv.querySelectorAll( '.accordions .accordion .title' );
-
-		// Add click event to each accordion
-		accordions.forEach( title => {
-			title.addEventListener( 'click', () => {
-				
-				// Get accordion variables
-				const typesElement = title.closest( '.accordion' ).querySelector( '.types' );
-				const typesHeight = typesElement ? typesElement.offsetHeight : 0;
-				const wrapper = title.closest( '.accordion' ).querySelector( '.types .types-wrapper' );
-				
-				// Update wrapper margins
-				if( typesHeight ) {
-					wrapper.style.marginTop = `calc((${typesHeight}px + 1rem) * -1)`;
-				} else {
-					wrapper.style.marginTop = '';
-				}
-
+		
+			// Create an array to hold the excluded post IDs
+			const exclude = [];
+		
+			// Loop through each post-card and get the 'data-post' attribute
+			this.postWrapper.querySelectorAll( '.post-card' ).forEach( card => {
+				exclude.push( card.dataset.post );
 			});
-		});
+		
+			// Add 'loading' class to the load-more text and loader elements
+			this.postWrapperLoadMore.querySelector( '.load-more-text' ).classList.add( 'loading' );
+			this.postWrapperLoadMore.querySelector( '.rc-loader' ).classList.add( 'loading' );
+		
+			// Call the filtering function, passing the exclude array
+			this.filtering( exclude );
 
-	}
-
-	accordionItemClickEvent () {
-
-		// Select all elements with the class 'type-block' and add a click event listener to each
-		this.apv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
-			
-			// Add click event listener to each 'type-block'
-			typeBlock.addEventListener( 'click', (e) => {
-
-				// Prevent the default behavior
-				e.preventDefault();
-
-				// Check if the clicked 'type-block' already has the 'active' class
-				if( typeBlock.classList.contains( 'active' ) ) {
-
-					// If it is active, remove the 'active' class
-					typeBlock.classList.remove( 'active' );
-
-				} else {
-
-					// Otherwise, if the 'type-block' is inside an accordion with the class 'sort'
-					const accordion = typeBlock.closest( '.accordion' );
-
-					if( accordion && accordion.classList.contains( 'sort' ) ) {
-
-						// Remove the 'active' class from any other 'type-block' inside the 'accordion.sort'
-						this.apv.querySelectorAll( '.accordion.sort .type-block.active' ).forEach( activeBlock => {
-							activeBlock.classList.remove( 'active' );
-						});
-
-					} else {
-
-						// If it's not inside 'accordion.sort', remove the 'active' class from 'type-block' within the closest accordion
-						accordion.querySelectorAll( '.type-block.active' ).forEach( activeBlock => {
-							activeBlock.classList.remove( 'active' );
-						});
-
-					}
-
-					// Add the 'active' class to the clicked 'type-block'
-					typeBlock.classList.add( 'active' );
-
-				}
-
-				// Check if no 'type-block' elements are active inside '.post-types'
-				if( this.apv.querySelectorAll( '.post-types .type-block.active' ).length === 0 ) {
-
-					// If none are active, activate the 'type-block' with data-type="any"
-					this.apv.querySelector( '.post-types .type-block[data-type="any"]' ).classList.add( 'active' );
-
-				}
-
-				// Call the filtering function
-				this.filtering();
-
-			});
 		});
 
 	}
@@ -485,6 +559,123 @@ class APV_ADMIN {
 	/***
 	* GENERATE FUNCTIONS
 	***/
+
+	resetGenerateView () {
+
+		// Reset generate view
+		this.generateView.classList.remove( 'for-post' );
+		this.generateView.dataset.post = '';
+		this.generateView.querySelector( '.featured-img' ).innerHTML = '';
+		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = '';
+		this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
+		this.generateView.querySelectorAll( '.setting input' ).forEach( input => { 
+			input.value = ''; 
+			const event = new Event( 'change' );
+			input.dispatchEvent( event ); 
+		});
+		this.generateView.querySelectorAll( '.setting select' ).forEach( select => select.selectedIndex = 0 );
+		this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
+		this.generateView.querySelector( '.history' ).style.height = '';
+
+	}
+
+	goBackToPostsClickEvent () {
+
+		this.apv.querySelector( '.back-to-posts' ).addEventListener( 'click', () => {
+
+			// Remove 'loaded' class from rendered-images
+			this.renderedImages.classList.remove( 'loaded' );
+		
+			// Clear the images wrapper content
+			this.renderedImagesWrapper.innerHTML = '';
+		
+			// Remove 'for-post' class and clear 'post' data attribute
+			this.generateView.classList.remove( 'for-post' );
+			this.generateView.setAttribute( 'data-post', '' );
+		
+			// Clear the featured image and background-image
+			const featuredImg = this.generateView.querySelector( '.featured-img' );
+			featuredImg.innerHTML = '';
+			featuredImg.style.backgroundImage = '';
+		
+			// Clear the current post title
+			this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
+		
+			// Clear input values and trigger change event
+			this.generateView.querySelectorAll( '.setting input' ).forEach( input => {
+				input.value = '';
+				const event = new Event( 'change' );
+				input.dispatchEvent( event );
+			});
+		
+			// Reset the number of images and select dropdowns
+			this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
+			this.generateView.querySelectorAll( '.setting select' ).forEach( select => {
+				select.selectedIndex = 0;
+				const event = new Event( 'change' );
+				select.dispatchEvent( event );
+			});
+		
+			// Reset history height
+			this.apv.querySelector( '.history' ).style.height = '';
+		
+			// Handle sidebar items' active class
+			this.sidebar.querySelectorAll( '.item' ).forEach( item => {
+				item.classList.remove( 'active' );
+			});
+			this.sidebar.querySelector( '.item.posts' ).classList.add( 'active' );
+		
+			// Handle main content templates' active class
+			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
+				template.classList.remove( 'active' );
+			});
+			this.postView.classList.add( 'active' );
+		
+			// Smooth scroll to the top
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+		
+		});		
+
+	}
+
+	revertToOriginalClickEvent () {
+
+		// Set click event for revert to original button
+		this.revertToOriginal.addEventListener( 'click', () => {
+
+			// Get post id
+			const postId = this.generateView.dataset.post;
+
+			// revet featured image to original
+			this.revertFeaturedImage( postId );
+
+		});
+
+	}
+
+	async revertFeaturedImage ( _postId ) {
+
+		// Set data object and action
+		const _$data = new FormData();
+		_$data.append( 'action', 'apv_revert_featured_image' );
+		_$data.append( 'post_id', _postId );
+
+		// Run fetch request
+		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Check if request successful
+		if( _$fetchRequest ) {
+
+			// Set background images for the featured image and post card
+			this.generateView.querySelector( '.current-featured .featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
+			this.postView.querySelector( `.post-card[data-post="${_postId}"] .image` ).style.backgroundImage = `url(${_$fetchRequest})`;
+
+			// Add 'hidden' class to the revert-to-original element
+			this.revertToOriginal.classList.add( 'hidden' );
+
+		}
+
+	}
 
 	renderButtonClickEvent () {
 
@@ -590,45 +781,6 @@ class APV_ADMIN {
 				this.revertToOriginal.classList.add( 'hidden' );
 
 			}
-
-		}
-
-	}
-
-	revertToOriginalClickEvent () {
-
-		// Set click event for revert to original button
-		this.revertToOriginal.addEventListener( 'click', () => {
-
-			// Get post id
-			const postId = this.generateView.dataset.post;
-
-			// revet featured image to original
-			this.revertFeaturedImage( postId );
-
-		});
-
-	}
-
-	async revertFeaturedImage ( _postId ) {
-
-		// Set data object and action
-		const _$data = new FormData();
-		_$data.append( 'action', 'apv_revert_featured_image' );
-		_$data.append( 'post_id', _postId );
-
-		// Run fetch request
-		const _$fetchRequest = await this.genericFetchRequest( _$data );
-
-		// Check if request successful
-		if( _$fetchRequest ) {
-
-			// Set background images for the featured image and post card
-			this.generateView.querySelector( '.current-featured .featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
-			this.postView.querySelector( `.post-card[data-post="${_postId}"] .image` ).style.backgroundImage = `url(${_$fetchRequest})`;
-
-			// Add 'hidden' class to the revert-to-original element
-			this.revertToOriginal.classList.add( 'hidden' );
 
 		}
 
@@ -756,21 +908,23 @@ class APV_ADMIN {
 		breakdown.querySelector( '.total span' ).innerHTML = `$${total}`;
 		breakdown.querySelector( '.cost-per-img span' ).innerHTML = `$${cost}`;
 
+		// Render btn update
+		this.updateRenderBtn();
+
 	}
 
-	resetGenerateView () {
+	keywordSearchChangeEvent () {
 
-		// Reset generate view
-		this.generateView.classList.remove( 'for-post' );
-		this.generateView.dataset.post = '';
-		this.generateView.querySelector( '.featured-img' ).innerHTML = '';
-		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = '';
-		this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
-		this.generateView.querySelectorAll( '.setting input' ).forEach( input => input.value = '' );
-		this.generateView.querySelectorAll( '.setting select' ).forEach( select => select.selectedIndex = 0 );
-		this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
-		this.generateView.querySelector( '.history' ).style.height = '';
+		// Handle resolution select change
+		this.apv.querySelector( '.keyword-input' ).addEventListener( 'change', (e) => {
 
+			// Prevent default functionality
+			e.preventDefault();
+
+			// Render btn update
+			this.updateRenderBtn();
+
+		});
 	}
 
 	numberInputChangeEvent () {
@@ -782,8 +936,14 @@ class APV_ADMIN {
 			e.preventDefault();
 
 			// Get number and resolution
-			const num = e.target.value;
+			let num = e.target.value;
 			const resolution = document.querySelector('#apv-admin-view .resolution-select select').value;
+
+			// Ensure number is at least one
+			if( !num ) {
+				num = 1;
+				e.target.value = 1;
+			}
 
 			// Update cost
 			this.updateCost( num, resolution );
@@ -806,65 +966,6 @@ class APV_ADMIN {
 			this.updateCost( num, resolution );
 
 		});
-	}
-
-	goBackToPostsClickEvent () {
-
-		this.apv.querySelector( '.back-to-posts' ).addEventListener( 'click', () => {
-
-			// Remove 'loaded' class from rendered-images
-			this.renderedImages.classList.remove( 'loaded' );
-		
-			// Clear the images wrapper content
-			this.renderedImagesWrapper.innerHTML = '';
-		
-			// Remove 'for-post' class and clear 'post' data attribute
-			this.generateView.classList.remove( 'for-post' );
-			this.generateView.setAttribute( 'data-post', '' );
-		
-			// Clear the featured image and background-image
-			const featuredImg = this.generateView.querySelector( '.featured-img' );
-			featuredImg.innerHTML = '';
-			featuredImg.style.backgroundImage = '';
-		
-			// Clear the current post title
-			this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
-		
-			// Clear input values and trigger change event
-			this.generateView.querySelectorAll( '.setting input' ).forEach( input => {
-				input.value = '';
-				const event = new Event( 'change' );
-				input.dispatchEvent( event );
-			});
-		
-			// Reset the number of images and select dropdowns
-			this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
-			this.generateView.querySelectorAll( '.setting select' ).forEach( select => {
-				select.selectedIndex = 0;
-				const event = new Event( 'change' );
-				select.dispatchEvent( event );
-			});
-		
-			// Reset history height
-			this.apv.querySelector( '.history' ).style.height = '';
-		
-			// Handle sidebar items' active class
-			this.sidebar.querySelectorAll( '.item' ).forEach( item => {
-				item.classList.remove( 'active' );
-			});
-			this.sidebar.querySelector( '.item.posts' ).classList.add( 'active' );
-		
-			// Handle main content templates' active class
-			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
-				template.classList.remove( 'active' );
-			});
-			this.postView.classList.add( 'active' );
-		
-			// Smooth scroll to the top
-			window.scrollTo({ top: 0, behavior: 'smooth' });
-		
-		});		
-
 	}
 
 	signUpTextClickEvent () {
@@ -912,6 +1013,25 @@ class APV_ADMIN {
 
 	}
 
+	setHistoryHeight () {
+
+		const height = this.generateView.querySelector( '.settings' ).clientHeight;
+		this.apv.querySelector( '.history' ).style.height = height;
+
+	}
+
+	updateRenderBtn () {
+
+		// Get all generate fields
+		const keywordSearch = this.apv.querySelector( '.keyword-input' ).value;
+		const numberInput = this.apv.querySelector( '.number-input' ).value;
+		const resolution = this.apv.querySelector( '.resolution-select select' ).value;
+
+		// Enable or disable the button based on whether all conditions are met
+		this.apv.querySelector( '.template-generate.validated .render.btn' ).classList.toggle( 'disabled', !(keywordSearch && numberInput && resolution) );
+
+	}
+
 	/***
 	* SETTINGS FUNCTIONS
 	***/
@@ -941,35 +1061,30 @@ class APV_ADMIN {
 		// Run fetch request
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
 
+		// Remove sign up text
+		const signUpText = this.generateView.querySelector( '.sign-up-text' );
+		if( signUpText ) {
+			signUpText.remove();
+		}
+
 	}
 
-	planSelectClickEvent () {
+	dataRetentionToggleClickEvent () {
 
-		// Add click event to select plan
-		this.apv.querySelectorAll( '.select-plan' ).forEach( plan => {
-			plan.addEventListener( 'click', async () => {
-				
-				// Set tier
-				const _tier = plan.dataset.tier;
+		// Add click event for retention toggle
+		this.settingsView.querySelector( '.setting.retention .toggle-input' ).addEventListener( 'click', async (e) => {
 
-				// Set data object and action
-				const _$data = new FormData();
-				_$data.append( 'action', 'apv_plans_routing' );
-				_$data.append( 'tier', _tier );
-				_$data.append( 'return_url', window.location.href );
+			// Get input
+			const input = e.target;
 
-				// Run fetch request
-				const _$fetchRequest = await this.genericFetchRequest( _$data );
+			// Set data object and action
+			const _$data = new FormData();
+			_$data.append( 'action', 'apv_save_clear_data_setting' );
+			_$data.append( 'clear_data', input.checked );
 
-				// Check if request successful
-				if( _$fetchRequest ) {
+			// Run fetch request
+			const _$fetchRequest = await this.genericFetchRequest( _$data );
 
-					// Reload page with the returned URL
-					window.location.href = _$fetchRequest.replaceAll( '"', '' );
-
-				}
-
-			});
 		});
 
 	}

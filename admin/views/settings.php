@@ -1,76 +1,55 @@
 <div class="template template-settings active <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="settings">
     <div class="settings">
 
-        <h3><?php echo esc_html_e( 'DALL·E API Key Settings', 'ai-post-visualizer' ); ?></h3>
+        <!-- DALL·E API Key Settings -->
+        <h3><?php esc_html_e( 'DALL·E API Key Settings', 'ai-post-visualizer' ); ?></h3>
         <div class="setting">
+
             <div class="label">
                 <?php
+                // Display instructions for entering the DALL·E API key
                 printf(
                     esc_html__('Type in DALL·E API key. If you don\'t have an API key, login to your account %1$shere%2$s then go to %3$sthe API keys page%4$s.', 'ai-post-visualizer'),
-                    '<a href="' . esc_url('https://platform.openai.com/') . '">', '</a>',
-                    '<a href="' . esc_url('https://platform.openai.com/api-keys') . '">', '</a>'
+                    '<a href="' . esc_url( 'https://platform.openai.com/' ) . '" target="_blank">', '</a>',
+                    '<a href="' . esc_url( 'https://platform.openai.com/api-keys' ) . '" target="_blank">', '</a>'
                 );
                 ?>
             </div>
-            <input type="password" name="dalleApiKey" class="text-input" placeholder="<?php echo esc_html_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $dalle_api_key ? 'value="' . $dalle_api_key . '"' : ''; ?> />
+
+            <!-- Input field for DALL·E API Key -->
+            <input 
+                type="password" 
+                name="dalleApiKey" 
+                class="dalle-api-key-input" 
+                placeholder="<?php esc_attr_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" 
+                min="1"
+                <?php echo $dalle_api_key ? 'value="' . esc_attr( $dalle_api_key ) . '"' : ''; ?> 
+            />
+
         </div>
 
-        <?php if( $api_key ) { ?>
-            <h3><?php echo esc_html_e( 'API Key Settings', 'ai-post-visualizer' ); ?></h3>
-            <div class="setting">
-                <div class="label"><?php echo esc_html_e( 'Type in AI Post Visualizer API key.  If you don\'t know your API key please select a plan to the right to get started.', 'ai-post-visualizer' ); ?></div>
-                <input type="text" name="apiKey" class="text-input" placeholder="<?php echo esc_html_e( 'Insert API Key', 'ai-post-visualizer' ); ?>" min="1" <?php echo $api_key ? 'value="' . $api_key . '"' : ''; ?> />
+        <!-- Data Retention Settings -->
+        <h3><?php esc_html_e( 'Data Retention Settings', 'ai-post-visualizer' ); ?></h3>
+        <div class="setting retention">
+
+            <div class="label">
+                <?php esc_html_e( 'If you would like for all AI Post Visualizer data to be removed after uninstalling the plugin, click the toggle below.', 'ai-post-visualizer'); ?>
             </div>
-        <?php } else { ?>
-            <h3><?php echo esc_html_e( 'Select a Plan', 'ai-post-visualizer' ); ?></h3>
-            <div class="setting">
-                <div class="label"><?php echo esc_html_e( 'If you prefer to let us manage your monthly AI image allotment. Please select the plan that best fits your needs based on the features and pricing.', 'ai-post-visualizer' ); ?></div>
+
+            <!-- Toggle button for data retention -->
+            <div class="toggle-button">
+                <input 
+                    type="checkbox" 
+                    id="toggle" 
+                    class="toggle-input" 
+                    <?php echo $clear_data ? 'checked' : ''; ?> 
+                />
+                <label for="toggle" class="toggle-label">
+                    <span class="toggle-circle"></span>
+                </label>
             </div>
-            <div class="plans">
-                <div class="plan starter">
-                    <h4><?php echo esc_html_e( 'Starter', 'ai-post-visualizer' ); ?></h4>
-                    <div class="plan-description"><?php echo esc_html_e( 'Perfect for individuals or small businesses who need a limited number of high-quality, unique images each month.', 'ai-post-visualizer' ); ?></div>
-                    <ul>
-                        <li><?php echo esc_html_e( 'Full access to our plugin', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Up to 100 image generations per month', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Clean, simple-to-use user interface', 'ai-post-visualizer' ); ?></li>
-                    </ul>
-                    <div class="plan-price">
-                        <div><?php echo esc_html_e( '$10', 'ai-post-visualizer' ); ?></div>
-                        <span><?php echo esc_html_e( 'per month', 'ai-post-visualizer' ); ?></span>
-                    </div>
-                    <div class="select-plan" data-tier="starter"><?php echo esc_html_e( 'Select Plan', 'ai-post-visualizer' ); ?></div>
-                </div>
-                <div class="plan pro">
-                    <h4><?php echo esc_html_e( 'Pro', 'ai-post-visualizer' ); ?></h4>
-                    <div class="plan-description"><?php echo esc_html_e( 'For those who need more images every month. Take your image creation to the next level and create more content, faster.', 'ai-post-visualizer' ); ?></div>
-                    <ul>
-                        <li><?php echo esc_html_e( 'Everything from the Starter plan', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Up to 250 image generations per month', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Prompt Helper', 'ai-post-visualizer' ); ?></li>
-                    </ul>
-                    <div class="plan-price">
-                        <div><?php echo esc_html_e( '$15', 'ai-post-visualizer' ); ?></div>
-                        <span><?php echo esc_html_e( 'per month', 'ai-post-visualizer' ); ?></span>
-                    </div>
-                    <div class="select-plan" data-tier="pro"><?php echo esc_html_e( 'Select Plan', 'ai-post-visualizer' ); ?></div>
-                </div>
-                <div class="plan enterprise">
-                    <h4><?php echo esc_html_e( 'Enterprise', 'ai-post-visualizer' ); ?></h4>
-                    <div class="plan-description"><?php echo esc_html_e( 'Catered towards content-rich websites and large-scale enterprise that require a high volume of AI-generated images.', 'ai-post-visualizer' ); ?></div>
-                    <ul>
-                        <li><?php echo esc_html_e( 'Everything from the Pro plan', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Up to 500 image generations per month', 'ai-post-visualizer' ); ?></li>
-                        <li><?php echo esc_html_e( 'Image Editor', 'ai-post-visualizer' ); ?></li>
-                    </ul>
-                    <div class="plan-price">
-                        <div><?php echo esc_html_e( '$25', 'ai-post-visualizer' ); ?></div>
-                        <span><?php echo esc_html_e( 'per month', 'ai-post-visualizer' ); ?></span>
-                    </div>
-                    <div class="select-plan" data-tier="enterprise"><?php echo esc_html_e( 'Select Plan', 'ai-post-visualizer' ); ?></div>
-                </div>
-            </div>
-        <?php } ?>
+
+        </div>
 
     </div>
 </div>

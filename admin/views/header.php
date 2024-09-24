@@ -1,9 +1,26 @@
 <div class="apv-header">
     <div class="content">
+
+        <!-- Logo section -->
         <div class="logo">
-            <img src="<?php echo plugin_dir_url( __FILE__ ) . 'img/codeadapted_logo_no_text.svg';?>" alt="CodeAdpated" title="CodeAdpated" />
+            <img 
+                src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/codeadapted_logo_no_text.svg' ); ?>" 
+                alt="<?php esc_attr_e( 'CodeAdapted Logo', 'ai-post-visualizer' ); ?>" 
+                title="<?php esc_attr_e( 'CodeAdapted', 'ai-post-visualizer' ); ?>" 
+            />
         </div>
-        <h1><?php echo esc_html_e( 'AI Post Visualizer', 'ai-post-visualizer' ); ?></h1>
+
+        <!-- Plugin Title -->
+        <h1><?php esc_html_e( 'AI Post Visualizer', 'ai-post-visualizer' ); ?></h1>
+
     </div>
-    <img class="sizer" src="<?php echo plugin_dir_url( __FILE__ ) . 'img/header.png';?>"/>
+
+    <!-- Sizer image -->
+    <img 
+        class="sizer" 
+        src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/header.png' ); ?>" 
+        alt="" 
+        role="presentation" 
+    />
+
 </div>

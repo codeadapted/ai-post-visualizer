@@ -2,302 +2,298 @@
 
 class APV_AI_PROCESSOR {
 
+    /**
+     * Constructor to initialize AJAX actions if in the admin.
+     */
+    public function __construct() {
+        if ( is_admin() ) {
+            add_action( 'wp_ajax_apv_get_dalle_images', array( $this, 'apv_get_dalle_images' ) );
+            add_action( 'wp_ajax_apv_set_dalle_image', array( $this, 'apv_set_dalle_image' ) );
+            add_action( 'wp_ajax_apv_revert_featured_image', array( $this, 'apv_revert_featured_image' ) );
+            add_action( 'wp_ajax_apv_load_dalle_history', array( $this, 'apv_load_dalle_history' ) );
+        }
+    }
 
-	/**
-	 * __construct
-	 *
-	 * @param   void
-	 * @return  void
-	 */
-	public function __construct() {
+    /**
+     * apv_get_dalle_images
+     *
+     * This function handles generating DALLE images via the OpenAI API.
+     *
+     * @return string JSON response with generated images or error message
+     */
+    public function apv_get_dalle_images() {
 
-		if ( is_admin() ) {
-			add_action( 'wp_ajax_apv_get_dalle_images', array( $this, 'apv_get_dalle_images' ) );
-			add_action( 'wp_ajax_apv_set_dalle_image', array( $this, 'apv_set_dalle_image' ) );
-			add_action( 'wp_ajax_apv_revert_featured_image', array( $this, 'apv_revert_featured_image' ) );
-			add_action( 'wp_ajax_apv_load_dalle_history', array( $this, 'apv_load_dalle_history' ) );
-		}
+        // Verify nonce for security to prevent CSRF
+        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
+        if ( $nonce_check ) {
+            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+            return false;
+        }
 
-	}
+        // Sanitize input
+        $post_id = intval( $_GET['post_id'] );
+        $prompt = sanitize_text_field( $_GET['prompt'] );
+        $n = isset( $_GET['n'] ) ? intval( $_GET['n'] ) : 1;
+        $size = isset( $_GET['size'] ) ? sanitize_text_field( $_GET['size'] ) : '256x256';
 
-	/**
-	 * apv_get_dalle_images
-	 *
-	 * Generate DALLE images
-	 *
-	 * @param   void
-	 * @return  string $content The HTML for the generated images
-	 */
-	public function apv_get_dalle_images() {
+        // Sanitize prompt for use as image title
+        $image_title = implode( '-', array_slice( explode( ' ', $prompt ), 0, 6 ) );
 
-		$post_id = $_GET['post_id'];
-		$prompt = $_GET['prompt'];
-		$n = $_GET['n'];
-		$size = $_GET['size'];
+        // Send the API request
+        $api_data = $this->apv_api_request( $prompt, $n, $size );
 
-		$image_title = explode( ' ', $prompt );
-		$image_title = implode( '-', array_splice( $image_title, 0, 6 ) );
+		// Check if api data valid
+        if( $api_data && !isset( $api_data->status ) ) {
 
-		if( $n ) {
-			$n = intval( $n );
-		} else {
-			$n = 1;
-		}
+			// Get urls and set empty content and generated_images variables
+            $urls = $api_data['data'];
+            $content = '';
+            $generated_images = array();
 
-		if( $size ) {
-			$size = $size;
-		} else {
-			$size = '256x256';
-		}
+            // Loop through the API response to generate images
+            foreach ( $urls as $i => $url ) {
 
-		$api_data = $this->apv_api_request( $prompt, $n, $size );
+				// Get iamge url and update generated_images array
+                $image_id = $this->upload_images_to_library( $url['url'], $image_title . '-' . $i );
+                $image_url = wp_get_attachment_url( $image_id );
+                $generated_images[] = $image_id;
 
-		if( $api_data && !isset( $api_data->status ) ) {
+                // Build the HTML content for the images
+                $content .= '<div class="post-card" data-image="' . esc_attr( $image_id ) . '">';
+                $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
+                $content .= '<div class="set-image">';
+                $content .= '<div class="plus">';
+                $content .= '<img src="' . esc_url( APV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+                $content .= '</div>';
+                $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
+                $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
+                $content .= '</div></div>';
+            }
 
-			$urls = $api_data['data'];
+            // Insert post history into the 'apv_history' custom post type
+            if ( !empty( $content ) ) {
+                $history = wp_insert_post( [
+                    'post_type'   => 'apv_history',
+                    'post_status' => 'publish',
+                    'post_title'  => $prompt,
+                    'post_name'   => uniqid( 'apv_' ),
+                ] );
 
-			$content = '';
-			$generated_images = array();
+                // Store meta data for the history
+                update_post_meta( $history, 'prompt', $prompt );
+                update_post_meta( $history, 'images', $generated_images );
+                update_post_meta( $history, 'resolution', $size );
 
-			$i = 0;
-			foreach( $urls as $url ) {
+				// Send json response
+                wp_send_json( $content );
 
-				$image_id = $this->upload_images_to_library( $url['url'], $image_title . '-' . $i );
-				$image_url = wp_get_attachment_url( $image_id );
-				array_push( $generated_images, $image_id );
+            } else {
 
-				$content .= '<div class="post-card" data-image="' . $image_id  . '">';
-					$content .= '<div class="image" style="background-image: url(' . $image_url . ')"></div>';
-					$content .= '<div class="set-image">';
-						$content .= '<div class="plus">';
-							$content .= '<img src="' . APV_PLUGIN_DIR  . 'admin/img/plus.svg" />';
-						$content .= '</div>';
-						$content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
-						$content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
-					$content .= '</div>';
-				$content .= '</div>';
+				// Send json error
+                wp_send_json_error( 'Error with prompt.' );
 
-				$i++;
+            }
 
-			}
+        } else {
+            $content = '<div class="invalid-api-key">' . __( 'Please go to the Settings tab and sign up for a plan before continuing.', 'ai-post-visualizer' ) . '</div>';
+            wp_send_json( $content );
+        }
 
-			if( $content ) {
+    }
 
-				$history = wp_insert_post( [
-						'post_type'    => 'apv_history',
-						'post_status'  => 'publish',
-						'post_title'   => $prompt,
-						'post_name'    => uniqid( 'apv_' )
-				] );
+    /**
+     * apv_set_dalle_image
+     *
+     * Sets the DALLE image as the post's featured image.
+     *
+     * @return string JSON response with image URL
+     */
+    public function apv_set_dalle_image() {
 
-				update_post_meta( $history, 'prompt', $prompt );
-				update_post_meta( $history, 'images', $generated_images );
+        // Verify nonce for security to prevent CSRF
+        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
+        if ( $nonce_check ) {
+            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+            return false;
+        }
 
-				wp_send_json( $content );
+        // Sanitize input
+        $post_id = intval( $_GET['post_id'] );
+        $image_id = intval( $_GET['image_id'] );
 
-			} else {
+        // Backup original featured image if not already done
+        $original = get_post_thumbnail_id( $post_id );
+        if ( !get_post_meta( $post_id, 'apv_revert', true ) ) {
+            update_post_meta( $post_id, 'apv_revert', $original );
+        }
 
-				wp_send_json( 'Error with prompt.' );
+        // Set the new featured image
+        set_post_thumbnail( $post_id, $image_id );
+        $image_url = wp_get_attachment_url( $image_id );
 
-			}
+		// Send json response
+        wp_send_json( $image_url );
 
-		} else {
+    }
 
-			$content = '<div class="invalid-api-key">' . __( 'Please go to the Settings tab and sign up for a plan before continuing.', 'ai-post-visualizer' ) . '</div>';
+    /**
+     * apv_revert_featured_image
+     *
+     * Reverts the post's featured image to its original state.
+     *
+     * @return string JSON response with image URL
+     */
+    public function apv_revert_featured_image() {
 
-			wp_send_json( $content );
+        // Verify nonce for security to prevent CSRF
+        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
+        if ( $nonce_check ) {
+            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+            return false;
+        }
 
-		}
+        // Sanitize input
+        $post_id = intval( $_GET['post_id'] );
+        $original_img = intval( get_post_meta( $post_id, 'apv_revert', true ) );
 
-	}
+        // Revert to the original featured image
+        set_post_thumbnail( $post_id, $original_img );
+        delete_post_meta( $post_id, 'apv_revert' );
 
-	/**
-	 * apv_set_dalle_image
-	 *
-	 * Set DALLE image as post featured image
-	 *
-	 * @param   void
-	 * @return  string $image_url Url of new featured image
-	 */
-	public function apv_set_dalle_image() {
+		// Get image attachment url
+        $image_url = wp_get_attachment_url( $original_img );
 
-		$post_id = $_GET['post_id'];
-		$image_id = $_GET['image_id'];
+		// Send json response
+        wp_send_json( $image_url );
 
-		$original = get_post_thumbnail_id( $post_id );
+    }
 
-		if( !get_post_meta( $post_id, 'apv_revert', true ) ) {
-			update_post_meta( $post_id, 'apv_revert', $original );
-		}
+    /**
+     * apv_load_dalle_history
+     *
+     * Loads stored DALLE images for a post.
+     *
+     * @return string JSON response with the image HTML
+     */
+    public function apv_load_dalle_history() {
 
-		set_post_thumbnail( $post_id, $image_id );
+        // Verify nonce for security to prevent CSRF
+        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
+        if ( $nonce_check ) {
+            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+            return false;
+        }
 
-		$image_url = wp_get_attachment_url( $image_id );
+        // Sanitize input
+        $post_id = intval( $_GET['post_id'] );
+        $images = get_post_meta( $post_id, 'images', true );
 
-		wp_send_json( $image_url );
+		// Set empty content variable
+        $content = '';
 
-	}
+        // Loop through and generate HTML for each stored image
+        foreach( $images as $img ) {
 
-	/**
-	 * apv_revert_featured_image
-	 *
-	 * Revert back to initial featured image
-	 *
-	 * @param   void
-	 * @return  string Success message
-	 */
-	public function apv_revert_featured_image() {
+			// Get image attachment url
+            $image_url = wp_get_attachment_url( $img );
 
-		$post_id = $_GET['post_id'];
-		$original_img = get_post_meta( $post_id, 'apv_revert', true );
+			// Check if image url available and update content
+            if ( $image_url ) {
+                $content .= '<div class="post-card" data-image="' . esc_attr( $img ) . '">';
+                $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
+                $content .= '<div class="set-image">';
+                $content .= '<div class="plus">';
+                $content .= '<img src="' . esc_url( APV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+                $content .= '</div>';
+                $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
+                $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
+                $content .= '</div></div>';
+            }
+        }
 
-		set_post_thumbnail( $post_id, $original_img );
+		// Send json response
+        wp_send_json( $content );
 
-		delete_post_meta( $post_id, 'apv_revert' );
+    }
 
-		$image_url = wp_get_attachment_url( $original_img );
+    /**
+     * apv_api_request
+     *
+     * Sends a request to the DALLE API.
+     *
+     * @param string $prompt The image generation prompt.
+     * @param int    $n      Number of images to generate.
+     * @param string $size   Size of the images.
+     * @return array|bool    The API response or false on failure.
+     */
+    public function apv_api_request( $prompt, $n, $size ) {
 
-		wp_send_json( $image_url );
+        // Get the DALLE API key from the options table
+        $dalle_api_key = get_option( 'apv_dalle_api_key' );
 
-	}
+        // Ensure the API key exists
+        if ( !$dalle_api_key ) {
+            return false;
+        }
 
-	/**
-	 * apv_load_dalle_history
-	 *
-	 * Load stored DALLE images
-	 *
-	 * @param   void
-	 * @return  string $content The HTML for the generated images
-	 */
-	public function apv_load_dalle_history() {
+        // API request headers
+        $headers = [
+            'Authorization: Bearer ' . $dalle_api_key,
+            'Content-Type: application/json',
+        ];
 
-		$post_id = $_GET['post_id'];
+        // Prepare the request data
+        $fields = json_encode([
+            'prompt' => $prompt,
+            'n' => $n,
+            'size' => $size,
+        ]);
 
-		$images = get_post_meta( $post_id, 'images', true );
+        // Initialize curl
+        $curl = curl_init( 'https://api.openai.com/v1/images/generations' );
 
-		$content = '';
+        // Setup curl options
+        curl_setopt( $curl, CURLOPT_POST, true );
+        curl_setopt( $curl, CURLOPT_POSTFIELDS, $fields );
+        curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
+        curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 
-		foreach( $images as $img ) {
+        // Execute the request
+        $response = curl_exec( $curl );
 
-			$image_url = wp_get_attachment_url( $img );
+        // Check for errors
+        if ( curl_errno( $curl ) ) {
+            error_log( 'Curl error: ' . curl_error( $curl ) );
+            curl_close( $curl );
+            return false;
+        }
 
-			if( $image_url ) {
-				$content .= '<div class="post-card" data-image="' . $img . '">';
-					$content .= '<div class="image" style="background-image: url(' . $image_url . ')"></div>';
-					$content .= '<div class="set-image">';
-						$content .= '<div class="plus">';
-							$content .= '<img src="' . APV_PLUGIN_DIR  . 'admin/img/plus.svg" />';
-						$content .= '</div>';
-						$content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
-						$content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
-					$content .= '</div>';
-				$content .= '</div>';
-			} else {
+        // Get the HTTP response code
+        $http_status = curl_getinfo( $curl, CURLINFO_HTTP_CODE );
+        curl_close( $curl );
 
-			}
+        // Ensure the request was successful
+        if ( $http_status !== 200 ) {
+            error_log( 'HTTP error: ' . $http_status . ' Response: ' . $response );
+            return false;
+        }
 
-		}
+        // Decode and return the response
+        return json_decode( $response, true );
+    }
 
-		wp_send_json( $content );
+    /**
+     * upload_images_to_library
+     *
+     * Uploads images to the WordPress media library.
+     *
+     * @param string $url   The URL of the image to upload.
+     * @param string $title The title for the image (optional).
+     * @return int|false    The attachment ID or false on failure.
+     */
+    public function upload_images_to_library ( $url, $title = null ) {
 
-	}
-
-	/**
-	 * apv_api_request
-	 *
-	 * Send API request
-	 *
-	 * @param   String $prompt Main from to send to API endpoint.
-	 * @param   Integer $n Number of images to return from API endpoint.
-	 * @param   String $size Size of images.
-	 * @return  Object $data Curl request response data
-	 */
-	public function apv_api_request( $prompt, $n, $size ) {
-
-		// Get API Keys
-		$dalle_api_key = get_option( 'apv_dalle_api_key' );
-		$api_key = get_option( 'apv_api_key' );
-	
-		// Ensure at least one API key is set
-		if( !$dalle_api_key && !$api_key ) {
-			return false;
-		}
-	
-		// Setup endpoint and headers based on the available API key
-		if( $dalle_api_key ) {
-			$endpoint = 'https://api.openai.com/v1/images/generations';
-			$headers = [
-				'Authorization: Bearer ' . $dalle_api_key,
-				'Content-Type: application/json'
-			];
-		} else {
-			$endpoint = 'https://apv-key-validator-6359afeed8ed.herokuapp.com/image-processor';
-			$headers = [
-				'Authorization: Bearer ' . $api_key,
-				'Content-Type: application/json'
-			];
-		}
-	
-		// Setup fields object
-		$fields = [
-			'prompt' => $prompt,
-			'n' => $n,
-			'size' => $size
-		];
-	
-		// Encode fields into JSON string
-		$json_string = json_encode( $fields );
-	
-		// Initialize curl
-		$curl = curl_init( $endpoint );
-	
-		// Setup and send curl request
-		curl_setopt( $curl, CURLOPT_POST, true );
-		curl_setopt( $curl, CURLOPT_POSTFIELDS, $json_string );
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true  );
-	
-		// Run curl and get response
-		$response = curl_exec( $curl );
-	
-		// Check for connection errors
-		if( curl_errno( $curl ) ) {
-
-			// Log connection errors
-			error_log( 'Curl error: ' . curl_error( $curl ) );
-			curl_close( $curl );
-			return false;
-
-		}
-	
-		// Get the HTTP response code
-		$http_status = curl_getinfo( $curl, CURLINFO_HTTP_CODE );
-		
-		// Close curl
-		curl_close( $curl );
-	
-		// Check if the HTTP response status is not OK (200)
-		if( $http_status !== 200 ) {
-			error_log( 'HTTP error: ' . $http_status . ' Response: ' . $response );
-			return false;
-		}
-	
-		// Decode and return the JSON response
-		return json_decode( $response, true );
-
-	}	
-
-	/**
-	 * upload_images_to_library
-	 *
-	 * Upload images to WP media library
-	 *
-	 * @param   String $url Image url
-	 * @param   String $title Optional title to add to image.
-	 * @return  integer $file_id Uploaded image id
-	 */
-	public function upload_images_to_library ( $url, $title = null ) {
-
+        // Setup required paths for image upload
 		require_once( ABSPATH . '/wp-load.php' );
 		require_once( ABSPATH . '/wp-admin/includes/image.php' );
 		require_once( ABSPATH . '/wp-admin/includes/file.php' );
