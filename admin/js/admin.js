@@ -81,6 +81,7 @@ class APV_ADMIN {
 		this.resetFilters();
 		this.sidebarClickEvent();
 		this.searchBarChangeEvent();
+		this.keywordSearchChangeEvent();
 		this.numberInputChangeEvent();
 		this.resolutionSelectChangeEvent();
 		this.renderButtonClickEvent();
@@ -475,17 +476,6 @@ class APV_ADMIN {
 				currentPostTitle.innerHTML = postTitle;
 				this.revertToOriginal.classList.add( 'hidden' );
 		
-				// Check for missing image
-				if( postCard.querySelector( '.missing-image' ) ) {
-					featuredImg.innerHTML = `
-                    <div class="missing-image">
-                        <div class="icon">
-                            <img src="/wp-content/plugins/ai-post-visualizer/admin/views/img/missing_image.svg">
-                        </div>
-                        <div class="text">Featured Image <br>Missing</div>
-                    </div>`;
-				}
-		
 				// Call functions (assuming these are defined elsewhere)
 				await this.getCurrentFI( postId );
 				await this.checkForFIRevert( postId );
@@ -501,6 +491,9 @@ class APV_ADMIN {
 
 	async getCurrentFI ( post ) {
 
+		// Set featured image
+		const featuredImage = this.generateView.querySelector( '.featured-img' );
+
 		// Set data object and action
 		const _$data = new FormData();
 		_$data.append( 'action', 'apv_get_current_fi' );
@@ -510,7 +503,12 @@ class APV_ADMIN {
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
 
 		// Update featured image
-		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = `url(${_$fetchRequest})`;
+		featuredImage.style.backgroundImage = `url(${_$fetchRequest.imageUrl})`;
+
+		// Check for missing image
+		if( _$fetchRequest.text ) {
+			featuredImage.innerHTML = _$fetchRequest.text;
+		}
 
 	}
 
@@ -570,7 +568,11 @@ class APV_ADMIN {
 		this.generateView.querySelector( '.featured-img' ).innerHTML = '';
 		this.generateView.querySelector( '.featured-img' ).style.backgroundImage = '';
 		this.generateView.querySelector( '.current-post-title' ).innerHTML = '';
-		this.generateView.querySelectorAll( '.setting input' ).forEach( input => input.value = '' );
+		this.generateView.querySelectorAll( '.setting input' ).forEach( input => { 
+			input.value = ''; 
+			const event = new Event( 'change' );
+			input.dispatchEvent( event ); 
+		});
 		this.generateView.querySelectorAll( '.setting select' ).forEach( select => select.selectedIndex = 0 );
 		this.generateView.querySelector( '.breakdown .num-images span' ).innerHTML = 1;
 		this.generateView.querySelector( '.history' ).style.height = '';
@@ -906,6 +908,23 @@ class APV_ADMIN {
 		breakdown.querySelector( '.total span' ).innerHTML = `$${total}`;
 		breakdown.querySelector( '.cost-per-img span' ).innerHTML = `$${cost}`;
 
+		// Render btn update
+		this.updateRenderBtn();
+
+	}
+
+	keywordSearchChangeEvent () {
+
+		// Handle resolution select change
+		this.apv.querySelector( '.keyword-input' ).addEventListener( 'change', (e) => {
+
+			// Prevent default functionality
+			e.preventDefault();
+
+			// Render btn update
+			this.updateRenderBtn();
+
+		});
 	}
 
 	numberInputChangeEvent () {
@@ -917,8 +936,14 @@ class APV_ADMIN {
 			e.preventDefault();
 
 			// Get number and resolution
-			const num = e.target.value;
+			let num = e.target.value;
 			const resolution = document.querySelector('#apv-admin-view .resolution-select select').value;
+
+			// Ensure number is at least one
+			if( !num ) {
+				num = 1;
+				e.target.value = 1;
+			}
 
 			// Update cost
 			this.updateCost( num, resolution );
@@ -995,6 +1020,18 @@ class APV_ADMIN {
 
 	}
 
+	updateRenderBtn () {
+
+		// Get all generate fields
+		const keywordSearch = this.apv.querySelector( '.keyword-input' ).value;
+		const numberInput = this.apv.querySelector( '.number-input' ).value;
+		const resolution = this.apv.querySelector( '.resolution-select select' ).value;
+
+		// Enable or disable the button based on whether all conditions are met
+		this.apv.querySelector( '.template-generate.validated .render.btn' ).classList.toggle( 'disabled', !(keywordSearch && numberInput && resolution) );
+
+	}
+
 	/***
 	* SETTINGS FUNCTIONS
 	***/
@@ -1023,6 +1060,12 @@ class APV_ADMIN {
 
 		// Run fetch request
 		const _$fetchRequest = await this.genericFetchRequest( _$data );
+
+		// Remove sign up text
+		const signUpText = this.generateView.querySelector( '.sign-up-text' );
+		if( signUpText ) {
+			signUpText.remove();
+		}
 
 	}
 

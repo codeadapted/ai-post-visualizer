@@ -291,43 +291,74 @@ class APV_AI_PROCESSOR {
      * @param string $title The title for the image (optional).
      * @return int|false    The attachment ID or false on failure.
      */
-    public function upload_images_to_library( $url, $title = null ) {
+    public function upload_images_to_library ( $url, $title = null ) {
 
-		// Get required files for image upload
-        require_once( ABSPATH . '/wp-load.php' );
-        require_once( ABSPATH . '/wp-admin/includes/image.php' );
-        require_once( ABSPATH . '/wp-admin/includes/file.php' );
-        require_once( ABSPATH . '/wp-admin/includes/media.php' );
+        // Setup required paths for image upload
+		require_once( ABSPATH . '/wp-load.php' );
+		require_once( ABSPATH . '/wp-admin/includes/image.php' );
+		require_once( ABSPATH . '/wp-admin/includes/file.php' );
+		require_once( ABSPATH . '/wp-admin/includes/media.php' );
 
-        // Download the image to a temporary file
-        $tmp = download_url( $url );
-        if ( is_wp_error( $tmp ) ) {
-            return false;
-        }
+		// Download url to a temp file
+		$tmp = download_url( $url );
+		if( is_wp_error( $tmp ) ) {
+			return false;
+		}
 
-        // Generate a unique filename
-        $filename = md5( uniqid( pathinfo( $url, PATHINFO_FILENAME ), true ) ) . '.' . pathinfo( $url, PATHINFO_EXTENSION );
+		// Get the filename and extension ("photo.png" => "photo", "png")
+		$filename = pathinfo( $url, PATHINFO_FILENAME );
+		$extension = pathinfo( $url, PATHINFO_EXTENSION );
 
-        // Prepare the file for sideloading
-        $file = array(
-            'name'     => $filename,
-            'tmp_name' => $tmp,
-        );
+		// An extension is required or else WordPress will reject the upload
+		if( ! $extension ) {
+			// Look up mime type, example: "/photo.png" -> "image/png"
+			$mime = mime_content_type( $tmp );
+			$mime = is_string( $mime ) ? sanitize_mime_type( $mime ) : false;
 
-        // Sideload the file into the media library
-        $attachment_id = media_handle_sideload( $file, 0, $title );
+			// Only allow certain mime types because mime types do not always end in a valid extension (see the .doc example below)
+			$mime_extensions = array(
+				// mime_type         => extension (no period)
+				'text/plain'         => 'txt',
+				'text/csv'           => 'csv',
+				'application/msword' => 'doc',
+				'image/jpg'          => 'jpg',
+				'image/jpeg'         => 'jpeg',
+				'image/gif'          => 'gif',
+				'image/png'          => 'png',
+				'video/mp4'          => 'mp4',
+			);
 
-        // Cleanup the temporary file
-        @unlink( $tmp );
+			if ( isset( $mime_extensions[$mime] ) ) {
+				// Use the mapped extension
+				$extension = $mime_extensions[$mime];
+			} else{
+				// Could not identify extension
+				@unlink($tmp);
+				return false;
+			}
+		}
 
-        // Return the attachment ID or false if the upload failed
-        if ( is_wp_error( $attachment_id ) ) {
-            return false;
-        }
+		// Upload by "sideloading": "the same way as an uploaded file is handled by media_handle_upload"
+		$filename = md5( uniqid( md5( $filename ), true ) ) . '_' . time();
+		$args = array(
+			'name' => "$filename.$extension",
+			'tmp_name' => $tmp,
+		);
 
-		// Return attachment id
-        return $attachment_id;
+		// Do the upload
+		$attachment_id = media_handle_sideload( $args, 0, $title );
 
-    }
+		// Cleanup temp file
+		@unlink($tmp);
+
+		// Error uploading
+		if ( is_wp_error( $attachment_id ) ) {
+			return false;
+		}
+
+		// Success, return attachment ID (int)
+		return (int) $attachment_id;
+
+	}
 
 }

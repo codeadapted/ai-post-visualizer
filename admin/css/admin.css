@@ -321,6 +321,7 @@ Posts tab
 	top: 100%;
     opacity: 1;
 	top: calc(100% - 6px);
+	pointer-events: visible;
 }
 
 #apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown .types {
@@ -336,6 +337,7 @@ Posts tab
 	top: calc(100% + 20px);
 	left: 0;
     opacity: 0;
+	pointer-events: none;
 	transition: all 0.2s ease-in-out;
 }
 
@@ -682,7 +684,7 @@ Generate tab
 
 #apv-admin-view .content-area .main-content .template-generate .current-featured .featured-img .missing-image .text {
 	font-weight: 400;
-	font-size: 20px;
+	font-size: 14px;
 	line-height: 1;
 	text-align: center;
 	color: var(--light-bg);
@@ -776,6 +778,17 @@ Generate tab
 	width: 175px;
 	font-size: 14px;
     height: 37.5px;
+	transition: opacity 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .render.btn.disabled {
+	pointer-events: none;
+	opacity: 0.7;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .render.btn.disabled:before, 
+#apv-admin-view .content-area .main-content .template-generate .render.btn.disabled span {
+	opacity: 0.7;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history {
@@ -791,9 +804,17 @@ Generate tab
 	display: flex;
     align-items: center;
     border-bottom: 1px solid var(--dark-border);
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
 	transition: border-color 0.2s ease-in-out;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .history .title.no-history {
+	border-bottom: 0;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .history .title.no-history .icon {
+	border-bottom-left-radius: 9px;
 }
 
 #apv-admin-view .content-area .main-content .template-generate .history .title .icon {
@@ -988,6 +1009,10 @@ Generate tab
     white-space: nowrap;
     margin-left: 1rem;
 	pointer-events: visible;
+}
+
+#apv-admin-view .content-area .main-content .template-generate .render.btn .sign-up-text.mobile {
+	display: none;
 }
 
 #apv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div {
@@ -1469,17 +1494,15 @@ Mobile styles
 	}
 	#apv-admin-view .content-area .main-content .template.template-posts {
 		flex-wrap: wrap;
+	}	
+	#apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown {
+		width: 100%;
 	}
-	#apv-admin-view .content-area .main-content .template-posts .filter-sidebar {
-		max-width: unset;
-		min-width: unset;
-		width: calc(100% - 120px);
-		flex-grow: 1;
-		flex-shrink: 0;
-		height: fit-content;
+	#apv-admin-view .content-area .main-content .template-posts .filters .dropdowns .dropdown.active .types {
+		z-index: 12;
 	}
-	#apv-admin-view .content-area .main-content .template-posts .filter-sidebar .accordions .accordion .types .type-block {
-		width: calc(25% - 0.75rem);
+	#apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card {
+		max-width: calc(50% - 1rem);
 	}
 }
 
@@ -1504,14 +1527,15 @@ Mobile styles
 }
 
 @media screen and (max-width: 640px) {
+	#apv-admin-view .content-area .main-content .template-posts .posts-section {
+		padding: 2rem;
+	}
 	#apv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card {
 		width: 100%;
-	}
-	#apv-admin-view .content-area .main-content .template-posts .filter-sidebar .accordions .accordion .types .type-block {
-		width: calc(50% - 0.5rem);
+		max-width: 100%;
 	}
 	#apv-admin-view .content-area .main-content .template.template-generate {
-		padding: 1rem;
+		padding: 2rem;
 	}
 	#apv-admin-view .apv-header .content h1 {
 		font-size: 25px;
@@ -1521,7 +1545,7 @@ Mobile styles
 		width: 50px;
 	}
 	#apv-admin-view .content-area .main-content .template-generate .settings-wrapper {
-		padding: 1rem;
+		padding: 0;
 	}
 	#apv-admin-view .content-area .main-content .template-generate .back-to-posts {
 		font-size: 14px;
@@ -1540,8 +1564,8 @@ Mobile styles
 		width: 100%;
 		height: 170px;
 	}
-	#apv-admin-view .content-area .main-content .settings h3 {
-		font-size: 20px;
+	#apv-admin-view .content-area .main-content h3 {
+		font-size: 22px;
 	}
 	#apv-admin-view .content-area .main-content .template-generate .history .title .text {
 		font-size: 16px;
@@ -1570,26 +1594,17 @@ Mobile styles
 	}
 	#apv-admin-view .content-area .main-content .template-generate .render.btn {
 		width: 100%;
-		height: unset;
-		display: flex;
-		flex-wrap: wrap;
-	}
-	#apv-admin-view .content-area .main-content .template-generate .render.btn span {
-		width: 100%;
-		height: unset;
-		display: flex;
-		flex-wrap: wrap;
 	}
 	#apv-admin-view .content-area .main-content .template-generate .render.btn .sign-up-text {
+		display: none;
+	}
+	#apv-admin-view .content-area .main-content .template-generate .sign-up-text.mobile {
 		width: 100%;
 		display: block;
-		left: 0;
-		margin: 0;
-		white-space: unset;
-		position: relative;
+		margin-top: 1rem;
 	}
 	#apv-admin-view .content-area .main-content .template.template-settings {
-		padding: 1.5rem;
+		padding: 2rem;
 	}
 }
 

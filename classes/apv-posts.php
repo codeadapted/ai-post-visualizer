@@ -190,11 +190,20 @@ class APV_Posts {
         // Get the post thumbnail URL or return a default image
         $thumbnail = get_the_post_thumbnail_url( $post_id, 'full' );
 
+        // Setup missing image
+        $missing_image_bg = esc_url( plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE ) );
+        $missing_image_text = '<div class="missing-image">
+            <div class="icon">
+                <img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', APV_PLUGIN_FILE ) ) . '">
+            </div>
+            <div class="text">' . esc_html__( 'Featured Image Missing', 'ai-post-visualizer' ) . '</div>
+        </div>';
+
 		// check if $thumbnail is set
         if ( $thumbnail ) {
-            wp_send_json( esc_url( $thumbnail ) );
+            wp_send_json( array( 'imageUrl' => $thumbnail ) );
         } else {
-            wp_send_json( esc_url( plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE ) ) );
+            wp_send_json( array( 'imageUrl' => $missing_image_bg, 'text' => $missing_image_text ) );
         }
     }
 

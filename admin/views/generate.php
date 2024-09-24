@@ -50,7 +50,8 @@
                     name="numOfImages" 
                     class="number-input" 
                     placeholder="<?php esc_attr_e( '1', 'ai-post-visualizer' ); ?>" 
-                    min="1" 
+                    min="1"
+                    value="1"
                 />
             </div>
 
@@ -93,7 +94,7 @@
             </div>
 
             <!-- Render Images Button -->
-            <div class="render btn">
+            <div class="render btn disabled">
                 <span><?php esc_html_e( 'Render Images', 'ai-post-visualizer' ); ?></span>
 
                 <!-- Prompt to Add API Key if Validation Fails -->
@@ -104,6 +105,13 @@
                     </div>
                 <?php } ?>
             </div>
+
+            <!-- Prompt to Add API Key if Validation Fails -->
+            <?php if( !$validation ) { ?>
+                <div class="sign-up-text mobile">
+                    <?php esc_html_e( 'Add your DALL·E API Key by going to Settings.', 'ai-post-visualizer' ); ?>
+                </div>
+            <?php } ?>
 
             <!-- Rendered Images Section -->
             <div class="rendered-images">
@@ -117,7 +125,7 @@
 
     <!-- History Section -->
     <div class="history">
-        <div class="title">
+        <div class="title<?php echo !$history ? ' no-history' : ''; ?>">
             <div class="icon">
                 <img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/generation_history.svg' ); ?>" alt="<?php esc_attr_e( 'History Icon', 'ai-post-visualizer' ); ?>" />
             </div>
