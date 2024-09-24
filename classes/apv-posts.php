@@ -33,63 +33,61 @@ class APV_Posts {
         if ( !current_user_can( 'manage_options' ) ) {
             return false;
         }
-
-        // Verify nonce for security to prevent CSRF
-		$ajax_check = isset( $_GET['post_type'] ) || isset( $_GET['search'] );
-		$nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $ajax_check && $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+    
+        // AJAX check
+        $ajax_check = isset( $_GET['post_type'] ) || isset( $_GET['search'] );
+    
+        // Validate the nonce
+        if ( $ajax_check && ! $this->validate_nonce() ) {
             return false;
         }
-
-        // Set up the default WP_Query arguments
+    
+        // Set up pagination
+        $paged = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+    
+        // Set up the WP_Query arguments
         $args = array(
             'posts_per_page' => 18,  // Limit to 18 posts per page
             'post_status'    => 'publish',  // Only get published posts
-            'public'         => true  // Get public posts
+            'public'         => true,  // Get public posts
+            'paged'          => $paged,  // Use pagination
+            'fields'         => 'ids',  // Only return post IDs for better performance
         );
-
-        // Sanitize and handle the 'exclude' parameter, turning it into an array of integers
-        if ( isset( $_GET['exclude'] ) && !empty( $_GET['exclude'] ) ) {
-            $exclude_ids = explode( ',', sanitize_text_field( $_GET['exclude'] ) );
-            $exclude_ids = array_map( 'absint', $exclude_ids );
-            $args['post__not_in'] = $exclude_ids;
-        }
-
-        // Sanitize and handle the 'post_type' parameter, fallback to 'any' post type if not provided
-        $args['post_type'] = isset( $_GET['post_type'] ) && !empty( $_GET['post_type'] ) ? sanitize_text_field( $_GET['post_type'] ) : 'any';
-
-        // Handle alphabetical sorting, default to ASC if invalid or not provided
+    
+        // Handle the 'post_type' parameter
+        $args['post_type'] = isset( $_GET['post_type'] ) && !empty( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : 'any';
+    
+        // Handle alphabetical sorting
         if ( isset( $_GET['alphabetical'] ) && !empty( $_GET['alphabetical'] ) ) {
-            $order = sanitize_text_field( $_GET['alphabetical'] );
+            $order = sanitize_text_field( wp_unslash( $_GET['alphabetical'] ) );
             $args['orderby'] = 'title';
             $args['order'] = in_array( $order, array( 'ASC', 'DESC' ) ) ? $order : 'ASC';
         }
-
-        // Handle date sorting, default to ASC if invalid or not provided
+    
+        // Handle date sorting
         if ( isset( $_GET['date'] ) && !empty( $_GET['date'] ) ) {
-            $order = sanitize_text_field( $_GET['date'] );
+            $order = sanitize_text_field( wp_unslash( $_GET['date'] ) );
             $args['orderby'] = 'date';
             $args['order'] = in_array( $order, array( 'ASC', 'DESC' ) ) ? $order : 'ASC';
         }
-
-        // Sanitize and handle the 'search' functionality
+    
+        // Handle search functionality
         if ( isset( $_GET['search'] ) && !empty( $_GET['search'] ) ) {
-            $args['s'] = sanitize_text_field( $_GET['search'] );
+            $args['s'] = sanitize_text_field( wp_unslash( $_GET['search'] ) );
         }
-
-        // Execute the WP_Query with the arguments
+    
+        // Execute the WP_Query
         $posts = new WP_Query( $args );
-
+    
         $content = '';
         $total_posts = $posts->found_posts;  // Get total posts found
-
+    
         if ( $posts->have_posts() ) {
-            while ( $posts->have_posts() ) {
-                $posts->the_post();
-                $post_id = get_the_ID();
+            foreach ( $posts->posts as $post_id ) {
+    
+                // Check if missing
                 $missing = false;
-
+    
                 // Get post thumbnail or fallback to a missing image placeholder
                 if ( has_post_thumbnail( $post_id ) ) {
                     $thumbnail = get_the_post_thumbnail_url( $post_id, 'medium' );
@@ -97,7 +95,7 @@ class APV_Posts {
                     $thumbnail = plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE );
                     $missing = true;
                 }
-
+    
                 // Generate HTML structure for each post card
                 $content .= '<div class="post-card" data-post="' . esc_attr( $post_id ) . '">';
                 if ( !$missing ) {
@@ -110,29 +108,32 @@ class APV_Posts {
                     $content .= '</div>';
                     $content .= '</div>';
                 }
-
+    
                 // Add title and button for generating a new image
                 $content .= '<div class="card-title">';
-                $content .= '<div class="post-type">' . esc_html( get_post_type() ) . '</div>';
-                $content .= '<div class="text">' . esc_html( get_the_title() ) . '</div>';
+                $content .= '<div class="post-type">' . esc_html( get_post_type( $post_id ) ) . '</div>';
+                $content .= '<div class="text">' . esc_html( get_the_title( $post_id ) ) . '</div>';
                 $content .= '<div class="btn"><span>' . esc_html__( 'Generate New Image', 'ai-post-visualizer' ) . '</span></div>';
                 $content .= '</div>';
                 $content .= '</div>';
             }
-
-            wp_reset_postdata();  // Reset post data after the loop
+    
+            // Reset post data after the loop
+            wp_reset_postdata();
+    
         } else {
             // If no posts are found, display a 'no results' message
             $content .= '<div class="no-results">' . esc_html__( 'No posts were found. Please try your query again.', 'ai-post-visualizer' ) . '</div>';
         }
-
+    
         // Return the content and total posts count in a JSON response for AJAX requests
         if ( $ajax_check ) {
             wp_send_json( array( 'content' => $content, 'total_posts' => $total_posts ) );
         } else {
             return array( 'content' => $content, 'total_posts' => $total_posts );
         }
-    }
+    
+    } 
 
     /**
      * apv_get_post_types
@@ -177,10 +178,8 @@ class APV_Posts {
      **/
     public function apv_get_current_fi() {
 
-		// Verify nonce for security to prevent CSRF
-		$nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+		// Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
@@ -216,10 +215,8 @@ class APV_Posts {
      **/
     public function apv_check_fi_revert() {
 
-		// Verify nonce for security to prevent CSRF
-		$nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+		// Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
@@ -247,12 +244,10 @@ class APV_Posts {
     public function apv_get_history() {
 
 		// Check if is ajax call
-        $is_ajax = isset( $_GET['is_ajax'] ) && $_GET['is_ajax'] ? true : false;
+        $is_ajax = isset( $_GET['is_ajax'] ) && sanitize_text_field( wp_unslash( $_GET['is_ajax'] ) ) ? true : false;
 
-		// Verify nonce for security to prevent CSRF
-		$nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $is_ajax && $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+		// Validate the nonce
+        if ( $is_ajax && ! $this->validate_nonce() ) {
             return false;
         }
 
@@ -314,6 +309,39 @@ class APV_Posts {
                 return $content;
             }
         }
+    }
+
+    /**
+     * Validate the nonce for security.
+     *
+     * @param string $action The nonce action name.
+     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
+     *
+     * @return bool|void False if the nonce is invalid or missing, true if valid.
+     */
+    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
+
+        // Check if the nonce exists in $_GET
+        if ( isset( $_GET[ $nonce_field ] ) ) {
+
+            // Sanitize and unslash the nonce
+            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
+
+            // Validate the nonce
+            if ( ! wp_verify_nonce( $nonce, $action ) ) {
+                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+                return false;
+            }
+
+        } else {
+            // Nonce is missing
+            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
+            return false;
+        }
+
+        // If everything is correct, return true
+        return true;
+
     }
 
 }

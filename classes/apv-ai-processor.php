@@ -23,18 +23,16 @@ class APV_AI_PROCESSOR {
      */
     public function apv_get_dalle_images() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize input
-        $post_id = intval( $_GET['post_id'] );
-        $prompt = sanitize_text_field( $_GET['prompt'] );
-        $n = isset( $_GET['n'] ) ? intval( $_GET['n'] ) : 1;
-        $size = isset( $_GET['size'] ) ? sanitize_text_field( $_GET['size'] ) : '256x256';
+        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+        $prompt = isset( $_GET['prompt'] ) ? sanitize_text_field( wp_unslash( $_GET['prompt'] ) ) : '';
+        $n = isset( $_GET['n'] ) ? intval( wp_unslash( $_GET['n'] ) ) : 1;
+        $size = isset( $_GET['size'] ) ? sanitize_text_field( wp_unslash( $_GET['size'] ) ) : '256x256';
 
         // Sanitize prompt for use as image title
         $image_title = implode( '-', array_slice( explode( ' ', $prompt ), 0, 6 ) );
@@ -110,16 +108,14 @@ class APV_AI_PROCESSOR {
      */
     public function apv_set_dalle_image() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize input
-        $post_id = intval( $_GET['post_id'] );
-        $image_id = intval( $_GET['image_id'] );
+        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+        $image_id = isset( $_GET['image_id'] ) ? intval( wp_unslash( $_GET['image_id'] ) ) : '';
 
         // Backup original featured image if not already done
         $original = get_post_thumbnail_id( $post_id );
@@ -145,15 +141,13 @@ class APV_AI_PROCESSOR {
      */
     public function apv_revert_featured_image() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize input
-        $post_id = intval( $_GET['post_id'] );
+        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
         $original_img = intval( get_post_meta( $post_id, 'apv_revert', true ) );
 
         // Revert to the original featured image
@@ -177,15 +171,13 @@ class APV_AI_PROCESSOR {
      */
     public function apv_load_dalle_history() {
 
-        // Verify nonce for security to prevent CSRF
-        $nonce_check = !isset( $_GET['apv_nonce'] ) || !wp_verify_nonce( $_GET['apv_nonce'], 'apv_nonce_action' );
-        if ( $nonce_check ) {
-            wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+        // Validate the nonce
+        if ( ! $this->validate_nonce() ) {
             return false;
         }
 
         // Sanitize input
-        $post_id = intval( $_GET['post_id'] );
+        $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : '';
         $images = get_post_meta( $post_id, 'images', true );
 
 		// Set empty content variable
@@ -230,57 +222,49 @@ class APV_AI_PROCESSOR {
 
         // Get the DALLE API key from the options table
         $dalle_api_key = get_option( 'apv_dalle_api_key' );
-
+    
         // Ensure the API key exists
         if ( !$dalle_api_key ) {
             return false;
         }
-
+    
         // API request headers
         $headers = [
-            'Authorization: Bearer ' . $dalle_api_key,
-            'Content-Type: application/json',
+            'Authorization' => 'Bearer ' . $dalle_api_key,
+            'Content-Type'  => 'application/json',
         ];
-
-        // Prepare the request data
-        $fields = json_encode([
+    
+        // Prepare the request data using wp_json_encode()
+        $body = wp_json_encode([
             'prompt' => $prompt,
-            'n' => $n,
-            'size' => $size,
+            'n'      => $n,
+            'size'   => $size,
         ]);
-
-        // Initialize curl
-        $curl = curl_init( 'https://api.openai.com/v1/images/generations' );
-
-        // Setup curl options
-        curl_setopt( $curl, CURLOPT_POST, true );
-        curl_setopt( $curl, CURLOPT_POSTFIELDS, $fields );
-        curl_setopt( $curl, CURLOPT_HTTPHEADER, $headers );
-        curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
-
-        // Execute the request
-        $response = curl_exec( $curl );
-
+    
+        // Perform the request using wp_remote_post
+        $response = wp_remote_post( 'https://api.openai.com/v1/images/generations', [
+            'headers' => $headers,
+            'body'    => $body,
+            'timeout' => 45, // Set an appropriate timeout
+        ]);
+    
         // Check for errors
-        if ( curl_errno( $curl ) ) {
-            error_log( 'Curl error: ' . curl_error( $curl ) );
-            curl_close( $curl );
+        if ( is_wp_error( $response ) ) {
+            error_log( 'HTTP request failed: ' . $response->get_error_message() );
             return false;
         }
-
-        // Get the HTTP response code
-        $http_status = curl_getinfo( $curl, CURLINFO_HTTP_CODE );
-        curl_close( $curl );
-
-        // Ensure the request was successful
+    
+        // Check if the response code is 200 OK
+        $http_status = wp_remote_retrieve_response_code( $response );
         if ( $http_status !== 200 ) {
-            error_log( 'HTTP error: ' . $http_status . ' Response: ' . $response );
+            error_log( 'HTTP error: ' . $http_status . ' Response: ' . wp_remote_retrieve_body( $response ) );
             return false;
         }
-
+    
         // Decode and return the response
-        return json_decode( $response, true );
-    }
+        return json_decode( wp_remote_retrieve_body( $response ), true );
+
+    }    
 
     /**
      * upload_images_to_library
@@ -333,7 +317,7 @@ class APV_AI_PROCESSOR {
 				$extension = $mime_extensions[$mime];
 			} else{
 				// Could not identify extension
-				@unlink($tmp);
+				wp_delete_file( $tmp );
 				return false;
 			}
 		}
@@ -349,7 +333,7 @@ class APV_AI_PROCESSOR {
 		$attachment_id = media_handle_sideload( $args, 0, $title );
 
 		// Cleanup temp file
-		@unlink($tmp);
+		wp_delete_file( $tmp );
 
 		// Error uploading
 		if ( is_wp_error( $attachment_id ) ) {
@@ -360,5 +344,38 @@ class APV_AI_PROCESSOR {
 		return (int) $attachment_id;
 
 	}
+
+    /**
+     * Validate the nonce for security.
+     *
+     * @param string $action The nonce action name.
+     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
+     *
+     * @return bool|void False if the nonce is invalid or missing, true if valid.
+     */
+    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
+
+        // Check if the nonce exists in $_GET
+        if ( isset( $_GET[ $nonce_field ] ) ) {
+
+            // Sanitize and unslash the nonce
+            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
+
+            // Validate the nonce
+            if ( ! wp_verify_nonce( $nonce, $action ) ) {
+                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
+                return false;
+            }
+
+        } else {
+            // Nonce is missing
+            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
+            return false;
+        }
+
+        // If everything is correct, return true
+        return true;
+
+    }
 
 }
