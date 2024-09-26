@@ -15,18 +15,14 @@ class APV_AI_PROCESSOR {
     }
 
     /**
-     * apv_get_dalle_images
-     *
      * This function handles generating DALLE images via the OpenAI API.
      *
      * @return string JSON response with generated images or error message
      */
     public function apv_get_dalle_images() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
@@ -52,7 +48,7 @@ class APV_AI_PROCESSOR {
             foreach ( $urls as $i => $url ) {
 
 				// Get iamge url and update generated_images array
-                $image_id = $this->upload_images_to_library( $url['url'], $image_title . '-' . $i );
+                $image_id = $this->apv_upload_images_to_library( $url['url'], $image_title . '-' . $i );
                 $image_url = wp_get_attachment_url( $image_id );
                 $generated_images[] = $image_id;
 
@@ -100,18 +96,14 @@ class APV_AI_PROCESSOR {
     }
 
     /**
-     * apv_set_dalle_image
-     *
      * Sets the DALLE image as the post's featured image.
      *
      * @return string JSON response with image URL
      */
     public function apv_set_dalle_image() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
@@ -133,18 +125,14 @@ class APV_AI_PROCESSOR {
     }
 
     /**
-     * apv_revert_featured_image
-     *
      * Reverts the post's featured image to its original state.
      *
      * @return string JSON response with image URL
      */
     public function apv_revert_featured_image() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
@@ -163,18 +151,14 @@ class APV_AI_PROCESSOR {
     }
 
     /**
-     * apv_load_dalle_history
-     *
      * Loads stored DALLE images for a post.
      *
      * @return string JSON response with the image HTML
      */
     public function apv_load_dalle_history() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : '';
@@ -209,8 +193,6 @@ class APV_AI_PROCESSOR {
     }
 
     /**
-     * apv_api_request
-     *
      * Sends a request to the DALLE API.
      *
      * @param string $prompt The image generation prompt.
@@ -267,15 +249,13 @@ class APV_AI_PROCESSOR {
     }    
 
     /**
-     * upload_images_to_library
-     *
      * Uploads images to the WordPress media library.
      *
      * @param string $url   The URL of the image to upload.
      * @param string $title The title for the image (optional).
      * @return int|false    The attachment ID or false on failure.
      */
-    public function upload_images_to_library ( $url, $title = null ) {
+    public function apv_upload_images_to_library ( $url, $title = null ) {
 
         // Setup required paths for image upload
 		require_once( ABSPATH . '/wp-load.php' );
@@ -344,38 +324,5 @@ class APV_AI_PROCESSOR {
 		return (int) $attachment_id;
 
 	}
-
-    /**
-     * Validate the nonce for security.
-     *
-     * @param string $action The nonce action name.
-     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
-     *
-     * @return bool|void False if the nonce is invalid or missing, true if valid.
-     */
-    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
-
-        // Check if the nonce exists in $_GET
-        if ( isset( $_GET[ $nonce_field ] ) ) {
-
-            // Sanitize and unslash the nonce
-            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
-
-            // Validate the nonce
-            if ( ! wp_verify_nonce( $nonce, $action ) ) {
-                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
-                return false;
-            }
-
-        } else {
-            // Nonce is missing
-            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
-            return false;
-        }
-
-        // If everything is correct, return true
-        return true;
-
-    }
 
 }

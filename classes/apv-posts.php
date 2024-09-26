@@ -3,8 +3,6 @@
 class APV_Posts {
 
     /**
-     * __construct
-     *
      * Register AJAX actions for admin.
      *
      * @param   void
@@ -20,8 +18,6 @@ class APV_Posts {
     }
 
     /**
-     * apv_get_posts
-     *
      * Get posts to render in the Posts admin panel.
      *
      * @param   void
@@ -37,9 +33,9 @@ class APV_Posts {
         // AJAX check
         $ajax_check = isset( $_GET['post_type'] ) || isset( $_GET['search'] );
     
-        // Validate the nonce
-        if ( $ajax_check && ! $this->validate_nonce() ) {
-            return false;
+        // Nonce validation
+        if ( $ajax_check ) {
+		    check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
         }
     
         // Set up pagination
@@ -136,8 +132,6 @@ class APV_Posts {
     } 
 
     /**
-     * apv_get_post_types
-     *
      * Get all public post types except attachments.
      *
      * @param   void
@@ -170,18 +164,14 @@ class APV_Posts {
     }
 
     /**
-     * apv_get_current_fi
-     *
      * Get the current featured image for a post.
      *
      * @return  string $url  JSON response containing the URL of the featured image
      **/
     public function apv_get_current_fi() {
 
-		// Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+		// Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize the post ID
         $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
@@ -207,18 +197,14 @@ class APV_Posts {
     }
 
     /**
-     * apv_check_fi_revert
-     *
      * Check if the post already has a thumbnail revert saved.
      *
      * @return  string $url  JSON response containing the revert URL or false
      **/
     public function apv_check_fi_revert() {
 
-		// Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+		// Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize the post ID
         $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
@@ -235,8 +221,6 @@ class APV_Posts {
     }
 
     /**
-     * apv_get_history
-     *
      * Get post history, including prompts and generated images.
      *
      * @return  string $content  HTML structure of history rows or JSON response
@@ -246,9 +230,9 @@ class APV_Posts {
 		// Check if is ajax call
         $is_ajax = isset( $_GET['is_ajax'] ) && sanitize_text_field( wp_unslash( $_GET['is_ajax'] ) ) ? true : false;
 
-		// Validate the nonce
-        if ( $is_ajax && ! $this->validate_nonce() ) {
-            return false;
+		// Nonce validation
+        if ( $is_ajax ) {
+            check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
         }
 
         // Set up the query arguments to get history posts
@@ -309,39 +293,6 @@ class APV_Posts {
                 return $content;
             }
         }
-    }
-
-    /**
-     * Validate the nonce for security.
-     *
-     * @param string $action The nonce action name.
-     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
-     *
-     * @return bool|void False if the nonce is invalid or missing, true if valid.
-     */
-    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
-
-        // Check if the nonce exists in $_GET
-        if ( isset( $_GET[ $nonce_field ] ) ) {
-
-            // Sanitize and unslash the nonce
-            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
-
-            // Validate the nonce
-            if ( ! wp_verify_nonce( $nonce, $action ) ) {
-                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
-                return false;
-            }
-
-        } else {
-            // Nonce is missing
-            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
-            return false;
-        }
-
-        // If everything is correct, return true
-        return true;
-
     }
 
 }

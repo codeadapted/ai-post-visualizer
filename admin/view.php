@@ -36,7 +36,7 @@ $post_types = apv()->posts()->apv_get_post_types();
 $history    = apv()->posts()->apv_get_history();
 
 // Fetch admin URL for internal linking purposes
-$admin_url  = apv()->plugin()->get_admin_url();
+$admin_url  = apv()->plugin()->apv_get_admin_url();
 
 // Variable to track if the API key is validated
 $validation = false;
