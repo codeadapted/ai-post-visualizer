@@ -3,8 +3,6 @@
 class APV_Plugin {
 
     /**
-     * install
-     *
      * Run installation functions.
      * Sets initial options when the plugin is activated.
      *
@@ -23,8 +21,6 @@ class APV_Plugin {
     }
 
     /**
-     * deactivate
-     *
      * Run deactivation functions.
      * Removes specific options when the plugin is deactivated.
      *
@@ -38,8 +34,6 @@ class APV_Plugin {
     }
 
     /**
-     * uninstall
-     *
      * Run uninstall functions.
      * Cleans up data if the user chooses to clear data on uninstall.
      *
@@ -56,8 +50,6 @@ class APV_Plugin {
     }
 
     /**
-     * __construct
-     *
      * Initializes the plugin hooks and filters.
      *
      * @return void
@@ -71,11 +63,11 @@ class APV_Plugin {
 
         if ( is_admin() ) {
             // Add admin page links, load admin scripts, register custom post types
-            add_filter( 'plugin_action_links_' . APV_BASENAME . '/ai-post-visualizer.php', array( $this, 'add_settings_link' ) );
-            add_action( 'admin_enqueue_scripts', array( $this, 'admin_enqueue' ) );
-            add_action( 'admin_menu', array( $this, 'admin_page' ) );
+            add_filter( 'plugin_action_links_' . APV_BASENAME . '/ai-post-visualizer.php', array( $this, 'apv_add_settings_link' ) );
+            add_action( 'admin_enqueue_scripts', array( $this, 'apv_admin_enqueue' ) );
+            add_action( 'admin_menu', array( $this, 'apv_admin_page' ) );
             add_action( 'init', array( $this, 'apv_register_history_post_type' ) );
-            add_action( 'init', array( $this, 'apv_load_plugin_textdomain' ) );
+            add_action( 'plugins_loaded', array( $this, 'apv_load_plugin_textdomain' ) );
 
             // AJAX actions
             add_action( 'wp_ajax_apv_update_viewer_mode', array( $this, 'apv_update_viewer_mode' ) );
@@ -86,8 +78,6 @@ class APV_Plugin {
     }
 
     /**
-     * apv_clear_data
-     *
      * Clears plugin-specific data from the database.
      *
      * @return void
@@ -101,10 +91,8 @@ class APV_Plugin {
         $options = array( 'apv_dalle_api_key', 'apv_clear_data', 'apv_viewer_mode' );
 
         // Loop through options and delete them
-        if( ! empty( $options ) && is_array( $options ) ) {
-            foreach ( $options as $option_name ) {
-                delete_option( $option_name );
-            }
+        foreach ( $options as $option ) {
+            delete_option( $option );
         }
 
 		// Query for all posts of custom post type 'apv_history'
@@ -128,18 +116,14 @@ class APV_Plugin {
     }
 
     /**
-     * apv_save_clear_data_setting
-     *
      * Saves the setting for clearing data on uninstall.
      *
      * @return void
      */
     public function apv_save_clear_data_setting() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize user input
         $clear_data = isset( $_GET['clear_data'] ) ? sanitize_text_field( wp_unslash( $_GET['clear_data'] ) ) : '';
@@ -157,8 +141,6 @@ class APV_Plugin {
     }
 
     /**
-     * apv_register_history_post_type
-     *
      * Registers the custom post type for storing image generation history.
      *
      * @return void
@@ -181,29 +163,25 @@ class APV_Plugin {
     }
 
     /**
-     * add_settings_link
-     *
      * Adds a settings link on the plugin page.
      *
      * @param array $links The links array.
      * @return array The updated links array.
      */
-    public function add_settings_link( $links ) {
-        $links[] = '<a href="' . $this->get_admin_url() . '">' . __( 'Settings' ) . '</a>';
+    public function apv_add_settings_link( $links ) {
+        $links[] = '<a href="' . $this->apv_get_admin_url() . '">' . __( 'Settings' ) . '</a>';
         return $links;
     }
 
     /**
-     * admin_enqueue
-     *
      * Registers and enqueues admin styles and scripts.
      *
      * @return void
      */
-    public function admin_enqueue() {
+    public function apv_admin_enqueue() {
 
         // Only enqueue scripts and styles on the settings page
-        if ( strpos( $this->get_current_admin_url(), $this->get_admin_url() ) !== false ) {
+        if ( strpos( $this->apv_get_current_admin_url(), $this->apv_get_admin_url() ) !== false ) {
 
             // Enqueue Google Fonts (Poppins)
             wp_enqueue_style( 'font-poppins', 'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap', array(), '1.0.0' );
@@ -229,70 +207,67 @@ class APV_Plugin {
     }
 
     /**
-     * admin_page
-     *
      * Registers the admin page and menu.
      *
      * @return void
      */
-    public function admin_page() {
-        add_submenu_page(
-            'options-general.php',
+    public function apv_admin_page() {
+        add_menu_page(
             __( 'AI Post Visualizer', 'ai-post-visualizer' ),
             __( 'AI Post Visualizer', 'ai-post-visualizer' ),
-            'administrator',
+            'manage_options',
             APV_DIRNAME,
-            array( $this, 'admin_page_settings' ),
+            array( $this, 'apv_admin_page_settings' ),
+            APV_PLUGIN_DIR . '/admin/views/img/menu_icon.png',
             100
         );
     }
 
     /**
-     * admin_page_settings
-     *
      * Renders the admin settings page.
      *
      * @return void
      */
-    public function admin_page_settings() {
+    public function apv_admin_page_settings() {
         require_once APV_DIRNAME . '/admin/view.php';
     }
 
     /**
-     * get_current_admin_url
-     *
      * Gets the current admin URL.
      *
      * @return string The current admin URL.
      */
-    public function get_current_admin_url() {
+    public function apv_get_current_admin_url() {
 
-		// Get uri
-        $uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-        $uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
-        if ( ! $uri ) {
-            return '';
-        }
+		// Get the current request URI
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		
+		// Ensure there's a valid URI
+		if ( empty( $uri ) ) {
+			return '';
+		}
+		
+		// Sanitize and clean the URI
+		$uri = esc_url_raw( $uri );
+	
+		// Strip the path to ensure we're only working within the wp-admin area
+		$uri = preg_replace( '|^.*/wp-admin/|i', '', $uri );
+	
+		// Return the sanitized current admin URL, without _wpnonce
+		return remove_query_arg( array( '_wpnonce' ), admin_url( $uri ) );
 
-		// Return admin url
-        return remove_query_arg( array( '_wpnonce' ), admin_url( $uri ) );
-
-    }
+	}
 
     /**
-     * get_admin_url
-     *
      * Gets the admin URL for the plugin settings page.
      *
      * @return string The admin URL.
      */
-    public function get_admin_url() {
-        return admin_url( 'options-general.php?page=' . APV_BASENAME );
+    public function apv_get_admin_url() {
+        return add_query_arg( array( 'page' => APV_BASENAME ), admin_url( 'admin.php' ) );
     }
 
     /**
-     * apv_load_plugin_textdomain
-     *
      * Loads the plugin's textdomain for translation.
      *
      * @return void
@@ -302,18 +277,14 @@ class APV_Plugin {
     }
 
     /**
-     * apv_update_viewer_mode
-     *
      * Updates the viewer mode (light/dark).
      *
      * @return void
      */
     public function apv_update_viewer_mode() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Sanitize the mode input
         $mode = isset( $_GET['mode'] ) ? sanitize_text_field( wp_unslash( $_GET['mode'] ) ) : 'dark';
@@ -324,8 +295,6 @@ class APV_Plugin {
     }
 
     /**
-	 * apv_set_dalle_api_key
-	 *
 	 * Set Dalle API Key 
 	 *
 	 * @param   void
@@ -333,10 +302,8 @@ class APV_Plugin {
 	 */
 	public function apv_set_dalle_api_key() {
 
-        // Validate the nonce
-        if ( ! $this->validate_nonce() ) {
-            return false;
-        }
+        // Nonce validation
+		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
 
         // Set api key
         $api_key = isset( $_GET['api_key'] ) ? sanitize_text_field( wp_unslash( $_GET['api_key'] ) ) : '';
@@ -350,38 +317,5 @@ class APV_Plugin {
         wp_send_json_success( array( 'message' => 'API key successfully updated' ) );
 
 	}
-
-    /**
-     * Validate the nonce for security.
-     *
-     * @param string $action The nonce action name.
-     * @param string $nonce_field The name of the nonce field, default is 'apv_nonce'.
-     *
-     * @return bool|void False if the nonce is invalid or missing, true if valid.
-     */
-    public function validate_nonce( $action = 'apv_nonce_action', $nonce_field = 'apv_nonce' ) {
-
-        // Check if the nonce exists in $_GET
-        if ( isset( $_GET[ $nonce_field ] ) ) {
-
-            // Sanitize and unslash the nonce
-            $nonce = sanitize_text_field( wp_unslash( $_GET[ $nonce_field ] ) );
-
-            // Validate the nonce
-            if ( ! wp_verify_nonce( $nonce, $action ) ) {
-                wp_send_json_error( array( 'message' => 'Invalid nonce' ) );
-                return false;
-            }
-
-        } else {
-            // Nonce is missing
-            wp_send_json_error( array( 'message' => 'Nonce is missing' ) );
-            return false;
-        }
-
-        // If everything is correct, return true
-        return true;
-
-    }
 
 }
