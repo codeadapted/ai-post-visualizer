@@ -1011,7 +1011,7 @@ Generate tab
 	pointer-events: visible;
 }
 
-#apv-admin-view .content-area .main-content .template-generate .render.btn .sign-up-text.mobile {
+#apv-admin-view .content-area .main-content .template-generate.not-validated .sign-up-text.mobile {
 	display: none;
 }
 
