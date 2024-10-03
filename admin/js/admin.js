@@ -447,8 +447,8 @@ class AIPV_ADMIN {
 	postCardClickEvent () {
 
 		// Loop through post card buttons and add click events
-		this.aipv.querySelectorAll( '.post-card .btn' ).forEach( btn => {
-			btn.addEventListener( 'click', async () => {
+		this.aipv.querySelectorAll( '.post-card' ).forEach( card => {
+			card.addEventListener( 'click', async () => {
 
 				// Set element variables
 				const featuredImg = this.generateView.querySelector( '.featured-img' );
@@ -460,10 +460,9 @@ class AIPV_ADMIN {
 				currentPostTitle.innerHTML = '';
 
 				// Get post ID and title
-				const postCard = btn.closest( '.post-card' );
-				if( !postCard ) return;
-				const postId = postCard.dataset.post;
-				const postTitleElement = postCard.querySelector( '.card-title .text' );
+				if( !card ) return;
+				const postId = card.dataset.post;
+				const postTitleElement = card.querySelector( '.card-title .text' );
 				const postTitle = postTitleElement ? postTitleElement.innerHTML : '';
 		
 				// Update sidebar and template classes

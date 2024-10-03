@@ -411,6 +411,7 @@ Posts tab
 	flex-direction: column;
 	max-width: calc((100% * (1/3)) - (2rem * (2/3)));
 	width: 100%;
+	cursor: pointer;
 }
 
 #aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .image {
@@ -422,6 +423,12 @@ Posts tab
 	position: relative;
 	border-top-left-radius: 20px;
     border-top-right-radius: 20px;
+	opacity: 0.8;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card:hover .image {
+	opacity: 1;
 }
 
 #aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .image .missing-image {
@@ -546,11 +553,11 @@ Posts tab
 	transition: left 0.2s ease-in-out;
 }
 
-#aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn:hover:after {
+#aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card:hover .card-title .btn:after {
 	left: 0;
 }
 
-#aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn:hover span:after {
+#aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card:hover .card-title .btn span:after {
 	right: 0;
 }
 
