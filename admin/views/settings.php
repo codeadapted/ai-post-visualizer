@@ -1,3 +1,9 @@
+<?php 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+?>
+
 <div class="template template-settings active <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="settings">
     <div class="settings">
 
@@ -10,7 +16,7 @@
                 // Display instructions for entering the DALL·E API key
                 printf(
                     // Translators: %1$s and %2$s are opening and closing anchor tags for the OpenAI login link, %3$s and %4$s are for the API keys page link.
-                    esc_html__('Type in DALL·E API key. If you don\'t have an API key, login to your account %1$shere%2$s then go to %3$sthe API keys page%4$s.', 'ai-post-visualizer'),
+                    esc_html__( 'Type in DALL·E API key. If you don\'t have an API key, login to your account %1$shere%2$s then go to %3$sthe API keys page%4$s.', 'ai-post-visualizer' ),
                     '<a href="' . esc_url( 'https://platform.openai.com/' ) . '" target="_blank">', '</a>',
                     '<a href="' . esc_url( 'https://platform.openai.com/api-keys' ) . '" target="_blank">', '</a>'
                 );

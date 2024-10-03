@@ -18,13 +18,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-if ( ! defined( 'APV_PLUGIN_FILE' ) ) {
-    define( 'APV_PLUGIN_FILE', __FILE__ );
+if ( ! defined( 'AIPV_PLUGIN_FILE' ) ) {
+    define( 'AIPV_PLUGIN_FILE', __FILE__ );
 }
 
-require_once __DIR__ . '/classes/apv-ai-processor.php';
-require_once __DIR__ . '/classes/apv-plugin.php';
-require_once __DIR__ . '/classes/apv-posts.php';
+require_once __DIR__ . '/classes/aipv-ai-processor.php';
+require_once __DIR__ . '/classes/aipv-plugin.php';
+require_once __DIR__ . '/classes/aipv-posts.php';
 
 if ( ! class_exists( 'AIPostVisualizer' ) ) {
 
@@ -60,20 +60,20 @@ if ( ! class_exists( 'AIPostVisualizer' ) ) {
 		function initialize() {
 
 			// Define constants.
-			$this->define( 'APV', true );
-			$this->define( 'APV_FILE', __FILE__ );
-			$this->define( 'APV_DIRNAME', dirname( __FILE__ ) );
-			$this->define( 'APV_PLUGIN_DIR', plugin_dir_url( __FILE__ ) );
-			$this->define( 'APV_BASENAME', basename( dirname( __FILE__ ) ) );
+			$this->define( 'AIPV', true );
+			$this->define( 'AIPV_FILE', __FILE__ );
+			$this->define( 'AIPV_DIRNAME', dirname( __FILE__ ) );
+			$this->define( 'AIPV_PLUGIN_DIR', plugin_dir_url( __FILE__ ) );
+			$this->define( 'AIPV_BASENAME', basename( dirname( __FILE__ ) ) );
 
 			// Do all the plugin stuff.
-			$this->plugin    = new APV_Plugin();
+			$this->plugin    = new AIPV_Plugin();
 
 			// Generate posts with appropriate metadata
-			$this->posts     = new APV_Posts();
+			$this->posts     = new AIPV_Posts();
 
 			// Ai Image processing
-			$this->ai_processor = new APV_AI_PROCESSOR();
+			$this->ai_processor = new AIPV_AI_Processor();
 
 		}
 
@@ -107,7 +107,7 @@ if ( ! class_exists( 'AIPostVisualizer' ) ) {
 	}
 
 	/*
-	* apv
+	* aipv
 	*
 	* The main function responsible for returning the one true AIPostVisualizer Instance to functions everywhere.
 	* Use this function like you would a global variable, except without needing to declare the global.
@@ -115,18 +115,18 @@ if ( ! class_exists( 'AIPostVisualizer' ) ) {
 	* @param   void
 	* @return  AIPostVisualizer
 	*/
-	function apv() {
-		global $apv;
+	function aipv() {
+		global $aipv;
 		// Instantiate only once.
-		if ( ! isset( $apv ) ) {
-			$apv = new AIPostVisualizer
+		if ( ! isset( $aipv ) ) {
+			$aipv = new AIPostVisualizer
 			();
-			$apv->initialize();
+			$aipv->initialize();
 		}
-		return $apv;
+		return $aipv;
 	}
 
 	// Instantiate.
-	apv();
+	aipv();
 
 } // class_exists check

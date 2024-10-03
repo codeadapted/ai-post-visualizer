@@ -1,6 +1,10 @@
 <?php
 
-class APV_Posts {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+class AIPV_Posts {
 
     /**
      * Register AJAX actions for admin.
@@ -10,10 +14,10 @@ class APV_Posts {
      **/
     public function __construct() {
         if ( is_admin() ) {
-            add_action( 'wp_ajax_apv_get_posts', array( $this, 'apv_get_posts' ) );
-            add_action( 'wp_ajax_apv_get_current_fi', array( $this, 'apv_get_current_fi' ) );
-            add_action( 'wp_ajax_apv_check_fi_revert', array( $this, 'apv_check_fi_revert' ) );
-            add_action( 'wp_ajax_apv_get_history', array( $this, 'apv_get_history' ) );
+            add_action( 'wp_ajax_aipv_get_posts', array( $this, 'aipv_get_posts' ) );
+            add_action( 'wp_ajax_aipv_get_current_fi', array( $this, 'aipv_get_current_fi' ) );
+            add_action( 'wp_ajax_aipv_check_fi_revert', array( $this, 'aipv_check_fi_revert' ) );
+            add_action( 'wp_ajax_aipv_get_history', array( $this, 'aipv_get_history' ) );
         }
     }
 
@@ -23,7 +27,7 @@ class APV_Posts {
      * @param   void
      * @return  string $content  JSON response containing the post content and total posts.
      **/
-    public function apv_get_posts() {
+    public function aipv_get_posts() {
 
         // Only allow admin users to access this function
         if ( !current_user_can( 'manage_options' ) ) {
@@ -35,7 +39,7 @@ class APV_Posts {
     
         // Nonce validation
         if ( $ajax_check ) {
-		    check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		    check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
         }
     
         // Set up pagination
@@ -88,7 +92,7 @@ class APV_Posts {
                 if ( has_post_thumbnail( $post_id ) ) {
                     $thumbnail = get_the_post_thumbnail_url( $post_id, 'medium' );
                 } else {
-                    $thumbnail = plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE );
+                    $thumbnail = plugins_url( 'admin/views/img/missing_image_bg.png', AIPV_PLUGIN_FILE );
                     $missing = true;
                 }
     
@@ -99,7 +103,7 @@ class APV_Posts {
                 } else {
                     $content .= '<div class="image" style="background-image: url(' . esc_url( $thumbnail ) . ')">';
                     $content .= '<div class="missing-image">';
-                    $content .= '<div class="icon"><img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', APV_PLUGIN_FILE ) ) . '" /></div>';
+                    $content .= '<div class="icon"><img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', AIPV_PLUGIN_FILE ) ) . '" /></div>';
                     $content .= '<div class="text">' . esc_html__( 'Featured Image Missing', 'ai-post-visualizer' ) . '</div>';
                     $content .= '</div>';
                     $content .= '</div>';
@@ -137,7 +141,7 @@ class APV_Posts {
      * @param   void
      * @return  string $content  HTML structure of post types
      **/
-    public function apv_get_post_types() {
+    public function aipv_get_post_types() {
 
         // Only allow admin users
         if ( !current_user_can( 'manage_options' ) ) {
@@ -168,10 +172,10 @@ class APV_Posts {
      *
      * @return  string $url  JSON response containing the URL of the featured image
      **/
-    public function apv_get_current_fi() {
+    public function aipv_get_current_fi() {
 
 		// Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize the post ID
         $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
@@ -180,10 +184,10 @@ class APV_Posts {
         $thumbnail = get_the_post_thumbnail_url( $post_id, 'full' );
 
         // Setup missing image
-        $missing_image_bg = esc_url( plugins_url( 'admin/views/img/missing_image_bg.png', APV_PLUGIN_FILE ) );
+        $missing_image_bg = esc_url( plugins_url( 'admin/views/img/missing_image_bg.png', AIPV_PLUGIN_FILE ) );
         $missing_image_text = '<div class="missing-image">
             <div class="icon">
-                <img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', APV_PLUGIN_FILE ) ) . '">
+                <img src="' . esc_url( plugins_url( 'admin/views/img/missing_image.svg', AIPV_PLUGIN_FILE ) ) . '">
             </div>
             <div class="text">' . esc_html__( 'Featured Image Missing', 'ai-post-visualizer' ) . '</div>
         </div>';
@@ -201,16 +205,16 @@ class APV_Posts {
      *
      * @return  string $url  JSON response containing the revert URL or false
      **/
-    public function apv_check_fi_revert() {
+    public function aipv_check_fi_revert() {
 
 		// Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize the post ID
         $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 
         // Get the revert meta field from the post
-        $revert = get_post_meta( $post_id, 'apv_revert', true );
+        $revert = get_post_meta( $post_id, 'aipv_revert', true );
 
 		// Check if $revert is set
         if ( $revert ) {
@@ -225,19 +229,19 @@ class APV_Posts {
      *
      * @return  string $content  HTML structure of history rows or JSON response
      **/
-    public function apv_get_history() {
+    public function aipv_get_history() {
 
 		// Check if is ajax call
         $is_ajax = isset( $_GET['is_ajax'] ) && sanitize_text_field( wp_unslash( $_GET['is_ajax'] ) ) ? true : false;
 
 		// Nonce validation
         if ( $is_ajax ) {
-            check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+            check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
         }
 
         // Set up the query arguments to get history posts
         $args = array(
-            'post_type'      => 'apv_history',
+            'post_type'      => 'aipv_history',
             'posts_per_page' => -1,
             'post_status'    => 'publish',
         );

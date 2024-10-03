@@ -75,6 +75,12 @@ AI Post Visualizer is a powerful WordPress plugin designed to generate and manag
    - **Enabled**: All plugin-related data (including generated images and settings) will be removed when the plugin is uninstalled.
    - **Disabled**: Data will be retained after plugin uninstallation for future use.
 
+== Third-Party Service Disclosure ==
+
+This plugin uses OpenAI's DALL·E API to generate AI-powered images for your posts. When you use this plugin, your keywords and requests are sent to the DALL·E API to generate the images.
+- [OpenAI Website](https://openai.com)
+- [OpenAI Terms of Use](https://openai.com/policies/terms-of-use)
+- [OpenAI Privacy Policy](https://openai.com/policies/privacy-policy)
 
 == Screenshots ==
 
