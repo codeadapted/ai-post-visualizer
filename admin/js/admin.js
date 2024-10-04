@@ -879,8 +879,6 @@ class AIPV_ADMIN {
 				// Check if prompt text is larger than max width
 				if( prompt.scrollHeight > 54 ) {
 
-					console.log( prompt.scrollHeight );
-
 					// Create load more text button
 					let loadMoreBtn = document.createElement( 'div' );
 					loadMoreBtn.classList.add( 'history-row-prompt', 'load-more-text' );
