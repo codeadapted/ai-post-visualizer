@@ -278,9 +278,9 @@ class AIPV_Posts {
                     $i++;
                 }
                 $content .= '</div>';
-                $content .= '<div class="history-row-prompt"><strong>Prompt:</strong> ' . esc_html( $capitalized_prompt ) . '</div>';
-                $content .= '<div class="history-row-prompt"><strong>Image Count:</strong> ' . esc_html( count( $images ) ) . '</div>';
-                $content .= '<div class="history-row-prompt"><strong>Image Resolution:</strong> ' . esc_html( $resolution ) . '</div>';
+                $content .= '<div class="history-row-prompt prompt"><strong>Prompt:</strong> ' . esc_html( $capitalized_prompt ) . '</div>';
+                $content .= '<div class="history-row-prompt image-count"><strong>Image Count:</strong> ' . esc_html( count( $images ) ) . '</div>';
+                $content .= '<div class="history-row-prompt image-res"><strong>Image Resolution:</strong> ' . esc_html( $resolution ) . '</div>';
                 $content .= '<div class="load-images btn"><span>' . esc_html__( 'Load Images', 'ai-post-visualizer' ) . '</span></div>';
                 $content .= '</div>';
             }

@@ -2,7 +2,7 @@
     'use strict';
 
     // Ensure the DOM is fully loaded before initializing
-    $( document ).ready( function () {
+    document.addEventListener( 'DOMContentLoaded', function() {
 
         // Initialize the AIPV_ADMIN class instance and call the initialization method
         const admin = new AIPV_ADMIN();
@@ -89,6 +89,7 @@ class AIPV_ADMIN {
 		this.goBackToPostsClickEvent();
 		this.postCardClickEvent();
 		this.historyLoadImagesClickEvent();
+		this.historyPromptLoadMoreButtonCheck();
 		this.checkQueryParams();
 		this.dalleAPIKeyInputChangeEvent();
 		this.dropdownItemClickEvent();
@@ -836,6 +837,9 @@ class AIPV_ADMIN {
 			// Insert the response HTML into the history rows container
 			this.aipv.querySelector( '.history-rows' ).innerHTML = _$fetchRequest;
 
+			// Add in load more text button
+			this.historyPromptLoadMoreButtonCheck();
+
 			// Load history images
 			this.historyLoadImagesClickEvent();
 
@@ -859,6 +863,42 @@ class AIPV_ADMIN {
 				this.loadDalleHistoryRow( historyId );
 
 			} );
+		} );
+
+	}
+
+	historyPromptLoadMoreButtonCheck () {
+
+		// Ensure the heights are loaded
+		window.requestAnimationFrame( () => {
+
+			// Check if large prompt text present and add click event to load more button
+			this.aipv.querySelectorAll( '.history .history-row-prompt.prompt' ).forEach( prompt => {
+
+				console.log( prompt );
+				// Check if prompt text is larger than max width
+				if( prompt.scrollHeight > 54 ) {
+
+					console.log( prompt.scrollHeight );
+
+					// Create load more text button
+					let loadMoreBtn = document.createElement( 'div' );
+					loadMoreBtn.classList.add( 'history-row-prompt', 'load-more-text' );
+					loadMoreBtn.textContent = 'Load More';
+
+					// Add in after prompt
+					prompt.insertAdjacentElement( 'afterend', loadMoreBtn );
+
+					// Add click event to show rest of prompt text
+					loadMoreBtn.addEventListener( 'click', () => {
+						prompt.classList.add( 'opened' );
+						loadMoreBtn.remove();
+					} );
+
+				}
+
+			} );
+
 		} );
 
 	}
