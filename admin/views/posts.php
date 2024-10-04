@@ -66,7 +66,7 @@ if ( ! defined( 'ABSPATH' ) ) {
                 </div>
 
                 <!-- Filter reset -->
-                <a class="filter-reset">Reset Filters</a>
+                <a class="filter-reset"><?php esc_html_e( 'Reset Filters', 'ai-post-visualizer' ); ?></a>
 
             </div>
         </div>
