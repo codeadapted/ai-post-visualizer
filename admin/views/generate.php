@@ -1,3 +1,9 @@
+<?php 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+?>
+
 <div class="template template-generate <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="generate">
     <div class="settings">
 

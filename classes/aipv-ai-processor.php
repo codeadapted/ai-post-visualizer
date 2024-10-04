@@ -1,16 +1,20 @@
 <?php
 
-class APV_AI_PROCESSOR {
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
+class AIPV_AI_Processor {
 
     /**
      * Constructor to initialize AJAX actions if in the admin.
      */
     public function __construct() {
         if ( is_admin() ) {
-            add_action( 'wp_ajax_apv_get_dalle_images', array( $this, 'apv_get_dalle_images' ) );
-            add_action( 'wp_ajax_apv_set_dalle_image', array( $this, 'apv_set_dalle_image' ) );
-            add_action( 'wp_ajax_apv_revert_featured_image', array( $this, 'apv_revert_featured_image' ) );
-            add_action( 'wp_ajax_apv_load_dalle_history', array( $this, 'apv_load_dalle_history' ) );
+            add_action( 'wp_ajax_aipv_get_dalle_images', array( $this, 'aipv_get_dalle_images' ) );
+            add_action( 'wp_ajax_aipv_set_dalle_image', array( $this, 'aipv_set_dalle_image' ) );
+            add_action( 'wp_ajax_aipv_revert_featured_image', array( $this, 'aipv_revert_featured_image' ) );
+            add_action( 'wp_ajax_aipv_load_dalle_history', array( $this, 'aipv_load_dalle_history' ) );
         }
     }
 
@@ -19,10 +23,10 @@ class APV_AI_PROCESSOR {
      *
      * @return string JSON response with generated images or error message
      */
-    public function apv_get_dalle_images() {
+    public function aipv_get_dalle_images() {
 
         // Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
@@ -34,7 +38,7 @@ class APV_AI_PROCESSOR {
         $image_title = implode( '-', array_slice( explode( ' ', $prompt ), 0, 6 ) );
 
         // Send the API request
-        $api_data = $this->apv_api_request( $prompt, $n, $size );
+        $api_data = $this->aipv_api_request( $prompt, $n, $size );
 
 		// Check if api data valid
         if( $api_data && !isset( $api_data->status ) ) {
@@ -48,7 +52,7 @@ class APV_AI_PROCESSOR {
             foreach ( $urls as $i => $url ) {
 
 				// Get iamge url and update generated_images array
-                $image_id = $this->apv_upload_images_to_library( $url['url'], $image_title . '-' . $i );
+                $image_id = $this->aipv_upload_images_to_library( $url['url'], $image_title . '-' . $i );
                 $image_url = wp_get_attachment_url( $image_id );
                 $generated_images[] = $image_id;
 
@@ -57,20 +61,20 @@ class APV_AI_PROCESSOR {
                 $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
                 $content .= '<div class="set-image">';
                 $content .= '<div class="plus">';
-                $content .= '<img src="' . esc_url( APV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+                $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
                 $content .= '</div>';
                 $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
                 $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
                 $content .= '</div></div>';
             }
 
-            // Insert post history into the 'apv_history' custom post type
+            // Insert post history into the 'aipv_history' custom post type
             if ( !empty( $content ) ) {
                 $history = wp_insert_post( [
-                    'post_type'   => 'apv_history',
+                    'post_type'   => 'aipv_history',
                     'post_status' => 'publish',
                     'post_title'  => $prompt,
-                    'post_name'   => uniqid( 'apv_' ),
+                    'post_name'   => uniqid( 'aipv_' ),
                 ] );
 
                 // Store meta data for the history
@@ -100,10 +104,10 @@ class APV_AI_PROCESSOR {
      *
      * @return string JSON response with image URL
      */
-    public function apv_set_dalle_image() {
+    public function aipv_set_dalle_image() {
 
         // Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
@@ -111,8 +115,8 @@ class APV_AI_PROCESSOR {
 
         // Backup original featured image if not already done
         $original = get_post_thumbnail_id( $post_id );
-        if ( !get_post_meta( $post_id, 'apv_revert', true ) ) {
-            update_post_meta( $post_id, 'apv_revert', $original );
+        if ( !get_post_meta( $post_id, 'aipv_revert', true ) ) {
+            update_post_meta( $post_id, 'aipv_revert', $original );
         }
 
         // Set the new featured image
@@ -129,18 +133,18 @@ class APV_AI_PROCESSOR {
      *
      * @return string JSON response with image URL
      */
-    public function apv_revert_featured_image() {
+    public function aipv_revert_featured_image() {
 
         // Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
-        $original_img = intval( get_post_meta( $post_id, 'apv_revert', true ) );
+        $original_img = intval( get_post_meta( $post_id, 'aipv_revert', true ) );
 
         // Revert to the original featured image
         set_post_thumbnail( $post_id, $original_img );
-        delete_post_meta( $post_id, 'apv_revert' );
+        delete_post_meta( $post_id, 'aipv_revert' );
 
 		// Get image attachment url
         $image_url = wp_get_attachment_url( $original_img );
@@ -155,10 +159,10 @@ class APV_AI_PROCESSOR {
      *
      * @return string JSON response with the image HTML
      */
-    public function apv_load_dalle_history() {
+    public function aipv_load_dalle_history() {
 
         // Nonce validation
-		check_ajax_referer( 'apv_nonce_action', 'apv_nonce' );
+		check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
         $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : '';
@@ -179,7 +183,7 @@ class APV_AI_PROCESSOR {
                 $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
                 $content .= '<div class="set-image">';
                 $content .= '<div class="plus">';
-                $content .= '<img src="' . esc_url( APV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+                $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
                 $content .= '</div>';
                 $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
                 $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
@@ -200,10 +204,10 @@ class APV_AI_PROCESSOR {
      * @param string $size   Size of the images.
      * @return array|bool    The API response or false on failure.
      */
-    public function apv_api_request( $prompt, $n, $size ) {
+    public function aipv_api_request( $prompt, $n, $size ) {
 
         // Get the DALLE API key from the options table
-        $dalle_api_key = get_option( 'apv_dalle_api_key' );
+        $dalle_api_key = get_option( 'aipv_dalle_api_key' );
     
         // Ensure the API key exists
         if ( !$dalle_api_key ) {
@@ -255,7 +259,7 @@ class APV_AI_PROCESSOR {
      * @param string $title The title for the image (optional).
      * @return int|false    The attachment ID or false on failure.
      */
-    public function apv_upload_images_to_library ( $url, $title = null ) {
+    public function aipv_upload_images_to_library ( $url, $title = null ) {
 
         // Setup required paths for image upload
 		require_once( ABSPATH . '/wp-load.php' );

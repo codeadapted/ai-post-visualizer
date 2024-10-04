@@ -75,12 +75,21 @@ AI Post Visualizer is a powerful WordPress plugin designed to generate and manag
    - **Enabled**: All plugin-related data (including generated images and settings) will be removed when the plugin is uninstalled.
    - **Disabled**: Data will be retained after plugin uninstallation for future use.
 
+== Third-Party Service Disclosure ==
+
+This plugin uses OpenAI's DALL·E API to generate AI-powered images for your posts. When you use this plugin, your keywords and requests are sent to the DALL·E API to generate the images.
+- [OpenAI Website](https://openai.com)
+- [OpenAI Terms of Use](https://openai.com/policies/terms-of-use)
+- [OpenAI Privacy Policy](https://openai.com/policies/privacy-policy)
 
 == Screenshots ==
 
-1. Settings Page: Configure your API key and data retention settings.
-2. Generate AI Images: Generate custom images using DALL·E based on keyword inputs.
-3. Post Management: View and manage the featured images for each post.
+1. Settings: Configure your API key and data retention settings.
+2. Posts: View and manage the featured images for each post.
+3. Posts Filtering: Filter and search through your posts to quickly find the posts you need to update.
+4. Generate AI Images: Effortlessly create custom images using DALL·E by entering keyword prompts, and seamlessly apply them to your posts.
+5. Generation History: Quickly access and reuse previously generated images for any post, and easily revert to the original image if needed.
+6. Viewer Mode: Easily switch between light and dark modes for a customized viewing experience.
 
 == Frequently Asked Questions ==
 

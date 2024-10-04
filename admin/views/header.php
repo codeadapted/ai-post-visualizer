@@ -1,4 +1,10 @@
-<div class="apv-header">
+<?php 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+?>
+
+<div class="aipv-header">
     <div class="content">
 
         <!-- Logo section -->

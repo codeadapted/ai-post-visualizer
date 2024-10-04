@@ -1,8 +1,12 @@
 <?php
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+
 // Ensure the user has the appropriate capability to manage options
 if ( !current_user_can( 'manage_options' ) ) {
-    wp_die( esc_html__( 'You do not have sufficient permissions to access this page.' ) );
+    wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'ai-post-visualizer' ) );
 }
 
 // Setup allowed html
@@ -27,32 +31,32 @@ $allowed_html = array(
     'a' => array()
 );
 
-// Check if the 'apv_clear_data' option is set, otherwise set default to false
-$clear_data = get_option( 'apv_clear_data', false );
+// Check if the 'aipv_clear_data' option is set, otherwise set default to false
+$clear_data = get_option( 'aipv_clear_data', false );
 
 // Fetch posts, post types, and history using the custom methods from the plugin instance
-$posts      = apv()->posts()->apv_get_posts();
-$post_types = apv()->posts()->apv_get_post_types();
-$history    = apv()->posts()->apv_get_history();
+$posts      = aipv()->posts()->aipv_get_posts();
+$post_types = aipv()->posts()->aipv_get_post_types();
+$history    = aipv()->posts()->aipv_get_history();
 
 // Fetch admin URL for internal linking purposes
-$admin_url  = apv()->plugin()->apv_get_admin_url();
+$admin_url  = aipv()->plugin()->aipv_get_admin_url();
 
 // Variable to track if the API key is validated
 $validation = false;
 
 // Fetch DALLE API key from options
-$dalle_api_key = get_option( 'apv_dalle_api_key' );
+$dalle_api_key = get_option( 'aipv_dalle_api_key' );
 
 // Fetch the viewer mode (light/dark) for setting the theme in the admin view
-$viewer_mode = get_option( 'apv_viewer_mode', 'dark' ); // Default to 'dark' if no mode is set
+$viewer_mode = get_option( 'aipv_viewer_mode', 'dark' ); // Default to 'dark' if no mode is set
 
 // Set validation flag if DALLE API key exists
 $validation = !empty( $dalle_api_key );
 
 // Begin rendering the admin page view
 ?>
-<div id="apv-admin-view" class="<?php echo esc_attr( $viewer_mode ); ?>">
+<div id="aipv-admin-view" class="<?php echo esc_attr( $viewer_mode ); ?>">
     <?php 
     // Include the header view for the admin page
     include_once dirname( __FILE__ ) . '/views/header.php'; 

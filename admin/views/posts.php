@@ -1,3 +1,9 @@
+<?php 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
+?>
+
 <div class="template template-posts <?php echo $validation ? 'validated' : 'not-validated'; ?>" data-tab="posts" data-current-page="1">
     <div class="posts-section">
 

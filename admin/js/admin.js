@@ -2,27 +2,27 @@
     'use strict';
 
     // Ensure the DOM is fully loaded before initializing
-    $( document ).ready( function () {
+    document.addEventListener( 'DOMContentLoaded', function() {
 
-        // Initialize the APV_ADMIN class instance and call the initialization method
-        const admin = new APV_ADMIN();
+        // Initialize the AIPV_ADMIN class instance and call the initialization method
+        const admin = new AIPV_ADMIN();
         admin.initialize();
 
     });
 
 } ( jQuery, window, document ) );
 
-// Main APV_ADMIN class
-class APV_ADMIN {
+// Main AIPV_ADMIN class
+class AIPV_ADMIN {
 	
 	constructor () {
         
         // Set AJAX URL and nonce from localized script (ensures secure requests)
-        this._ajaxURL = apv_obj.ajax_url;
-        this._nonce = apv_obj.apv_nonce;
+        this._ajaxURL = aipv_obj.ajax_url;
+        this._nonce = aipv_obj.aipv_nonce;
 
         // Global variables
-        this.apv = '';
+        this.aipv = '';
         this.sidebar = '';
         this.postView = '';
         this.generateView = '';
@@ -53,23 +53,23 @@ class APV_ADMIN {
 	setupGlobalVariables () {
 
 		// Setup global element variables
-		this.apv = document.getElementById( 'apv-admin-view' );
-		this.sidebar = this.apv.querySelector( '.sidebar' );
+		this.aipv = document.getElementById( 'aipv-admin-view' );
+		this.sidebar = this.aipv.querySelector( '.sidebar' );
 
 		// Setup posts view variables
-		this.postView = this.apv.querySelector( '.template.template-posts' );
-		this.searchInput = this.apv.querySelector( '.search-bar .search-input' );
-		this.postWrapper = this.apv.querySelector( '.posts-section .posts-wrapper' );
-		this.postWrapperLoadMore = this.apv.querySelector( '.load-more' );
+		this.postView = this.aipv.querySelector( '.template.template-posts' );
+		this.searchInput = this.aipv.querySelector( '.search-bar .search-input' );
+		this.postWrapper = this.aipv.querySelector( '.posts-section .posts-wrapper' );
+		this.postWrapperLoadMore = this.aipv.querySelector( '.load-more' );
 
 		// Set up generate view variables
-		this.generateView = this.apv.querySelector( '.template.template-generate' );
-		this.renderedImages = this.apv.querySelector( '.rendered-images' );
+		this.generateView = this.aipv.querySelector( '.template.template-generate' );
+		this.renderedImages = this.aipv.querySelector( '.rendered-images' );
 		this.renderedImagesWrapper = this.renderedImages.querySelector( '.images-wrapper' );
 		this.revertToOriginal = this.generateView.querySelector( '.revert-to-original' );
 
 		// Set up settings view variables
-		this.settingsView = this.apv.querySelector( '.template.template-settings' );
+		this.settingsView = this.aipv.querySelector( '.template.template-settings' );
 
 	}
 
@@ -89,6 +89,7 @@ class APV_ADMIN {
 		this.goBackToPostsClickEvent();
 		this.postCardClickEvent();
 		this.historyLoadImagesClickEvent();
+		this.historyPromptLoadMoreButtonCheck();
 		this.checkQueryParams();
 		this.dalleAPIKeyInputChangeEvent();
 		this.dropdownItemClickEvent();
@@ -118,8 +119,8 @@ class APV_ADMIN {
 		}
 	
 		// Update active state for templates
-		this.apv.querySelectorAll( '.main-content .template' ).forEach( item => item.classList.remove( 'active' ) );
-		const currentTemplate = this.apv.querySelector( `.main-content .template[data-tab="${currentTab}"]` );
+		this.aipv.querySelectorAll( '.main-content .template' ).forEach( item => item.classList.remove( 'active' ) );
+		const currentTemplate = this.aipv.querySelector( `.main-content .template[data-tab="${currentTab}"]` );
 		if( currentTemplate ) {
 			currentTemplate.classList.add( 'active' );
 		}
@@ -146,7 +147,7 @@ class APV_ADMIN {
 			let url = this._ajaxURL;
 
 			// Set nonce to data
-			_$data.append( 'apv_nonce', this._nonce );
+			_$data.append( 'aipv_nonce', this._nonce );
 	
 			// Set the body only for POST (or other methods that allow a body)
 			if( _method === 'POST' ) {
@@ -193,21 +194,21 @@ class APV_ADMIN {
 	modeToggle () {
 
 		// Add change event for mode toggling between light and dark
-		this.apv.querySelectorAll( '.mode-toggle .mode' ).forEach( mode => {
+		this.aipv.querySelectorAll( '.mode-toggle .mode' ).forEach( mode => {
 			mode.addEventListener( 'click', async () => {
 
 				// Set modeString
 				let modeString = mode.classList.contains( 'light' ) ? 'light' : 'dark';
 
                 // Toggle active states between light/dark
-                this.apv.classList.toggle( 'light', modeString === 'light' );
+                this.aipv.classList.toggle( 'light', modeString === 'light' );
                 mode.classList.add( 'active' );
                 mode.nextElementSibling?.classList.remove( 'active' );
                 mode.previousElementSibling?.classList.remove( 'active' );
 
                 // Send AJAX request to update viewer mode option
                 const _$data = new FormData();
-                _$data.append( 'action', 'apv_update_viewer_mode' );
+                _$data.append( 'action', 'aipv_update_viewer_mode' );
                 _$data.append( 'mode', modeString );
                 await this.genericFetchRequest( _$data );
 
@@ -268,10 +269,10 @@ class APV_ADMIN {
 		// Set search value and create FormData object
 		const search = this.searchInput.value;
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_get_posts' );
+		_$data.append( 'action', 'aipv_get_posts' );
 
 		// Loop through active filters and set postType, order, and date if present
-		this.apv.querySelectorAll( '.type-block.active' ).forEach( item => {
+		this.aipv.querySelectorAll( '.type-block.active' ).forEach( item => {
 			if( Boolean( item.dataset.type ) ) {
 				_$data.append( 'post_type', item.dataset.type );
 			}
@@ -320,8 +321,8 @@ class APV_ADMIN {
 
 			// Clear search and dropdown filters
 			this.searchInput.value = '';
-			this.apv.querySelectorAll( '.type-block.active' ).forEach( typeBlock => typeBlock.classList.remove( 'active' ) );
-			this.apv.querySelector( '.type-block[data-type="any"]' ).classList.add( 'active' );
+			this.aipv.querySelectorAll( '.type-block.active' ).forEach( typeBlock => typeBlock.classList.remove( 'active' ) );
+			this.aipv.querySelector( '.type-block[data-type="any"]' ).classList.add( 'active' );
 
 			// Start filtering
 			this.filtering();
@@ -347,7 +348,7 @@ class APV_ADMIN {
 	dropdownClickEvents () {
 
 		// Set dropdowns
-		const dropdowns = this.apv.querySelectorAll( '.dropdowns .dropdown .title' );
+		const dropdowns = this.aipv.querySelectorAll( '.dropdowns .dropdown .title' );
 
 		// Add click event to each dropdown
 		dropdowns.forEach( title => {
@@ -357,7 +358,7 @@ class APV_ADMIN {
 				const parentDropdown = title.closest( '.dropdown' );
 				
 				// Update active filter dropdown
-				this.apv.querySelectorAll( '.dropdowns .dropdown' ).forEach( dropdown => {
+				this.aipv.querySelectorAll( '.dropdowns .dropdown' ).forEach( dropdown => {
 					if( dropdown != parentDropdown ) {
 						dropdown.classList.remove( 'active' );
 					}
@@ -371,7 +372,7 @@ class APV_ADMIN {
 		// Add a click event listener to the document
 		document.addEventListener( 'click', ( event ) => {
 
-			const dropdown = this.apv.querySelector( '.dropdowns .dropdown.active' )
+			const dropdown = this.aipv.querySelector( '.dropdowns .dropdown.active' )
 
 			// Check if the clicked element is not inside the dropdown
 			if( dropdown && !dropdown.contains( event.target ) ) {
@@ -388,7 +389,7 @@ class APV_ADMIN {
 	dropdownItemClickEvent () {
 
 		// Select all elements with the class 'type-block' and add a click event listener to each
-		this.apv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
+		this.aipv.querySelectorAll( '.type-block' ).forEach( typeBlock => {
 			
 			// Add click event listener to each 'type-block'
 			typeBlock.addEventListener( 'click', (e) => {
@@ -410,7 +411,7 @@ class APV_ADMIN {
 					if( dropdown && dropdown.classList.contains( 'sort' ) ) {
 
 						// Remove the 'active' class from any other 'type-block' inside the 'dropdown.sort'
-						this.apv.querySelectorAll( '.dropdown.sort .type-block.active' ).forEach( activeBlock => {
+						this.aipv.querySelectorAll( '.dropdown.sort .type-block.active' ).forEach( activeBlock => {
 							activeBlock.classList.remove( 'active' );
 						});
 
@@ -429,10 +430,10 @@ class APV_ADMIN {
 				}
 
 				// Check if no 'type-block' elements are active inside '.post-types'
-				if( this.apv.querySelectorAll( '.post-types .type-block.active' ).length === 0 ) {
+				if( this.aipv.querySelectorAll( '.post-types .type-block.active' ).length === 0 ) {
 
 					// If none are active, activate the 'type-block' with data-type="any"
-					this.apv.querySelector( '.post-types .type-block[data-type="any"]' ).classList.add( 'active' );
+					this.aipv.querySelector( '.post-types .type-block[data-type="any"]' ).classList.add( 'active' );
 
 				}
 
@@ -447,8 +448,8 @@ class APV_ADMIN {
 	postCardClickEvent () {
 
 		// Loop through post card buttons and add click events
-		this.apv.querySelectorAll( '.post-card .btn' ).forEach( btn => {
-			btn.addEventListener( 'click', async () => {
+		this.aipv.querySelectorAll( '.post-card' ).forEach( card => {
+			card.addEventListener( 'click', async () => {
 
 				// Set element variables
 				const featuredImg = this.generateView.querySelector( '.featured-img' );
@@ -460,10 +461,9 @@ class APV_ADMIN {
 				currentPostTitle.innerHTML = '';
 
 				// Get post ID and title
-				const postCard = btn.closest( '.post-card' );
-				if( !postCard ) return;
-				const postId = postCard.dataset.post;
-				const postTitleElement = postCard.querySelector( '.card-title .text' );
+				if( !card ) return;
+				const postId = card.dataset.post;
+				const postTitleElement = card.querySelector( '.card-title .text' );
 				const postTitle = postTitleElement ? postTitleElement.innerHTML : '';
 		
 				// Update sidebar and template classes
@@ -471,7 +471,7 @@ class APV_ADMIN {
 					item.classList.remove( 'active' );
 				} );
 				this.sidebar.querySelector( '.item.generate' ).classList.add( 'active' );
-				this.apv.querySelectorAll( '.template' ).forEach( template => {
+				this.aipv.querySelectorAll( '.template' ).forEach( template => {
 					template.classList.remove( 'active' );
 				} );
 				this.generateView.classList.add( 'for-post', 'active' );
@@ -499,7 +499,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_get_current_fi' );
+		_$data.append( 'action', 'aipv_get_current_fi' );
 		_$data.append( 'post_id', post );
 
 		// Run fetch request
@@ -519,7 +519,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_check_fi_revert' );
+		_$data.append( 'action', 'aipv_check_fi_revert' );
 		_$data.append( 'post_id', post );
 
 		// Run fetch request
@@ -580,7 +580,7 @@ class APV_ADMIN {
 
 	goBackToPostsClickEvent () {
 
-		this.apv.querySelector( '.back-to-posts' ).addEventListener( 'click', () => {
+		this.aipv.querySelector( '.back-to-posts' ).addEventListener( 'click', () => {
 
 			// Remove 'loaded' class from rendered-images
 			this.renderedImages.classList.remove( 'loaded' );
@@ -616,7 +616,7 @@ class APV_ADMIN {
 			});
 		
 			// Reset history height
-			this.apv.querySelector( '.history' ).style.height = '';
+			this.aipv.querySelector( '.history' ).style.height = '';
 		
 			// Handle sidebar items' active class
 			this.sidebar.querySelectorAll( '.item' ).forEach( item => {
@@ -625,7 +625,7 @@ class APV_ADMIN {
 			this.sidebar.querySelector( '.item.posts' ).classList.add( 'active' );
 		
 			// Handle main content templates' active class
-			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
+			this.aipv.querySelectorAll( '.main-content .template' ).forEach( template => {
 				template.classList.remove( 'active' );
 			});
 			this.postView.classList.add( 'active' );
@@ -656,7 +656,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_revert_featured_image' );
+		_$data.append( 'action', 'aipv_revert_featured_image' );
 		_$data.append( 'post_id', _postId );
 
 		// Run fetch request
@@ -679,7 +679,7 @@ class APV_ADMIN {
 	renderButtonClickEvent () {
 
 		// Get validated generate view
-		const validatedGenerateView = this.apv.querySelector( '.template-generate.validated' );
+		const validatedGenerateView = this.aipv.querySelector( '.template-generate.validated' );
 
 		// Ensure view is validate with api key
 		if( !validatedGenerateView ) return;
@@ -712,7 +712,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_get_dalle_images' );
+		_$data.append( 'action', 'aipv_get_dalle_images' );
 		_$data.append( 'prompt', _prompt );
 		_$data.append( 'n', _n );
 		_$data.append( 'size', _size );
@@ -749,7 +749,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_set_dalle_image' );
+		_$data.append( 'action', 'aipv_set_dalle_image' );
 		_$data.append( 'post_id', _postId );
 		_$data.append( 'image_id', _imageId );
 
@@ -792,7 +792,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_load_dalle_history' );
+		_$data.append( 'action', 'aipv_load_dalle_history' );
 		_$data.append( 'post_id', _historyId );
 
 		// Run fetch request
@@ -825,7 +825,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_get_history' );
+		_$data.append( 'action', 'aipv_get_history' );
 		_$data.append( 'is_ajax', 1 );
 
 		// Run fetch request
@@ -835,7 +835,10 @@ class APV_ADMIN {
 		if( _$fetchRequest ) {
 
 			// Insert the response HTML into the history rows container
-			this.apv.querySelector( '.history-rows' ).innerHTML = _$fetchRequest;
+			this.aipv.querySelector( '.history-rows' ).innerHTML = _$fetchRequest;
+
+			// Add in load more text button
+			this.historyPromptLoadMoreButtonCheck();
 
 			// Load history images
 			this.historyLoadImagesClickEvent();
@@ -847,7 +850,7 @@ class APV_ADMIN {
 	historyLoadImagesClickEvent () {
 
 		// Add click event listeners to the 'load-images' buttons
-		this.apv.querySelectorAll( '.history .load-images' ).forEach( button => {
+		this.aipv.querySelectorAll( '.history .load-images' ).forEach( button => {
 			button.addEventListener( 'click', ( e ) => {
 
 				// Prevent the default action
@@ -860,6 +863,40 @@ class APV_ADMIN {
 				this.loadDalleHistoryRow( historyId );
 
 			} );
+		} );
+
+	}
+
+	historyPromptLoadMoreButtonCheck () {
+
+		// Ensure the heights are loaded
+		window.requestAnimationFrame( () => {
+
+			// Check if large prompt text present and add click event to load more button
+			this.aipv.querySelectorAll( '.history .history-row-prompt.prompt' ).forEach( prompt => {
+
+				console.log( prompt );
+				// Check if prompt text is larger than max width
+				if( prompt.scrollHeight > 54 ) {
+
+					// Create load more text button
+					let loadMoreBtn = document.createElement( 'div' );
+					loadMoreBtn.classList.add( 'history-row-prompt', 'load-more-text' );
+					loadMoreBtn.textContent = 'Load More';
+
+					// Add in after prompt
+					prompt.insertAdjacentElement( 'afterend', loadMoreBtn );
+
+					// Add click event to show rest of prompt text
+					loadMoreBtn.addEventListener( 'click', () => {
+						prompt.classList.add( 'opened' );
+						loadMoreBtn.remove();
+					} );
+
+				}
+
+			} );
+
 		} );
 
 	}
@@ -902,7 +939,7 @@ class APV_ADMIN {
 		const total = (num * cost).toFixed( 3 );
 
 		// Set breakdown
-		const breakdown = this.apv.querySelector( '.breakdown' );
+		const breakdown = this.aipv.querySelector( '.breakdown' );
 		breakdown.querySelector( '.num-images span' ).innerHTML = num;
 		breakdown.querySelector( '.total span' ).innerHTML = `$${total}`;
 		breakdown.querySelector( '.cost-per-img span' ).innerHTML = `$${cost}`;
@@ -915,7 +952,7 @@ class APV_ADMIN {
 	keywordSearchChangeEvent () {
 
 		// Handle resolution select change
-		this.apv.querySelector( '.keyword-input' ).addEventListener( 'change', (e) => {
+		this.aipv.querySelector( '.keyword-input' ).addEventListener( 'change', (e) => {
 
 			// Prevent default functionality
 			e.preventDefault();
@@ -929,14 +966,14 @@ class APV_ADMIN {
 	numberInputChangeEvent () {
 
 		// Handle number input change
-		this.apv.querySelector( '.number-input' ).addEventListener( 'change', (e) => {
+		this.aipv.querySelector( '.number-input' ).addEventListener( 'change', (e) => {
 
 			// Prevent default functionality
 			e.preventDefault();
 
 			// Get number and resolution
 			let num = e.target.value;
-			const resolution = document.querySelector('#apv-admin-view .resolution-select select').value;
+			const resolution = document.querySelector('#aipv-admin-view .resolution-select select').value;
 
 			// Ensure number is at least one
 			if( !num ) {
@@ -954,14 +991,14 @@ class APV_ADMIN {
 	resolutionSelectChangeEvent () {
 
 		// Handle resolution select change
-		this.apv.querySelector( '.resolution-select select' ).addEventListener( 'change', (e) => {
+		this.aipv.querySelector( '.resolution-select select' ).addEventListener( 'change', (e) => {
 
 			// Prevent default functionality
 			e.preventDefault();
 
 			// Get number and resolution
 			const resolution = e.target.value;
-			const num = document.querySelector('#apv-admin-view .number-input').value;
+			const num = document.querySelector('#aipv-admin-view .number-input').value;
 			this.updateCost( num, resolution );
 
 		});
@@ -970,7 +1007,7 @@ class APV_ADMIN {
 	signUpTextClickEvent () {
 
 		// Set validation check
-		const invalidGenerateView = this.apv.querySelector( '.template-generate.not-validated' );
+		const invalidGenerateView = this.aipv.querySelector( '.template-generate.not-validated' );
 
 		// Skip click if valid generate view
 		if( !invalidGenerateView ) return;
@@ -990,7 +1027,7 @@ class APV_ADMIN {
 			this.sidebar.querySelector( `.item[data-tab="${tab}"]` ).classList.add( 'active' );
 		
 			// Remove 'active' class from all templates
-			this.apv.querySelectorAll( '.main-content .template' ).forEach( template => {
+			this.aipv.querySelectorAll( '.main-content .template' ).forEach( template => {
 				template.classList.remove( 'active' );
 			});
 		
@@ -1015,19 +1052,19 @@ class APV_ADMIN {
 	setHistoryHeight () {
 
 		const height = this.generateView.querySelector( '.settings' ).clientHeight;
-		this.apv.querySelector( '.history' ).style.height = height;
+		this.aipv.querySelector( '.history' ).style.height = height;
 
 	}
 
 	updateRenderBtn () {
 
 		// Get all generate fields
-		const keywordSearch = this.apv.querySelector( '.keyword-input' ).value;
-		const numberInput = this.apv.querySelector( '.number-input' ).value;
-		const resolution = this.apv.querySelector( '.resolution-select select' ).value;
+		const keywordSearch = this.aipv.querySelector( '.keyword-input' ).value;
+		const numberInput = this.aipv.querySelector( '.number-input' ).value;
+		const resolution = this.aipv.querySelector( '.resolution-select select' ).value;
 
 		// Enable or disable the button based on whether all conditions are met
-		this.apv.querySelector( '.template-generate.validated .render.btn' ).classList.toggle( 'disabled', !(keywordSearch && numberInput && resolution) );
+		this.aipv.querySelector( '.template-generate.validated .render.btn' ).classList.toggle( 'disabled', !(keywordSearch && numberInput && resolution) );
 
 	}
 
@@ -1054,7 +1091,7 @@ class APV_ADMIN {
 
 		// Set data object and action
 		const _$data = new FormData();
-		_$data.append( 'action', 'apv_set_dalle_api_key' );
+		_$data.append( 'action', 'aipv_set_dalle_api_key' );
 		_$data.append( 'api_key', apiKey );
 
 		// Run fetch request
@@ -1078,7 +1115,7 @@ class APV_ADMIN {
 
 			// Set data object and action
 			const _$data = new FormData();
-			_$data.append( 'action', 'apv_save_clear_data_setting' );
+			_$data.append( 'action', 'aipv_save_clear_data_setting' );
 			_$data.append( 'clear_data', input.checked );
 
 			// Run fetch request
