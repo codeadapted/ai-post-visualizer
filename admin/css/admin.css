@@ -465,7 +465,7 @@ Posts tab
 #aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: flex-start;
 	margin-bottom: 2rem;
 	padding: 1rem;
 	border: 1px solid var(--dark-input-bg);
@@ -509,6 +509,7 @@ Posts tab
 #aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn {
 	width: 175px;
 	font-size: 11.75px;
+	margin-top: auto;
 }
 
 #aipv-admin-view .content-area .main-content .template-posts .posts-section .posts-wrapper .post-card .card-title .btn span {
