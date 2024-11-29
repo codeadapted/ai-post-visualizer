@@ -2,8 +2,8 @@
 Contributors: CodeAdapted
 Tags: AI, DALL·E, Featured Image, Post Management, Image Generator
 Requires at least: 5.0 or higher
-Tested up to: 6.6.2
-Stable tag: 1.0.1
+Tested up to: 6.7.1
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -103,6 +103,9 @@ Yes, you can revert back to the original featured image at any time using the "R
 If the **Data Retention** toggle is enabled, all plugin-related data (including generated images) will be removed when the plugin is uninstalled.
 
 == Changelog ==
+
+= 1.0.2 =
+* Remove unwanted logging from production files.
 
 = 1.0.1 =
 * Add Spanish translations.

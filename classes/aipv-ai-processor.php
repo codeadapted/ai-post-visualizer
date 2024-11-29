@@ -236,14 +236,14 @@ class AIPV_AI_Processor {
     
         // Check for errors
         if ( is_wp_error( $response ) ) {
-            error_log( 'HTTP request failed: ' . $response->get_error_message() );
+            // error_log( 'HTTP request failed: ' . $response->get_error_message() );
             return false;
         }
     
         // Check if the response code is 200 OK
         $http_status = wp_remote_retrieve_response_code( $response );
         if ( $http_status !== 200 ) {
-            error_log( 'HTTP error: ' . $http_status . ' Response: ' . wp_remote_retrieve_body( $response ) );
+            // error_log( 'HTTP error: ' . $http_status . ' Response: ' . wp_remote_retrieve_body( $response ) );
             return false;
         }
     
