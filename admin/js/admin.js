@@ -845,7 +845,6 @@ class AIPV_ADMIN {
       this.aipv
         .querySelectorAll(".history .history-row-prompt.prompt")
         .forEach((prompt) => {
-          console.log(prompt);
           // Check if prompt text is larger than max width
           if (prompt.scrollHeight > 54) {
             // Create load more text button
