@@ -18,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         <input 
           name="searchPosts" 
           class="search-input" 
+          aria-label="<?php esc_attr_e( 'Search posts', 'ai-post-visualizer' ); ?>"
           placeholder="<?php esc_attr_e( 'Search Posts', 'ai-post-visualizer' ); ?>" 
         />
         <div class="icon">
@@ -66,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
           </div>
 
           <!-- Filter reset -->
-          <a class="filter-reset"><?php esc_html_e( 'Reset Filters', 'ai-post-visualizer' ); ?></a>
+          <a class="filter-reset" role="button" tabindex="0"><?php esc_html_e( 'Reset Filters', 'ai-post-visualizer' ); ?></a>
 
       </div>
     </div>

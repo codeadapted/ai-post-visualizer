@@ -27,6 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/header.png' ); ?>" 
     alt="" 
     role="presentation" 
+    aria-hidden="true" 
   />
 
 </div>

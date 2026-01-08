@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   <div class="settings">
 
     <!-- Back to Posts button -->
-    <div class="back-to-posts">
+    <div class="back-to-posts" role="button" tabindex="0">
         <span></span>
         <?php esc_html_e( 'Back to Posts', 'ai-post-visualizer' ); ?>
     </div>
@@ -21,8 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
       <!-- Current Featured Image Section -->
       <div class="current-featured">
         <h3><?php esc_html_e( 'Current Featured Image', 'ai-post-visualizer' ); ?></h3>
-        <div class="featured-img" style=""></div> <!-- Image will be dynamically set via JS -->
-        <span class="revert-to-original"><?php esc_html_e( 'Revert to Original', 'ai-post-visualizer' ); ?></span>
+        <div class="featured-img" role="img" aria-label="<?php esc_attr_e( 'Current featured image', 'ai-post-visualizer' ); ?>" style=""></div> <!-- Image will be dynamically set via JS -->
+        <span class="revert-to-original" role="button" tabindex="0"><?php esc_html_e( 'Revert to Original', 'ai-post-visualizer' ); ?></span>
       </div>
 
       <!-- Section for Generating New Images -->
@@ -55,6 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
           type="number" 
           name="numOfImages" 
           class="number-input" 
+          aria-label="<?php esc_attr_e( 'Number of images to generate', 'ai-post-visualizer' ); ?>"
           placeholder="<?php esc_attr_e( '1', 'ai-post-visualizer' ); ?>" 
           min="1"
           value="1"

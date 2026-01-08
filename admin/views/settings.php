@@ -28,6 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
         type="password" 
         name="dalleApiKey" 
         class="dalle-api-key-input" 
+        aria-label="<?php esc_attr_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>"
         placeholder="<?php esc_attr_e( 'Insert DALL·E API Key', 'ai-post-visualizer' ); ?>" 
         min="1"
         <?php echo $dalle_api_key ? 'value="' . esc_attr( $dalle_api_key ) . '"' : ''; ?> 
@@ -49,6 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
           type="checkbox" 
           id="toggle" 
           class="toggle-input" 
+          aria-label="<?php esc_attr_e( 'Toggle data retention', 'ai-post-visualizer' ); ?>"
           <?php echo $clear_data ? 'checked' : ''; ?> 
         />
         <label for="toggle" class="toggle-label">

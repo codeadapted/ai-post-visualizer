@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   </div>
 
   <!-- Sidebar navigation for the Posts section -->
-  <div class="item posts" data-tab="posts">
+  <div class="item posts" data-tab="posts" role="button" tabindex="0">
     <div class="icon">
       <!-- Use esc_url to sanitize the URL and esc_attr for the alt and title attributes -->
       <img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/posts.svg' ); ?>" alt="<?php esc_attr_e( 'Posts', 'ai-post-visualizer' ); ?>" title="<?php esc_attr_e( 'Posts', 'ai-post-visualizer' ); ?>" />
@@ -33,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   </div>
 
   <!-- Sidebar navigation for the Generate section -->
-  <div class="item generate" data-tab="generate">
+  <div class="item generate" data-tab="generate" role="button" tabindex="0">
     <div class="icon">
       <!-- Sanitize URL and attributes for security -->
       <img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/generate.svg' ); ?>" alt="<?php esc_attr_e( 'Generate', 'ai-post-visualizer' ); ?>" title="<?php esc_attr_e( 'Generate', 'ai-post-visualizer' ); ?>" />
@@ -42,7 +42,7 @@ if ( ! defined( 'ABSPATH' ) ) {
   </div>
 
   <!-- Sidebar navigation for the Settings section (set as active by default) -->
-  <div class="item settings active" data-tab="settings">
+  <div class="item settings active" data-tab="settings" role="button" tabindex="0">
     <div class="icon">
       <!-- Sanitize URL and attributes for security -->
       <img src="<?php echo esc_url( plugin_dir_url( __FILE__ ) . 'img/settings.svg' ); ?>" alt="<?php esc_attr_e( 'Settings', 'ai-post-visualizer' ); ?>" title="<?php esc_attr_e( 'Settings', 'ai-post-visualizer' ); ?>" />

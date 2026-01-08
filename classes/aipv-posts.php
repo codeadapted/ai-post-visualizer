@@ -178,7 +178,7 @@ class AIPV_Posts {
     check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
     // Sanitize the post ID
-    $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+    $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
 
     // Get the post thumbnail URL or return a default image
     $thumbnail = get_the_post_thumbnail_url( $post_id, 'full' );
@@ -211,7 +211,7 @@ class AIPV_Posts {
     check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
     // Sanitize the post ID
-    $post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
+    $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
 
     // Get the revert meta field from the post
     $revert = get_post_meta( $post_id, 'aipv_revert', true );

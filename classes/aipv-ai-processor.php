@@ -19,6 +19,15 @@ class AIPV_AI_Processor {
     }
 
     /**
+     * Checks if the DALLE API key exists in the options.
+     *
+     * @return bool True if the API key exists, false otherwise.
+     */
+    private function aipv_api_key_exists() {
+      return !!get_option( 'aipv_dalle_api_key' );
+    }
+
+    /**
      * This function handles generating DALLE images via the OpenAI API.
      *
      * @return string JSON response with generated images or error message
@@ -58,13 +67,13 @@ class AIPV_AI_Processor {
 
           // Build the HTML content for the images
           $content .= '<div class="post-card" data-image="' . esc_attr( $image_id ) . '">';
-          $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
-          $content .= '<div class="set-image">';
+          $content .= '<div class="image" role="img" aria-label="' . esc_attr__( 'Generated image preview', 'ai-post-visualizer' ) . '" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
+          $content .= '<div class="set-image" aria-label="' . esc_attr__( 'Set as featured image', 'ai-post-visualizer' ) . '">';
           $content .= '<div class="plus">';
-          $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+          $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" alt="' . esc_attr__( 'Set as featured image', 'ai-post-visualizer' ) . '" />';
           $content .= '</div>';
-          $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
-          $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
+          $content .= '<div class="set-text" role="button" tabindex="0">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
+          $content .= '<div class="current-text" role="button" tabindex="0">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
           $content .= '</div></div>';
 
         }
@@ -94,7 +103,11 @@ class AIPV_AI_Processor {
         }
 
       } else {
-        $content = '<div class="invalid-api-key">' . __( 'Please go to the Settings tab and add your API key before continuing.', 'ai-post-visualizer' ) . '</div>';
+        if( !$this->aipv_api_key_exists() ) {
+          $content = '<div class="invalid-api-key" role="alert">' . __( 'Please go to the Settings tab and add your API key before continuing.', 'ai-post-visualizer' ) . '</div>';
+        } else {
+          $content = '<div class="invalid-api-key" role="alert">' . __( 'There was an error connecting to the OpenAI API. Please check that your API key is valid and that you have available credits.', 'ai-post-visualizer' ) . '</div>';
+        }
         wp_send_json( $content );
       }
 
@@ -166,7 +179,7 @@ class AIPV_AI_Processor {
 		    check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
-        $post_id = isset( $_GET['post_id'] ) ? intval( $_GET['post_id'] ) : '';
+        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
         $images = get_post_meta( $post_id, 'images', true );
 
 	    	// Set empty content variable
@@ -181,13 +194,13 @@ class AIPV_AI_Processor {
           // Check if image url available and update content
           if ( $image_url ) {
             $content .= '<div class="post-card" data-image="' . esc_attr( $img ) . '">';
-            $content .= '<div class="image" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
-            $content .= '<div class="set-image">';
+            $content .= '<div class="image" role="img" aria-label="' . esc_attr__( 'Generated image preview', 'ai-post-visualizer' ) . '" style="background-image: url(' . esc_url( $image_url ) . ')"></div>';
+            $content .= '<div class="set-image" aria-label="' . esc_attr__( 'Set as featured image', 'ai-post-visualizer' ) . '">';
             $content .= '<div class="plus">';
-            $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" />';
+            $content .= '<img src="' . esc_url( AIPV_PLUGIN_DIR . 'admin/views/img/plus.svg' ) . '" alt="' . esc_attr__( 'Set as featured image', 'ai-post-visualizer' ) . '" />';
             $content .= '</div>';
-            $content .= '<div class="set-text">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
-            $content .= '<div class="current-text">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
+            $content .= '<div class="set-text" role="button" tabindex="0">' . __( 'Set Featured Image', 'ai-post-visualizer' ) . '</div>';
+            $content .= '<div class="current-text" role="button" tabindex="0">' . __( 'Current Featured Image', 'ai-post-visualizer' ) . '</div>';
             $content .= '</div></div>';
           }
         }
@@ -211,7 +224,7 @@ class AIPV_AI_Processor {
         $dalle_api_key = get_option( 'aipv_dalle_api_key' );
     
         // Ensure the API key exists
-        if ( !$dalle_api_key ) {
+        if ( !$this->aipv_api_key_exists() ) {
           return false;
         }
     
@@ -237,14 +250,14 @@ class AIPV_AI_Processor {
     
         // Check for errors
         if ( is_wp_error( $response ) ) {
-          // error_log( 'HTTP request failed: ' . $response->get_error_message() );
+          error_log( '[AIPV] HTTP request failed: ' . $response->get_error_message() );
           return false;
         }
     
         // Check if the response code is 200 OK
         $http_status = wp_remote_retrieve_response_code( $response );
         if ( $http_status !== 200 ) {
-          // error_log( 'HTTP error: ' . $http_status . ' Response: ' . wp_remote_retrieve_body( $response ) );
+          error_log( '[AIPV] HTTP error: ' . $http_status . ' Response: ' . wp_remote_retrieve_body( $response ) );
           return false;
         }
     
