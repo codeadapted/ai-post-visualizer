@@ -189,8 +189,8 @@ msgid "Oldest first"
 msgstr ""
 
 #: classes/aipv-ai-processor.php:96
-msgid "Please go to the Settings tab and sign up for a plan before continuing."
-msgstr ""
+msgid ""
+msgstr ""Please go to the Settings tab and add your API Key before continuing.
 
 #: admin/views/posts.php:34
 msgid "Post Types"
