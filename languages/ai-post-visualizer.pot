@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Post Visualizer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-04 14:46+0000\n"
+"POT-Creation-Date: 2026-01-08 01:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -16,31 +16,31 @@ msgstr ""
 "X-Loco-Version: 2.6.11; wp-6.6.2\n"
 "X-Domain: ai-post-visualizer"
 
-#: admin/views/generate.php:58
+#: admin/views/generate.php:59
 msgid "1"
 msgstr ""
 
-#: admin/views/generate.php:81
+#: admin/views/generate.php:82
 msgid "1024 x 1024"
 msgstr ""
 
-#: admin/views/generate.php:73
+#: admin/views/generate.php:74
 msgid "1024x1024: $0.02 per image"
 msgstr ""
 
-#: admin/views/generate.php:79
+#: admin/views/generate.php:80
 msgid "256 x 256"
 msgstr ""
 
-#: admin/views/generate.php:71
+#: admin/views/generate.php:72
 msgid "256x256: $0.016 per image"
 msgstr ""
 
-#: admin/views/generate.php:80
+#: admin/views/generate.php:81
 msgid "512 x 512"
 msgstr ""
 
-#: admin/views/generate.php:72
+#: admin/views/generate.php:73
 msgid "512x512: $0.018 per image"
 msgstr ""
 
@@ -50,16 +50,16 @@ msgid ""
 "one place."
 msgstr ""
 
-#: admin/views/generate.php:109
+#: admin/views/generate.php:110
 msgid "Add your DALL·E API Key by going to "
 msgstr ""
 
-#: admin/views/generate.php:118
+#: admin/views/generate.php:119
 msgid "Add your DALL·E API Key by going to Settings."
 msgstr ""
 
 #. Name of the plugin
-#: classes/aipv-plugin.php:220 classes/aipv-plugin.php:221
+#: classes/aipv-plugin.php:221 classes/aipv-plugin.php:222
 #: admin/views/header.php:20
 msgid "AI Post Visualizer"
 msgstr ""
@@ -68,15 +68,15 @@ msgstr ""
 msgid "AI Post Visualizer data set to be cleared on uninstall"
 msgstr ""
 
-#: admin/views/posts.php:37
+#: admin/views/posts.php:38
 msgid "All"
 msgstr ""
 
-#: admin/views/posts.php:48
+#: admin/views/posts.php:49
 msgid "Alphabetical Order"
 msgstr ""
 
-#: admin/views/posts.php:51
+#: admin/views/posts.php:52
 msgid "Ascending"
 msgstr ""
 
@@ -93,32 +93,36 @@ msgstr ""
 msgid "CodeAdapted Logo"
 msgstr ""
 
-#: admin/views/generate.php:88
+#: admin/views/generate.php:89
 msgid "Cost of rendering images:"
 msgstr ""
 
-#: admin/views/generate.php:94
+#: admin/views/generate.php:95
 msgid "Cost per Image: "
 msgstr ""
 
-#: classes/aipv-ai-processor.php:67 classes/aipv-ai-processor.php:189
+#: classes/aipv-ai-processor.php:76 classes/aipv-ai-processor.php:203
 #: admin/views/generate.php:23
 msgid "Current Featured Image"
+msgstr ""
+
+#: admin/views/generate.php:24
+msgid "Current featured image"
 msgstr ""
 
 #: admin/views/settings.php:11
 msgid "DALL·E API Key Settings"
 msgstr ""
 
-#: admin/views/settings.php:39
+#: admin/views/settings.php:40
 msgid "Data Retention Settings"
 msgstr ""
 
-#: admin/views/posts.php:59
+#: admin/views/posts.php:60
 msgid "Date"
 msgstr ""
 
-#: admin/views/posts.php:52
+#: admin/views/posts.php:53
 msgid "Descending"
 msgstr ""
 
@@ -142,11 +146,15 @@ msgstr ""
 msgid "Generate New Images"
 msgstr ""
 
-#: admin/views/generate.php:138
+#: classes/aipv-ai-processor.php:70 classes/aipv-ai-processor.php:197
+msgid "Generated image preview"
+msgstr ""
+
+#: admin/views/generate.php:139
 msgid "Generation History"
 msgstr ""
 
-#: admin/views/generate.php:136
+#: admin/views/generate.php:137
 msgid "History Icon"
 msgstr ""
 
@@ -154,13 +162,13 @@ msgstr ""
 msgid "https://codeadapted.com"
 msgstr ""
 
-#: admin/views/settings.php:43
+#: admin/views/settings.php:44
 msgid ""
 "If you would like for all AI Post Visualizer data to be removed after "
 "uninstalling the plugin, click the toggle below."
 msgstr ""
 
-#: admin/views/settings.php:31
+#: admin/views/settings.php:31 admin/views/settings.php:32
 msgid "Insert DALL·E API Key"
 msgstr ""
 
@@ -168,11 +176,11 @@ msgstr ""
 msgid "Load Images"
 msgstr ""
 
-#: admin/views/posts.php:81
+#: admin/views/posts.php:82
 msgid "Load More"
 msgstr ""
 
-#: admin/views/posts.php:62
+#: admin/views/posts.php:63
 msgid "Newest first"
 msgstr ""
 
@@ -180,19 +188,23 @@ msgstr ""
 msgid "No posts were found. Please try your query again."
 msgstr ""
 
-#: admin/views/generate.php:91
+#: admin/views/generate.php:58
+msgid "Number of images to generate"
+msgstr ""
+
+#: admin/views/generate.php:92
 msgid "Number of Images: "
 msgstr ""
 
-#: admin/views/posts.php:63
+#: admin/views/posts.php:64
 msgid "Oldest first"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:96
-msgid ""
-msgstr ""Please go to the Settings tab and add your API Key before continuing.
+#: classes/aipv-ai-processor.php:107
+msgid "Please go to the Settings tab and add your API key before continuing."
+msgstr ""
 
-#: admin/views/posts.php:34
+#: admin/views/posts.php:35
 msgid "Post Types"
 msgstr ""
 
@@ -200,12 +212,16 @@ msgstr ""
 msgid "Posts"
 msgstr ""
 
-#: admin/views/generate.php:104
+#: admin/views/generate.php:105
 msgid "Render Images"
 msgstr ""
 
-#: admin/views/generate.php:124
+#: admin/views/generate.php:125
 msgid "Rendered Images"
+msgstr ""
+
+#: admin/views/posts.php:70
+msgid "Reset Filters"
 msgstr ""
 
 #: admin/views/generate.php:25
@@ -216,7 +232,7 @@ msgstr ""
 msgid "Search Icon"
 msgstr ""
 
-#: admin/views/posts.php:25
+#: admin/views/posts.php:26
 msgid "Search icon"
 msgstr ""
 
@@ -224,11 +240,20 @@ msgstr ""
 msgid "Search Keywords"
 msgstr ""
 
-#: admin/views/posts.php:21
+#: admin/views/posts.php:22
 msgid "Search Posts"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:66 classes/aipv-ai-processor.php:188
+#: admin/views/posts.php:21
+msgid "Search posts"
+msgstr ""
+
+#: classes/aipv-ai-processor.php:71 classes/aipv-ai-processor.php:73
+#: classes/aipv-ai-processor.php:198 classes/aipv-ai-processor.php:200
+msgid "Set as featured image"
+msgstr ""
+
+#: classes/aipv-ai-processor.php:75 classes/aipv-ai-processor.php:202
 msgid "Set Featured Image"
 msgstr ""
 
@@ -236,7 +261,7 @@ msgstr ""
 msgid "Set number of images to be rendered at once. (Default is 1)"
 msgstr ""
 
-#: admin/views/generate.php:67
+#: admin/views/generate.php:68
 msgid "Set resolution of generated images. (Default is 256 x 256)"
 msgstr ""
 
@@ -245,11 +270,21 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: admin/views/generate.php:110
+#: admin/views/generate.php:111
 msgid "Settings."
 msgstr ""
 
-#: admin/views/generate.php:97
+#: classes/aipv-ai-processor.php:109
+msgid ""
+"There was an error connecting to the OpenAI API. Please check that your API "
+"key is valid and that you have available credits."
+msgstr ""
+
+#: admin/views/settings.php:53
+msgid "Toggle data retention"
+msgstr ""
+
+#: admin/views/generate.php:98
 msgid "Total Cost: "
 msgstr ""
 
@@ -267,8 +302,4 @@ msgstr ""
 
 #: admin/view.php:9
 msgid "You do not have sufficient permissions to access this page."
-msgstr ""
-
-#: admin/views/posts.php:69
-msgid "Reset Filters"
 msgstr ""
