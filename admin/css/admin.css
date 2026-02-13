@@ -1041,14 +1041,26 @@ Generate tab
 }
 
 #aipv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div {
-	color: var(--light-bg);
+	color: var(--link-teal);
 	transition: color 0.2s ease-in-out;
 	cursor: pointer;
 	display: inline-block;
+	position: relative;
 }
 
-#aipv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div:hover {
-	color: var(--btn-purple);
+#aipv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div:after {
+	content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background-color: var(--link-teal);
+    transition: width .2s ease-in-out, color 0.2s ease-in-out;
+}
+
+#aipv-admin-view .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div:hover:after {
+	width: 100%;
 }
 
 /******
@@ -1852,6 +1864,18 @@ Light Mode
 
 #aipv-admin-view .content-area .main-content .template-generate .rendered-images .post-card .set-image:hover .plus img {
 	filter: unset;
+}
+
+#aipv-admin-view.light .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text {
+	color: var(--dark-secondary-bg);
+}
+
+#aipv-admin-view.light .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div {
+	color: var(--btn-purple);
+}
+
+#aipv-admin-view.light .content-area .main-content .template-generate.not-validated .render.btn .sign-up-text div:after {
+    background-color: var(--btn-purple);
 }
 
 #aipv-admin-view.light .content-area .main-content .template-settings .toggle-circle {
