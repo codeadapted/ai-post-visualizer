@@ -71,7 +71,13 @@ if ( ! defined( 'ABSPATH' ) ) {
             <div class="tooltip-description">
               <?php esc_html_e( '256x256: $0.016 per image', 'ai-post-visualizer' ); ?><br>
               <?php esc_html_e( '512x512: $0.018 per image', 'ai-post-visualizer' ); ?><br>
-              <?php esc_html_e( '1024x1024: $0.02 per image', 'ai-post-visualizer' ); ?>
+					<?php esc_html_e( '1024x1024: $0.02 per image', 'ai-post-visualizer' ); ?><br>
+					<small>
+						<?php esc_html_e( 'Estimates as of 02/2026. Pricing may change.', 'ai-post-visualizer' ); ?>
+						<a href="<?php echo esc_url( 'https://openai.com/pricing' ); ?>" target="_blank" rel="noopener noreferrer">
+							<?php esc_html_e( 'See pricing', 'ai-post-visualizer' ); ?>
+						</a>
+					</small>
             </div>
           </div>
         </div>
@@ -98,6 +104,12 @@ if ( ! defined( 'ABSPATH' ) ) {
               <?php esc_html_e( 'Total Cost: ', 'ai-post-visualizer' ); ?><span>$0.016</span>
           </div>
         </div>
+      <div class="text" style="font-size: 12px; opacity: 0.8; margin-top: 8px;">
+        <?php esc_html_e( 'Costs shown are estimates as of 02/2026. Always verify current pricing in your OpenAI account.', 'ai-post-visualizer' ); ?>
+        <a href="<?php echo esc_url( 'https://openai.com/pricing' ); ?>" target="_blank" rel="noopener noreferrer">
+          <?php esc_html_e( 'OpenAI pricing', 'ai-post-visualizer' ); ?>
+        </a>
+      </div>
       </div>
 
       <!-- Render Images Button -->

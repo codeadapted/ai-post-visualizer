@@ -6,6 +6,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class AIPV_AI_Processor {
 
+  /**
+   * Enforces permissions for post-specific actions.
+   *
+   * @param int $post_id
+   * @return void
+   */
+  private function aipv_require_post_permissions( $post_id ) {
+    $post_id = absint( $post_id );
+    if ( ! $post_id ) {
+      wp_send_json_error( array( 'message' => __( 'Invalid post ID.', 'ai-post-visualizer' ) ), 400 );
+    }
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+      wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'ai-post-visualizer' ) ), 403 );
+    }
+  }
+
     /**
      * Constructor to initialize AJAX actions if in the admin.
      */
@@ -24,7 +40,10 @@ class AIPV_AI_Processor {
      * @return bool True if the API key exists, false otherwise.
      */
     private function aipv_api_key_exists() {
-      return !!get_option( 'aipv_dalle_api_key' );
+      if ( function_exists( 'aipv' ) ) {
+        return (bool) aipv()->plugin()->aipv_has_dalle_api_key();
+      }
+      return false;
     }
 
     /**
@@ -38,10 +57,20 @@ class AIPV_AI_Processor {
       check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
       // Sanitize input
-      $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+      $post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
       $prompt = isset( $_GET['prompt'] ) ? sanitize_text_field( wp_unslash( $_GET['prompt'] ) ) : '';
       $n = isset( $_GET['n'] ) ? intval( wp_unslash( $_GET['n'] ) ) : 1;
       $size = isset( $_GET['size'] ) ? sanitize_text_field( wp_unslash( $_GET['size'] ) ) : '256x256';
+
+			// Capability checks: must be able to edit the post, and upload media.
+			$this->aipv_require_post_permissions( $post_id );
+			if ( ! current_user_can( 'upload_files' ) ) {
+				wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'ai-post-visualizer' ) ), 403 );
+			}
+
+			if ( $prompt === '' ) {
+				wp_send_json_error( array( 'message' => __( 'Prompt is required.', 'ai-post-visualizer' ) ), 400 );
+			}
 
       // Sanitize prompt for use as image title
       $image_title = implode( '-', array_slice( explode( ' ', $prompt ), 0, 6 ) );
@@ -50,7 +79,7 @@ class AIPV_AI_Processor {
       $api_data = $this->aipv_api_request( $prompt, $n, $size );
 
       // Check if api data valid
-      if( $api_data && !isset( $api_data->status ) ) {
+      if ( is_array( $api_data ) && isset( $api_data['data'] ) && is_array( $api_data['data'] ) ) {
 
         // Get urls and set empty content and generated_images variables
         $urls = $api_data['data'];
@@ -61,7 +90,13 @@ class AIPV_AI_Processor {
         foreach ( $urls as $i => $url ) {
 
           // Get image url and update generated_images array
-          $image_id = $this->aipv_upload_images_to_library( $url['url'], $image_title . '-' . $i );
+          if ( ! isset( $url['url'] ) ) {
+          continue;
+        }
+        $image_id = $this->aipv_upload_images_to_library( $url['url'], $image_title . '-' . $i );
+        if ( ! $image_id ) {
+          continue;
+        }
           $image_url = wp_get_attachment_url( $image_id );
           $generated_images[] = $image_id;
 
@@ -91,6 +126,7 @@ class AIPV_AI_Processor {
           update_post_meta( $history, 'prompt', $prompt );
           update_post_meta( $history, 'images', $generated_images );
           update_post_meta( $history, 'resolution', $size );
+          update_post_meta( $history, 'post_id', $post_id );
 
           // Send json response
           wp_send_json( $content );
@@ -124,8 +160,11 @@ class AIPV_AI_Processor {
 		    check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
-        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
-        $image_id = isset( $_GET['image_id'] ) ? intval( wp_unslash( $_GET['image_id'] ) ) : '';
+        $post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+        $image_id = isset( $_GET['image_id'] ) ? absint( wp_unslash( $_GET['image_id'] ) ) : 0;
+
+      			// Capability checks
+      			$this->aipv_require_post_permissions( $post_id );
 
         // Backup original featured image if not already done
         $original = get_post_thumbnail_id( $post_id );
@@ -153,7 +192,10 @@ class AIPV_AI_Processor {
 		    check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
-        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+        $post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+
+      			// Capability checks
+      			$this->aipv_require_post_permissions( $post_id );
         $original_img = intval( get_post_meta( $post_id, 'aipv_revert', true ) );
 
         // Revert to the original featured image
@@ -179,8 +221,14 @@ class AIPV_AI_Processor {
 		    check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
         // Sanitize input
-        $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+        $post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+
+      // Capability checks
+      $this->aipv_require_post_permissions( $post_id );
         $images = get_post_meta( $post_id, 'images', true );
+      if ( ! is_array( $images ) ) {
+        $images = array();
+      }
 
 	    	// Set empty content variable
         $content = '';
@@ -220,11 +268,11 @@ class AIPV_AI_Processor {
      */
     public function aipv_api_request( $prompt, $n, $size ) {
 
-        // Get the DALLE API key from the options table
-        $dalle_api_key = get_option( 'aipv_dalle_api_key' );
+      // Get the DALLE API key from server config or encrypted options.
+  			$dalle_api_key = function_exists( 'aipv' ) ? aipv()->plugin()->aipv_get_dalle_api_key() : '';
     
         // Ensure the API key exists
-        if ( !$this->aipv_api_key_exists() ) {
+        if ( !$dalle_api_key ) {
           return false;
         }
     
@@ -262,7 +310,8 @@ class AIPV_AI_Processor {
         }
     
         // Decode and return the response
-        return json_decode( wp_remote_retrieve_body( $response ), true );
+        $decoded = json_decode( wp_remote_retrieve_body( $response ), true );
+      			return is_array( $decoded ) ? $decoded : false;
 
     }    
 

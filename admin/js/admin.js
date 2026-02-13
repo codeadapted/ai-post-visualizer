@@ -888,7 +888,9 @@ class AIPV_ADMIN {
     // Set cost variable
     let cost;
 
-    // Get cost from resolution
+    // Get cost from resolution.
+    // Note: values are estimates as of 02/2026 for DALL·E 2 and may change.
+    // Reference: https://openai.com/pricing
     switch (resolution) {
       case "256x256":
         cost = 0.016;
@@ -1064,7 +1066,7 @@ class AIPV_ADMIN {
     _$data.append("api_key", apiKey);
 
     // Run fetch request
-    const _$fetchRequest = await this.genericFetchRequest(_$data);
+    const _$fetchRequest = await this.genericFetchRequest(_$data, "POST");
 
     // Remove sign up text
     const signUpText = this.generateView.querySelector(".sign-up-text");

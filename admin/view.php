@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-// Ensure the user has the appropriate capability to manage options
-if ( !current_user_can( 'manage_options' ) ) {
-  wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'ai-post-visualizer' ) );
+// Ensure the user has the appropriate capability to use the plugin UI.
+if ( ! current_user_can( 'edit_posts' ) ) {
+	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'ai-post-visualizer' ) );
 }
 
 // Setup allowed html
@@ -45,14 +45,14 @@ $admin_url  = aipv()->plugin()->aipv_get_admin_url();
 // Variable to track if the API key is validated
 $validation = false;
 
-// Fetch DALLE API key from options
-$dalle_api_key = get_option( 'aipv_dalle_api_key' );
+// API key presence + source (env/constant/encrypted option).
+$api_key_source = aipv()->plugin()->aipv_get_dalle_api_key_source();
 
 // Fetch the viewer mode (light/dark) for setting the theme in the admin view
 $viewer_mode = get_option( 'aipv_viewer_mode', 'dark' ); // Default to 'dark' if no mode is set
 
 // Set validation flag if DALLE API key exists
-$validation = !empty( $dalle_api_key );
+$validation = (bool) aipv()->plugin()->aipv_has_dalle_api_key();
 
 // Begin rendering the admin page view
 ?>

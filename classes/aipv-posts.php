@@ -7,6 +7,33 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AIPV_Posts {
 
   /**
+   * Enforces minimum permissions for accessing the plugin UI.
+   *
+   * @return void
+   */
+  private function aipv_require_editor_access() {
+    if ( ! current_user_can( 'edit_posts' ) ) {
+      wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'ai-post-visualizer' ) ), 403 );
+    }
+  }
+
+  /**
+   * Enforces permissions for a specific post.
+   *
+   * @param int $post_id
+   * @return void
+   */
+  private function aipv_require_post_access( $post_id ) {
+    $post_id = absint( $post_id );
+    if ( ! $post_id ) {
+      wp_send_json_error( array( 'message' => __( 'Invalid post ID.', 'ai-post-visualizer' ) ), 400 );
+    }
+    if ( ! current_user_can( 'edit_post', $post_id ) ) {
+      wp_send_json_error( array( 'message' => __( 'Insufficient permissions', 'ai-post-visualizer' ) ), 403 );
+    }
+  }
+
+  /**
    * Register AJAX actions for admin.
    *
    * @param   void
@@ -29,10 +56,7 @@ class AIPV_Posts {
    **/
   public function aipv_get_posts() {
 
-    // Only allow admin users to access this function
-    if ( !current_user_can( 'manage_options' ) ) {
-      return false;
-    }
+		$this->aipv_require_editor_access();
 
     // AJAX check
     $ajax_check = isset( $_GET['post_type'] ) || isset( $_GET['search'] );
@@ -143,10 +167,7 @@ class AIPV_Posts {
    **/
   public function aipv_get_post_types() {
 
-    // Only allow admin users
-    if ( !current_user_can( 'manage_options' ) ) {
-      return false;
-    }
+		$this->aipv_require_editor_access();
 
     // Set empty content variable
     $content = '';
@@ -174,11 +195,14 @@ class AIPV_Posts {
    **/
   public function aipv_get_current_fi() {
 
+		$this->aipv_require_editor_access();
+
     // Nonce validation
     check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
     // Sanitize the post ID
-    $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+		$post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+		$this->aipv_require_post_access( $post_id );
 
     // Get the post thumbnail URL or return a default image
     $thumbnail = get_the_post_thumbnail_url( $post_id, 'full' );
@@ -207,21 +231,23 @@ class AIPV_Posts {
    **/
   public function aipv_check_fi_revert() {
 
+		$this->aipv_require_editor_access();
+
     // Nonce validation
     check_ajax_referer( 'aipv_nonce_action', 'aipv_nonce' );
 
     // Sanitize the post ID
-    $post_id = isset( $_GET['post_id'] ) ? intval( wp_unslash( $_GET['post_id'] ) ) : '';
+		$post_id = isset( $_GET['post_id'] ) ? absint( wp_unslash( $_GET['post_id'] ) ) : 0;
+		$this->aipv_require_post_access( $post_id );
 
     // Get the revert meta field from the post
     $revert = get_post_meta( $post_id, 'aipv_revert', true );
 
-    // Check if $revert is set
-    if ( $revert ) {
-      wp_send_json( esc_url( $revert ) );
-    } else {
-      wp_send_json( false );
-    }
+		// Check if revert exists (stored as attachment ID).
+		if ( $revert ) {
+			wp_send_json( true );
+		}
+		wp_send_json( false );
   }
 
   /**
@@ -230,6 +256,8 @@ class AIPV_Posts {
    * @return  string $content  HTML structure of history rows or JSON response
    **/
   public function aipv_get_history() {
+
+		$this->aipv_require_editor_access();
 
     // Check if is ajax call
     $is_ajax = isset( $_GET['is_ajax'] ) && sanitize_text_field( wp_unslash( $_GET['is_ajax'] ) ) ? true : false;
