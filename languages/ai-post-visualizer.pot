@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AI Post Visualizer\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-08 01:50+0000\n"
+"POT-Creation-Date: 2026-02-17 22:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: \n"
@@ -20,7 +20,7 @@ msgstr ""
 msgid "1"
 msgstr ""
 
-#: admin/views/generate.php:82
+#: admin/views/generate.php:88
 msgid "1024 x 1024"
 msgstr ""
 
@@ -28,7 +28,7 @@ msgstr ""
 msgid "1024x1024: $0.02 per image"
 msgstr ""
 
-#: admin/views/generate.php:80
+#: admin/views/generate.php:86
 msgid "256 x 256"
 msgstr ""
 
@@ -36,7 +36,7 @@ msgstr ""
 msgid "256x256: $0.016 per image"
 msgstr ""
 
-#: admin/views/generate.php:81
+#: admin/views/generate.php:87
 msgid "512 x 512"
 msgstr ""
 
@@ -50,21 +50,21 @@ msgid ""
 "one place."
 msgstr ""
 
-#: admin/views/generate.php:110
+#: admin/views/generate.php:122
 msgid "Add your DALL·E API Key by going to "
 msgstr ""
 
-#: admin/views/generate.php:119
+#: admin/views/generate.php:131
 msgid "Add your DALL·E API Key by going to Settings."
 msgstr ""
 
 #. Name of the plugin
-#: classes/aipv-plugin.php:221 classes/aipv-plugin.php:222
+#: classes/aipv-plugin.php:232 classes/aipv-plugin.php:233
 #: admin/views/header.php:20
 msgid "AI Post Visualizer"
 msgstr ""
 
-#: classes/aipv-plugin.php:143
+#: classes/aipv-plugin.php:154
 msgid "AI Post Visualizer data set to be cleared on uninstall"
 msgstr ""
 
@@ -74,6 +74,18 @@ msgstr ""
 
 #: admin/views/posts.php:49
 msgid "Alphabetical Order"
+msgstr ""
+
+#: classes/aipv-plugin.php:356
+msgid "API key cleared"
+msgstr ""
+
+#: classes/aipv-plugin.php:337
+msgid "API key is managed by server configuration and cannot be changed here."
+msgstr ""
+
+#: classes/aipv-plugin.php:376
+msgid "API key successfully updated"
 msgstr ""
 
 #: admin/views/posts.php:52
@@ -93,15 +105,21 @@ msgstr ""
 msgid "CodeAdapted Logo"
 msgstr ""
 
-#: admin/views/generate.php:89
+#: admin/views/generate.php:95
 msgid "Cost of rendering images:"
 msgstr ""
 
-#: admin/views/generate.php:95
+#: admin/views/generate.php:101
 msgid "Cost per Image: "
 msgstr ""
 
-#: classes/aipv-ai-processor.php:76 classes/aipv-ai-processor.php:203
+#: admin/views/generate.php:108
+msgid ""
+"Costs shown are estimates as of 02/2026. Always verify current pricing in "
+"your OpenAI account."
+msgstr ""
+
+#: classes/aipv-ai-processor.php:111 classes/aipv-ai-processor.php:251
 #: admin/views/generate.php:23
 msgid "Current Featured Image"
 msgstr ""
@@ -114,7 +132,7 @@ msgstr ""
 msgid "DALL·E API Key Settings"
 msgstr ""
 
-#: admin/views/settings.php:40
+#: admin/views/settings.php:46
 msgid "Data Retention Settings"
 msgstr ""
 
@@ -126,7 +144,20 @@ msgstr ""
 msgid "Descending"
 msgstr ""
 
-#: classes/aipv-posts.php:107 classes/aipv-posts.php:192
+#. %1$s and %2$s are opening and closing anchor tags for the OpenAI login link, %3$s and %4$s are for the API keys page link.
+#: admin/views/settings.php:19
+#, php-format
+msgid ""
+"Enter an OpenAI API key. For security, this field is never displayed after "
+"saving. If you don't have an API key, login %1$shere%2$s then visit %3$sthe "
+"API keys page%4$s."
+msgstr ""
+
+#: admin/views/generate.php:76
+msgid "Estimates as of 02/2026. Pricing may change."
+msgstr ""
+
+#: classes/aipv-posts.php:131 classes/aipv-posts.php:216
 msgid "Featured Image Missing"
 msgstr ""
 
@@ -138,7 +169,7 @@ msgstr ""
 msgid "Generate"
 msgstr ""
 
-#: classes/aipv-posts.php:116
+#: classes/aipv-posts.php:140
 msgid "Generate New Image"
 msgstr ""
 
@@ -146,15 +177,15 @@ msgstr ""
 msgid "Generate New Images"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:70 classes/aipv-ai-processor.php:197
+#: classes/aipv-ai-processor.php:105 classes/aipv-ai-processor.php:245
 msgid "Generated image preview"
 msgstr ""
 
-#: admin/views/generate.php:139
+#: admin/views/generate.php:151
 msgid "Generation History"
 msgstr ""
 
-#: admin/views/generate.php:137
+#: admin/views/generate.php:149
 msgid "History Icon"
 msgstr ""
 
@@ -162,17 +193,32 @@ msgstr ""
 msgid "https://codeadapted.com"
 msgstr ""
 
-#: admin/views/settings.php:44
+#: admin/views/settings.php:50
 msgid ""
 "If you would like for all AI Post Visualizer data to be removed after "
 "uninstalling the plugin, click the toggle below."
 msgstr ""
 
-#: admin/views/settings.php:31 admin/views/settings.php:32
+#: admin/views/settings.php:37
 msgid "Insert DALL·E API Key"
 msgstr ""
 
-#: classes/aipv-posts.php:284
+#: admin/views/settings.php:38
+msgid "Insert OpenAI API Key"
+msgstr ""
+
+#: classes/aipv-ai-processor.php:21 classes/aipv-ai-processor.php:68
+#: classes/aipv-plugin.php:140 classes/aipv-plugin.php:307
+#: classes/aipv-plugin.php:331 classes/aipv-posts.php:16
+#: classes/aipv-posts.php:32
+msgid "Insufficient permissions"
+msgstr ""
+
+#: classes/aipv-ai-processor.php:18 classes/aipv-posts.php:29
+msgid "Invalid post ID."
+msgstr ""
+
+#: classes/aipv-posts.php:312
 msgid "Load Images"
 msgstr ""
 
@@ -180,11 +226,15 @@ msgstr ""
 msgid "Load More"
 msgstr ""
 
+#: admin/views/settings.php:38
+msgid "Managed by server configuration"
+msgstr ""
+
 #: admin/views/posts.php:63
 msgid "Newest first"
 msgstr ""
 
-#: classes/aipv-posts.php:126
+#: classes/aipv-posts.php:150
 msgid "No posts were found. Please try your query again."
 msgstr ""
 
@@ -192,7 +242,7 @@ msgstr ""
 msgid "Number of images to generate"
 msgstr ""
 
-#: admin/views/generate.php:92
+#: admin/views/generate.php:98
 msgid "Number of Images: "
 msgstr ""
 
@@ -200,7 +250,17 @@ msgstr ""
 msgid "Oldest first"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:107
+#: admin/views/generate.php:110
+msgid "OpenAI pricing"
+msgstr ""
+
+#: classes/aipv-plugin.php:361
+msgid ""
+"OpenSSL is not available on this server. Define AIPV_OPENAI_API_KEY as an "
+"environment variable or constant instead of storing it in the database."
+msgstr ""
+
+#: classes/aipv-ai-processor.php:143
 msgid "Please go to the Settings tab and add your API key before continuing."
 msgstr ""
 
@@ -212,11 +272,15 @@ msgstr ""
 msgid "Posts"
 msgstr ""
 
-#: admin/views/generate.php:105
+#: classes/aipv-ai-processor.php:72
+msgid "Prompt is required."
+msgstr ""
+
+#: admin/views/generate.php:117
 msgid "Render Images"
 msgstr ""
 
-#: admin/views/generate.php:125
+#: admin/views/generate.php:137
 msgid "Rendered Images"
 msgstr ""
 
@@ -248,12 +312,16 @@ msgstr ""
 msgid "Search posts"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:71 classes/aipv-ai-processor.php:73
-#: classes/aipv-ai-processor.php:198 classes/aipv-ai-processor.php:200
+#: admin/views/generate.php:78
+msgid "See pricing"
+msgstr ""
+
+#: classes/aipv-ai-processor.php:106 classes/aipv-ai-processor.php:108
+#: classes/aipv-ai-processor.php:246 classes/aipv-ai-processor.php:248
 msgid "Set as featured image"
 msgstr ""
 
-#: classes/aipv-ai-processor.php:75 classes/aipv-ai-processor.php:202
+#: classes/aipv-ai-processor.php:110 classes/aipv-ai-processor.php:250
 msgid "Set Featured Image"
 msgstr ""
 
@@ -265,26 +333,32 @@ msgstr ""
 msgid "Set resolution of generated images. (Default is 256 x 256)"
 msgstr ""
 
-#: classes/aipv-plugin.php:176 admin/views/sidebar.php:48
+#: classes/aipv-plugin.php:187 admin/views/sidebar.php:48
 #: admin/views/sidebar.php:48 admin/views/sidebar.php:50
 msgid "Settings"
 msgstr ""
 
-#: admin/views/generate.php:111
+#: admin/views/generate.php:123
 msgid "Settings."
 msgstr ""
 
-#: classes/aipv-ai-processor.php:109
+#: classes/aipv-ai-processor.php:145
 msgid ""
 "There was an error connecting to the OpenAI API. Please check that your API "
 "key is valid and that you have available credits."
 msgstr ""
 
-#: admin/views/settings.php:53
+#: admin/views/settings.php:28
+msgid ""
+"This site is configured to use a server-managed API key (environment "
+"variable/constant). The key cannot be edited here."
+msgstr ""
+
+#: admin/views/settings.php:59
 msgid "Toggle data retention"
 msgstr ""
 
-#: admin/views/generate.php:98
+#: admin/views/generate.php:104
 msgid "Total Cost: "
 msgstr ""
 
@@ -292,12 +366,8 @@ msgstr ""
 msgid "Type in a series of words that best describe the desired image."
 msgstr ""
 
-#. %1$s and %2$s are opening and closing anchor tags for the OpenAI login link, %3$s and %4$s are for the API keys page link.
-#: admin/views/settings.php:19
-#, php-format
-msgid ""
-"Type in DALL·E API key. If you don't have an API key, login to your account "
-"%1$shere%2$s then go to %3$sthe API keys page%4$s."
+#: classes/aipv-plugin.php:368
+msgid "Unable to store API key securely."
 msgstr ""
 
 #: admin/view.php:9
